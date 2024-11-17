@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "telesolv-client-side-solution",
+    "id": "d8fe21b4-eb4f-4801-bb27-3db491e7ccf7",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "Telesolv description"
+      },
+      "longDescription": {
+        "default": "Telesolv description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "telesolv Feature",
+        "description": "The feature that activates elements of the telesolv solution.",
+        "id": "1cfa093d-f948-4c34-8d87-4898db712e39",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/telesolv.sppkg"
+  }
+}

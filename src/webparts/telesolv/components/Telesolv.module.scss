@@ -1,0 +1,141 @@
+.navBar {
+  // height: 50px;
+  width: 99%;
+  background-color: #ffffff;
+  display: flex;
+  box-shadow: 0px 5px 0px #f9f9f9;
+  justify-content: space-between;
+  //padding-left: 20px;
+  // padding-right: 20px;
+}
+
+.navRightContainers {
+  img {
+    //height: 50px;
+    width: 190px;
+  }
+}
+.navLeftContainers {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.navLeftContainers P {
+  padding: 10px;
+  cursor: pointer;
+  .selected {
+    padding: 10px;
+    border-bottom: 2px solid #233b83;
+    color: #233b83;
+  }
+}
+.ConfigContainer {
+  display: flex;
+}
+.CheckPointSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.RightSection {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.QuestionSection {
+  margin-top: 10px;
+  p {
+    font-size: 12px;
+    color: orange;
+    font-weight: lighter;
+    padding-left: 15%;
+  }
+}
+
+.AnswersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.NewOptionContainer {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.AddOptionContainer {
+  margin-top: 20px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  cursor: pointer;
+}
+.addNewQuestionSection {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+}
+.ConfigBtns {
+  padding: 10px;
+  display: flex;
+
+  justify-content: end;
+  gap: 10px;
+}
+
+.CheckpointConfigHeader {
+  width: 70%;
+  margin-left: 15%;
+  margin-right: 15%;
+  background-color: #f0f8ff;
+
+  .HeaderTitle {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #233b83;
+  }
+}
+
+.OnboardingContainer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  .OnboardingRightContainer {
+    display: flex;
+    gap: 20px;
+  }
+}
+.addDialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  p {
+    width: 40%;
+  }
+}
+// .HeaderTabview {
+//   border: none !important;
+//   .p-tabview-nav ul {
+//     border: none;
+//     background-color: greenyellow !important;
+//   }
+//   .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+//     background-color: greenyellow !important;
+//   }
+//   .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+//     background-color: greenyellow !important;
+//   }
+// }

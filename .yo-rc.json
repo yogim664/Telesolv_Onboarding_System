@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.18.1",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.18.2",
+    "libraryName": "telesolv",
+    "libraryId": "d8fe21b4-eb4f-4801-bb27-3db491e7ccf7",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "Telesolv",
+    "solutionShortDescription": "Telesolv description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
