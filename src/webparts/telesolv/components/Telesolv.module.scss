@@ -43,6 +43,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  padding: 10px;
 }
 .RightSection {
   display: flex;
@@ -50,14 +51,11 @@
   gap: 14px;
 }
 
-.QuestionSection {
-  margin-top: 10px;
-  p {
-    font-size: 12px;
-    color: orange;
-    font-weight: lighter;
-    padding-left: 15%;
-  }
+.QuestionTag {
+  color: orange;
+  font-weight: lighter;
+  margin-left: 13%;
+  font-size: 12px;
 }
 
 .AnswersContainer {
@@ -74,7 +72,8 @@
 }
 
 .AddOptionContainer {
-  margin-top: 20px;
+  margin: 15px;
+
   display: flex;
   gap: 5px;
   align-items: center;
@@ -85,6 +84,7 @@
   align-items: center;
   margin-top: 10px;
   gap: 10px;
+  color: #233b83;
 }
 .ConfigBtns {
   padding: 10px;
@@ -126,16 +126,19 @@
     width: 40%;
   }
 }
-// .HeaderTabview {
-//   border: none !important;
-//   .p-tabview-nav ul {
-//     border: none;
-//     background-color: greenyellow !important;
-//   }
-//   .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-//     background-color: greenyellow !important;
-//   }
-//   .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-//     background-color: greenyellow !important;
-//   }
-// }
+.HeaderTabview {
+  border: none !important;
+  .p-tabview-nav-container {
+    .p-tabview .p-tabview-nav {
+      border: none !important;
+    }
+  }
+}
+.card {
+  display: flex !important;
+  justify-content: center;
+  align-items: center !important;
+  .DataTable {
+    border: 1px solid black !important;
+  }
+}

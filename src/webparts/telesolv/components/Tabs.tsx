@@ -11,7 +11,10 @@ import { useEffect } from "react";
 import { useState } from "react";
 import "./HrPersons";
 import HrPersons from "./HrPersons";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cmtImg: string = require("../assets/Images/Comment.png");
 import { sp } from "@pnp/sp";
+
 // import "primeicons/primeicons.css";
 // import "../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -259,20 +262,27 @@ const Tabs = (props: any) => {
             <div key={question.QuestionNo} className="question-block">
               <div className={styles.CheckPointSection}>
                 <div className={styles.leftSection}>
-                  <i className="pi pi-comment" /> Question {question.QuestionNo}
+                  {/* <i className="pi pi-comment" /> */}
+                  <img src={cmtImg} alt="logo" />
+
+                  <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+                    Question {question.QuestionNo}
+                  </span>
                 </div>
                 <div className={styles.RightSection}>
                   <i
                     className="pi pi-trash"
                     onClick={() => deleteQuestion(question.Id)}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", color: "red" }}
                   />
                   <i
                     className="pi pi-arrow-up"
                     onClick={() => moveQuestionUp(index)}
+                    style={{ cursor: "pointer", color: "#233b83" }}
                   />
                   <i
                     className="pi pi-arrow-down"
+                    style={{ cursor: "pointer", color: "#233b83" }}
                     onClick={() => moveQuestionDownn(index)}
                   />
                 </div>
@@ -282,13 +292,14 @@ const Tabs = (props: any) => {
                 <InputText
                   value={question?.QuestionTitle}
                   placeholder="Enter here"
-                  style={{ width: "35%" }}
+                  style={{ width: "35%", color: "#233b83" }}
                   onChange={(e) => {
                     handleQuestionChange(question?.Id, e.target.value);
                   }}
                 />
-                <p>Note: Choose any one option that triggers the workflow</p>
-
+                <div className={styles.QuestionTag}>
+                  Note: Choose any one option that triggers the workflow
+                </div>
                 {question.Options.length > 0 && (
                   <div className="flex flex-column gap-3">
                     {question.Options.map((category: any) => (
@@ -296,24 +307,47 @@ const Tabs = (props: any) => {
                         key={category.key}
                         className="flex align-items-center"
                       >
-                        <RadioButton
-                          inputId={`${question.QuestionNo}-${category.key}`}
-                          name={`category-${question.QuestionNo}`}
-                          value={category}
-                          onChange={(e) =>
-                            handleOptionChange(question.QuestionNo, e.value)
-                          }
-                          checked={
-                            selectedOptions[question.QuestionNo]?.key ===
-                            category.key
-                          }
-                        />
-                        <label
-                          htmlFor={`${question.QuestionNo}-${category.key}`}
-                          className="ml-2"
+                        <div
+                          style={{
+                            margin: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
                         >
-                          {category.name}
-                        </label>
+                          <RadioButton
+                            inputId={`${question.QuestionNo}-${category.key}`}
+                            name={`category-${question.QuestionNo}`}
+                            value={category}
+                            style={{ margin: "2px" }}
+                            onChange={(e) =>
+                              handleOptionChange(question.QuestionNo, e.value)
+                            }
+                            checked={
+                              selectedOptions[question.QuestionNo]?.key ===
+                              category.key
+                            }
+                          />
+                          <label
+                            htmlFor={`${question.QuestionNo}-${category.key}`}
+                            style={{ paddingLeft: "10px" }}
+                            className="ml-2"
+                          >
+                            {category.name}
+                          </label>
+                          {selectedOptions[question.QuestionNo]?.key ===
+                            category.key && (
+                            <span
+                              style={{
+                                marginLeft: "50px",
+                                backgroundColor: "#e2fbe9",
+                                color: "green",
+                                fontsize:"10px"
+                              }}
+                            >
+                              Options that trigger to work flow
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -328,26 +362,25 @@ const Tabs = (props: any) => {
                     value={newOptionText}
                     onChange={(e) => setNewOptionText(e.target.value)}
                   />
-                  <Button
-                    label="Add"
-                    style={{ height: "30px" }}
+                  <i
+                    className="pi pi-check"
+                    style={{ color: "Green" }}
                     onClick={() => handleAddNewOption(question.Id)}
                   />
-                  <Button
-                    label="Cancel"
-                    style={{ height: "30px" }}
+
+                  <i
+                    className="pi pi-times"
+                    style={{ color: "red" }}
                     onClick={() => setSelectedQuestionId(null)}
                   />
                 </div>
               )}
-
-              {/* Add Option Button */}
               <div
                 className={styles.AddOptionContainer}
                 onClick={() => handleAddOptionClick(question.Id)}
               >
-                <i className="pi pi-plus" />
-                Add Option
+                <i className="pi pi-plus" style={{ color: "#233b83" }} />
+                <span style={{ color: "#233b83" }}> Add Option</span>
               </div>
             </div>
           ))}
@@ -356,13 +389,19 @@ const Tabs = (props: any) => {
             className={styles.addNewQuestionSection}
             onClick={addNewQuestion}
           >
-            <i className="pi  pi-plus-circle" /> Add new question
+            <i className="pi pi-plus-circle" style={{ color: "#233b83" }} />
+            <span style={{ color: "#233b83" }}>Add new question</span>
           </div>
           {questions.length > 0 && (
             <div className={styles.ConfigBtns}>
               <Button
                 label="Cancel"
-                style={{ height: "30px" }}
+                style={{
+                  height: "30px",
+                  backgroundColor: "#cfcfcf",
+                  color: "#000",
+                  border: "none",
+                }}
                 onClick={() => setSelectedQuestionId(null)}
               />
               <Button

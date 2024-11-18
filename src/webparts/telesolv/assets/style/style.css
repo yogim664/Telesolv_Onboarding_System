@@ -37,23 +37,3 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
   left: 0 !important;
   right: 0 !important;
 }
-.HeaderTabview {
-  border: none !important;
-  .p-tabview-nav {
-    border: none;
-    background-color: greenyellow !important;
-    .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-      background: transparent !important;
-      border-bottom: 2px solid red !important;
-      color: red !important;
-    }
-  }
-  .p-tabview-nav-link {
-    border: none;
-  }
-  .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-    background: transparent !important;
-    border-bottom: 2px solid red !important;
-    color: red !important;
-  }
-}
