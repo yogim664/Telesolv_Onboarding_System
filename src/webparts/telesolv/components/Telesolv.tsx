@@ -6,7 +6,6 @@ import * as React from "react";
 import "../assets/style/style.css";
 import styles from "./Telesolv.module.scss";
 //import { Button } from "primereact/button";
-import Header from "./Header";
 import Tabs from "./Tabs";
 const logoImg: string = require("../assets/Images/Logo.svg");
 import { TabView, TabPanel } from "primereact/tabview";
@@ -19,8 +18,6 @@ const Telesolve = (props: any): JSX.Element => {
 
   return (
     <div>
-      <Header />
-
       <div className={styles.navBar}>
         <div className={styles.navRightContainers}>
           <img src={logoImg} alt="logo" />
@@ -32,7 +29,7 @@ const Telesolve = (props: any): JSX.Element => {
           <TabView
             activeIndex={activeIndex}
             onTabChange={(e) => setActiveIndex(e.index)}
-            className={"HeaderTabview"}
+            className={styles.HeaderTabview}
           >
             <TabPanel header="Configuration">
               <p>Configuration Content</p>

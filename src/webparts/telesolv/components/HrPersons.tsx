@@ -132,7 +132,7 @@ const HrPersons = (props: any) => {
 
   return (
     <div>
-      <div className="card">
+      <div className={styles.card}>
         <DataTable value={hrperson || []} tableStyle={{ minWidth: "50rem" }}>
           <Column
             field="QuestionTitle"
@@ -155,7 +155,12 @@ const HrPersons = (props: any) => {
         <div className={styles.ConfigBtns}>
           <Button
             label="Cancel"
-            style={{ height: "30px" }}
+            style={{
+              height: "30px",
+              backgroundColor: "#cfcfcf",
+              color: "#000",
+              border: "none",
+            }}
             // onClick={() => setSelectedQuestionId(null)}
           />
           <Button
