@@ -17,7 +17,7 @@ import { SPComponentLoader } from "@microsoft/sp-loader";
 //require("../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css");
 import "../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css";
 // require("../../assets/style/style.css");
-import "../telesolv/assets/style/style.css";
+require("../telesolv/assets/style/style.css");
 // require("../../components/common/CustomInputFields/customStyle.css");
 
 export interface ITelesolvWebPartProps {

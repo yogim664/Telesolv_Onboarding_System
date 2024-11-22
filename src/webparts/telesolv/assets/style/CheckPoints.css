@@ -1,0 +1,23 @@
+.CongifTab .p-tabview-nav-link {
+  border: none !important;
+}
+.CongifTab .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: #e5eafb !important;
+  color: #233b83 !important;
+  margin-bottom: 3px !important;
+}
+.p-tabview .p-tabview-nav {
+  border: none !important;
+}
+.question-block {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0px;
+}
+.p-tabview .p-tabview-panels {
+  padding: 0px !important;
+}
+.CongifTab .p-tabview-selected a {
+  border-radius: 6px;
+}

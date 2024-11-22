@@ -1,0 +1,10 @@
+.MainTab .p-tabview-nav-link {
+  border: none !important;
+}
+.MainTab .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  border-bottom: 3px solid #233b83 !important;
+  color: #233b83 !important;
+}
+.p-tabview .p-tabview-nav {
+  border: none !important;
+}

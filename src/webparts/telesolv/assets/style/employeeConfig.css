@@ -1,0 +1,7 @@
+.employeeConfig th div {
+  padding-left: 0px !important;
+}
+.employeeConfig tbody td {
+  padding-left: 16px !important;
+  color: #484848;
+}

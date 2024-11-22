@@ -4,8 +4,11 @@
 import * as React from "react";
 import styles from "./Telesolv.module.scss";
 import { DataTable } from "primereact/datatable";
+import "../assets/style/HrPersonStyle.css";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
+import { useRef } from "react";
+import { Toast } from "primereact/toast";
 import {
   PeoplePicker,
   PrincipalType,
@@ -14,10 +17,43 @@ import { sp } from "@pnp/sp";
 
 const HrPersons = (props: any) => {
   const [hrperson, setHRperon] = React.useState<any>([]);
+  const [isEdit, setisEdit] = React.useState(true);
+
+  // style variables
+  const peoplePickerStyles = {
+    root: {
+      ".ms-BasePicker-text": {
+        border: isEdit && "none",
+        "::after": {
+          backgroundColor: "transparent !important",
+        },
+      },
+    },
+  };
 
   React.useEffect(() => {
     setHRperon([...props.Question]);
   }, [props]);
+
+  const toast = useRef<any>(null); // Create a reference for the Toast component
+
+  const showError = (string: any) => {
+    toast.current?.show({
+      severity: "error",
+      summary: "Error",
+      detail: string,
+      life: 3000,
+    });
+  };
+
+  const showSuccess = (string: any) => {
+    toast.current.show({
+      severity: "success",
+      summary: "Success",
+      detail: string,
+      life: 3000,
+    });
+  };
 
   const handleChange = (selectedPeople: any[], rowData: any) => {
     const updatedQuestions: any = hrperson.map((question: any) =>
@@ -38,53 +74,22 @@ const HrPersons = (props: any) => {
     console.log(updatedQuestions, "updatedQuestions");
   };
 
-  //Update to sp
-
-  //   const AddAssigene = async () => {
-  //     try {
-  //       const promises = hrperson.map((question: any) => {
-  //         // // Prepare the Assigened field by converting it to a proper format (array of user objects)
-  //         // const assignees =
-  //         //   question.Assigened?.map((assignee: string) => ({
-  //         //     // Adjust this logic if your Assigened field requires a different format
-  //         //     claims: `i:0#.f|membership|${assignee}`, // Example claim format
-  //         //   })) || [];
-
-  //         // Check if the item already exists (you may need to check for ID, title, etc.)
-  //         if (question.Id) {
-  //           // Update existing item using the ID
-  //           return sp.web.lists
-  //             .getByTitle("CheckpointConfig")
-  //             .items.getById(question.Id)
-  //             .update({
-  //               //   Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
-  //               //   Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
-  //               //    Options: JSON.stringify(question.Options), // Convert Options to JSON string
-  //               AssigenedId: question.Assigened.map((val: any) => val), // Store Assigened as an array of user objects
-  //             });
-  //         } else {
-  //           // If the item does not exist, create a new item
-  //           return sp.web.lists.getByTitle("CheckpointConfig").items.add({
-  //             //   Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
-  //             //   Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
-  //             //   Options: JSON.stringify(question.Options), // Convert Options to JSON string
-  //             AssigenedId: question.Assigened.map((val: any) => val), // Store Assigened as an array of user objects
-  //           });
-  //         }
-  //       });
-
-  //       // Wait for all promises to resolve (add or update)
-  //       await Promise.all(promises);
-  //       console.log("Questions saved or updated successfully to SharePoint!");
-  //     } catch (error) {
-  //       console.error("Error saving or updating questions:", error);
-  //     }
-  //   };
-
   const AddAssigene = async () => {
     try {
       for (let i = 0; i < hrperson.length; i++) {
-        console.log(hrperson[i].Assigened.map((val: any) => val));
+        const assignedValues = hrperson[i].Assigened;
+
+        // Check if the Assigened field is empty
+        if (!assignedValues || assignedValues.length === 0) {
+          // Call the showErrorToast function to display the error
+          showError(
+            //  `Assigened field is empty for person with Id: ${hrperson[i].Id}`
+            "Assigened field is empty "
+          );
+          return; // Exit the function if Assigened is empty for any person
+        }
+
+        console.log(assignedValues.map((val: any) => val));
 
         if (hrperson[i].Id) {
           await sp.web.lists
@@ -92,7 +97,7 @@ const HrPersons = (props: any) => {
             .items.getById(hrperson[i].Id)
             .update({
               AssigenedId: {
-                results: hrperson[i].Assigened.map((val: any) => val.id),
+                results: assignedValues.map((val: any) => val.id),
               },
             })
             .then((res) => {
@@ -100,6 +105,7 @@ const HrPersons = (props: any) => {
             });
         }
       }
+      showSuccess("Submitted success");
       console.log("Questions saved or updated successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving or updating questions:", error);
@@ -120,34 +126,52 @@ const HrPersons = (props: any) => {
         onChange={(selectedPeople: any[]) => {
           handleChange(selectedPeople, rowData); // Pass selectedPeople and rowData
         }}
-        //   styles={multiPeoplePickerStyle}
+        styles={peoplePickerStyles}
         //   showHiddenInUI={true}
         principalTypes={[PrincipalType.User]}
         defaultSelectedUsers={rowData?.Assigened?.map((val: any) => val.Email)}
         resolveDelay={1000}
-        //   disabled={readOnly}
+        disabled={isEdit}
       />
     );
   };
 
   return (
     <div>
+      <Toast ref={toast} />
       <div className={styles.card}>
-        <DataTable value={hrperson || []} tableStyle={{ minWidth: "50rem" }}>
+        <div className={styles.HrEditContainer}>
+          <Button
+            label="Edit"
+            outlined
+            icon="pi pi-pencil"
+            style={{
+              height: "30px",
+              color: "#ffff",
+              backgroundColor: "#233b83",
+              border: "none",
+            }}
+            onClick={() => setisEdit(false)}
+          />
+        </div>
+        <DataTable
+          value={hrperson || []}
+          //tableStyle={{ minWidth: "50rem" }}
+        >
           <Column
             field="QuestionTitle"
             header="CheckPoints"
-            // style={{
-            //   backgroundColor: "#f0f8ff",
-            // }}
+            style={{
+              width: "40%",
+            }}
           ></Column>
           <Column
             field="Assigenee"
             header="HR Person"
             body={peopletemplate}
-            // style={{
-            //   color: "#233b83",
-            // }}
+            style={{
+              width: "65%",
+            }}
           ></Column>
         </DataTable>
       </div>
@@ -161,10 +185,12 @@ const HrPersons = (props: any) => {
               color: "#000",
               border: "none",
             }}
+            disabled={isEdit}
             // onClick={() => setSelectedQuestionId(null)}
           />
           <Button
             label="Save"
+            disabled={isEdit}
             style={{
               height: "30px",
               color: "#ffff",
