@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable react/no-unescaped-entities */
@@ -6,18 +7,21 @@ import * as React from "react";
 import "../assets/style/style.css";
 import styles from "./Telesolv.module.scss";
 //import { Button } from "primereact/button";
-import Tabs from "./Tabs";
+import Config from "./Config";
 const logoImg: string = require("../assets/Images/Logo.svg");
 import { TabView, TabPanel } from "primereact/tabview";
 import Onboarding from "./EmployeeOnboarding";
+import "../assets/style/Tabs.css";
+//import EmployeeForm from "./EmployeeForm";
 
 const Telesolve = (props: any): JSX.Element => {
   // State to manage visibility
   const [activeIndex, setActiveIndex] = React.useState<number>(0);
-  console.log(activeIndex);
-
   return (
-    <div>
+    // <div>
+    //   <EmployeeForm />
+    // </div>
+    <div style={{ padding: 10 }}>
       <div className={styles.navBar}>
         <div className={styles.navRightContainers}>
           <img src={logoImg} alt="logo" />
@@ -29,19 +33,28 @@ const Telesolve = (props: any): JSX.Element => {
           <TabView
             activeIndex={activeIndex}
             onTabChange={(e) => setActiveIndex(e.index)}
-            className={styles.HeaderTabview}
+            className="MainTab"
           >
-            <TabPanel header="Configuration">
-              <p>Configuration Content</p>
+            <TabPanel
+              header="Configuration"
+              style={{ fontFamily: "interRegular" }}
+            >
+              {}
             </TabPanel>
-            <TabPanel header="Onboarding">
-              <p>Onboarding Content</p>
+            <TabPanel
+              header="Onboarding"
+              style={{ fontFamily: "interRegular" }}
+            >
+              {}
             </TabPanel>
           </TabView>
         </div>
       </div>
-      {activeIndex !== 1 && <Tabs context={props.context} />}
-      {activeIndex !== 0 && <Onboarding />}
+      {activeIndex !== 0 ? (
+        <Onboarding context={props.context} />
+      ) : (
+        <Config context={props.context} />
+      )}
     </div>
   );
 };

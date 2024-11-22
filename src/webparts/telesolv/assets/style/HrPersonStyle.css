@@ -1,0 +1,23 @@
+.p-datatable .p-datatable-thead > tr > th {
+  background-color: #f0f8ff !important;
+  color: #233b83 !important;
+  border: none !important;
+}
+
+.p-datatable-wrapper {
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.p-datatable .p-column-header-content {
+  padding-left: 50px;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  text-align: left;
+  border: none;
+  /* border-width: 1px 0 0 0; */
+  padding-top: 10px;
+  padding-left: 65px;
+  padding-bottom: 10px;
+}

@@ -52,10 +52,12 @@
 }
 
 .QuestionTag {
-  color: orange;
-  font-weight: lighter;
-  margin-left: 13%;
+  color: #837023;
+  margin-left: 12%;
   font-size: 12px;
+  margin-top: 8px;
+  font-weight: 400;
+  font-family: "interRegular";
 }
 
 .AnswersContainer {
@@ -112,20 +114,47 @@
   display: flex;
   width: 100%;
   align-items: center;
+  margin: 10px 0px;
   justify-content: space-between;
   .OnboardingRightContainer {
     display: flex;
     gap: 20px;
   }
 }
+
 .addDialog {
-  display: flex;
+  background-color: white;
+  display: flex !important;
   align-items: center;
-  justify-content: center;
-  p {
-    width: 40%;
+  justify-content: center !important;
+  margin: 16px;
+
+  .addDialogHeader {
+    align-items: center;
+    display: flex;
+
+    justify-content: flex-start;
+    width: 30%;
+  }
+  .addDialogInput {
+    align-items: center;
+    display: flex;
+    justify-content: flex-start;
+    width: 70% !important;
+  }
+  .peoplePickerWrapper {
+    div:first-child {
+      width: 100%;
+    }
   }
 }
+.addDialogBtnContainer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 .HeaderTabview {
   border: none !important;
   .p-tabview-nav-container {
@@ -135,10 +164,103 @@
   }
 }
 .card {
-  display: flex !important;
+  //display: flex !important;
+  width: 50%;
+  margin: auto;
   justify-content: center;
   align-items: center !important;
   .DataTable {
     border: 1px solid black !important;
   }
+}
+
+.HrEditContainer {
+  display: flex;
+  justify-content: end;
+  margin-left: 20px;
+  padding-bottom: 10px;
+}
+
+.Bgstyle {
+  background-image: url("../assets//Images//Bg.svg");
+  height: 80vh;
+  width: 100%;
+  background-size: cover;
+}
+
+.EmployeeAnsContainer {
+  width: 50%;
+  margin-top: 10px;
+  margin-left: 25%;
+  // border: 1px solid red;
+  //display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  background-color: #fff;
+  padding: 10px 0px;
+}
+
+.EmployeeAnsContainerheader {
+  p {
+    display: flex;
+    font-size: 20px;
+    font-weight: 600;
+    font-family: interRegular;
+  }
+  span {
+    font-size: 16px;
+    font-family: interRegular;
+  }
+
+  color: white;
+  background-color: #233b83;
+  width: 100%;
+  padding: 10px;
+}
+.EmployeeQuestionContainer {
+  display: flex;
+  background-color: white;
+}
+.EmployeeQuestionContainer .question {
+  box-shadow: 0px 4px 24px -9px #00000026;
+  padding: 10px 14px;
+}
+.commentsContainer {
+  background-color: #fff;
+  margin: 20px 10px;
+  padding: 0;
+  textarea {
+    width: 100%;
+    resize: none;
+    height: 80px;
+  }
+  .commentsContainerHeader {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0px;
+  }
+}
+.employeeFormFooter {
+  display: flex;
+  margin: 10px;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.employeeFormFooter button {
+  border: none;
+}
+.CongifTab {
+  margin: 16px 0px;
+}
+
+.pendingSts {
+  background: #d8e5f0;
+  padding: 4px;
+  border-radius: 6px;
+  text-align: center;
+  color: #1e71b9;
+  font-weight: 500;
+  font-size: 12px;
 }

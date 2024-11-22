@@ -37,3 +37,41 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
   left: 0 !important;
   right: 0 !important;
 }
+
+/* font faces */
+@font-face {
+  font-family: "interThin";
+  src: url("../fonts/InterGF/Inter-Thin.ttf");
+}
+@font-face {
+  font-family: "interRegular";
+  src: url("../fonts/InterGF/Inter-Regular.ttf");
+}
+@font-face {
+  font-family: "interBold";
+  src: url("../fonts/InterGF/Inter-Bold.ttf");
+}
+@font-face {
+  font-family: "interSemibold";
+  src: url("../fonts/InterGF/Inter-SemiBold.ttf");
+}
+@font-face {
+  font-family: "interLight";
+  src: url("../fonts/InterGF/Inter-Light.ttf");
+}
+@font-face {
+  font-family: "interExtralight";
+  src: url("../fonts/InterGF/Inter-ExtraLight.ttf");
+}
+@font-face {
+  font-family: "interExtraBold";
+  src: url("../fonts/InterGF/Inter-ExtraBold.ttf");
+}
+@font-face {
+  font-family: "interBlack";
+  src: url("../fonts/InterGF/Inter-Black.ttf");
+}
+@font-face {
+  font-family: "interMedium";
+  src: url("../fonts/InterGF/Inter-Medium.ttf");
+}
