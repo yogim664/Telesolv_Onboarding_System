@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-lone-blocks */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-sequences */
@@ -14,6 +15,7 @@ import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import { useRef } from "react";
+import EmployeeResponseView from "./EmployeeResponseView";
 import "../assets/style/employeeConfig.css";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
@@ -24,11 +26,17 @@ import {
   PeoplePicker,
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { Dropdown } from "primereact/dropdown";
 
 const Onboarding = (props: any) => {
   const [visible, setVisible] = useState(false);
   const [Update, setUpdate] = useState(false);
   const [EmployeeOnboarding, setEmployeeOnboarding] = useState<any>([]);
+  const [SelectedEmp, setSelectedEmp] = useState<any>([]);
+  const [showResponseView, setShowResponseView] = useState(false);
+  const [questions, setQuestions] = useState<any>([]);
+  const [Departments, setDepartments] = useState<any>([]);
+
   const [TempEmployeeOnboarding, setTempEmployeeOnboarding] = useState<any>({
     Employee: {
       EmployeeId: null,
@@ -37,16 +45,43 @@ const Onboarding = (props: any) => {
     },
 
     Role: "",
-    Department: "",
+    Department: { key: "", name: "" },
     Email: "",
     PhoneNumber: "",
   });
 
+  //Get Departments
+  // Function to fetch Title values
+  const getAllTitles = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle("Department") // Replace 'Departments' with your list name
+        .items.select("Title") // Fetch only the Title column
+        .get();
+
+      // Format the fetched items for react-select
+      const titleValues = items.map((item: any) => ({
+        key: item.Title, // Unique identifier
+        name: item.Title, // Display name
+      }));
+      console.log(titleValues, "dep");
+      setDepartments([...titleValues]);
+      console.log(Departments, "SetDep");
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
+  };
+
+  // Fetch titles when the component mounts
+  useEffect(() => {
+    getAllTitles();
+  }, []);
+
   const handleChange = (key: string, value: any) => {
-    let curObj: any = { ...TempEmployeeOnboarding };
+    const curObj: any = { ...TempEmployeeOnboarding };
     curObj[key] = value;
 
-    if (key == "Employee") {
+    if (key === "Employee") {
       curObj[key].EmployeeId = value.id;
       curObj[key].EmployeeEMail = value.secondaryText;
       curObj[key].EmployeeTitle = value.text;
@@ -126,7 +161,14 @@ const Onboarding = (props: any) => {
             }
           : "",
         Role: item.Role ? item.Role : "",
-        Department: item.Department ? item.Department : "",
+        // Department: item.Department ? item.Department : "",
+        Department: item.Department
+          ? {
+              key: item.Department,
+              name: item.Department,
+            }
+          : {},
+
         Email: item.Email ? item.Email : "",
         PhoneNumber: item.PhoneNumber ? item.PhoneNumber : "",
         Status: item.Status ? item.Status : "",
@@ -141,11 +183,64 @@ const Onboarding = (props: any) => {
     }
   };
 
-  const fetchQuestions = async () => {
-    const fetchedItems = await EmployeeOnboardingDetails();
-    setEmployeeOnboarding(fetchedItems); // Store in state
+  // Get items to SP
+  const questionConfig = async () => {
+    try {
+      // Fetch items from the SharePoint list
+      const items = await sp.web.lists
+        .getByTitle("CheckpointConfig")
+        .items.select("*,Assigened/ID,Assigened/EMail")
+        .expand("Assigened")
+        .filter("isDelete ne 1")
+        .get();
+      console.log(items, "items");
+
+      // Map the items to create an array of values
+      const formattedQuestions = items.map((item: any) => ({
+        Id: item.Id,
+        isEdit: false,
+        QuestionNo: item.Sno,
+        QuestionTitle: item.Title,
+        isDelete: item.isDelete,
+        Answer: item.Answer
+          ? {
+              key: item.Answer,
+              name: item.Answer,
+            }
+          : null,
+        Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
+        Assigened: item.Assigened?.map((Assigened: any) => {
+          return {
+            id: Assigened.ID,
+            Email: Assigened.EMail,
+          };
+        }),
+      }));
+
+      console.log("Fetched Items:", formattedQuestions);
+
+      // Return the formatted array
+      return formattedQuestions;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
   };
 
+  const fetchQuestions = async () => {
+    try {
+      // Fetch employee onboarding details
+      const fetchedItems = await EmployeeOnboardingDetails();
+      setEmployeeOnboarding(fetchedItems); // Store the data in state
+
+      // Fetch question configuration and store it in state
+      const formattedQuestions = await questionConfig();
+      setQuestions(formattedQuestions);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  console.log(questions);
   useEffect(() => {
     fetchQuestions();
   }, []);
@@ -153,10 +248,16 @@ const Onboarding = (props: any) => {
   const ActionIcons = (Rowdata: any) => {
     return (
       <div style={{ display: "flex", gap: 6 }}>
-        <i className="pi pi-eye" style={{ fontSize: "1rem", color: "green" }} />
         <i
-          className="pi pi-pencil
-"
+          className="pi pi-eye"
+          style={{ fontSize: "1rem", color: "green" }}
+          onClick={() => {
+            setShowResponseView(true);
+            setSelectedEmp(Rowdata);
+          }}
+        />
+        <i
+          className="pi pi-pencil"
           style={{ fontSize: "1rem", color: "#233b83" }}
           onClick={() => {
             setVisible(true);
@@ -181,7 +282,7 @@ const Onboarding = (props: any) => {
   };
 
   // Post into list SP
-  const saveEmployeeDetailsToSP = async () => {
+  const saveEmployeeDetailsToSP = async (): Promise<void> => {
     console.log(TempEmployeeOnboarding);
 
     try {
@@ -191,7 +292,7 @@ const Onboarding = (props: any) => {
           .items.getById(TempEmployeeOnboarding.Id)
           .update({
             Role: TempEmployeeOnboarding.Role,
-            Department: TempEmployeeOnboarding.Department,
+            Department: TempEmployeeOnboarding.Department.key,
             Email: TempEmployeeOnboarding.Email,
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
@@ -201,16 +302,39 @@ const Onboarding = (props: any) => {
         console.log("Employee details updated successfully in SharePoint!");
       } else {
         // Create new item
-        await sp.web.lists.getByTitle("EmployeeOnboarding").items.add({
-          Role: TempEmployeeOnboarding.Role,
-          Department: TempEmployeeOnboarding.Department,
-          Email: TempEmployeeOnboarding.Email,
-          PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
-          EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
-          Status: "Pending",
-        });
+        await sp.web.lists
+          .getByTitle("EmployeeOnboarding")
+          .items.add({
+            Role: TempEmployeeOnboarding.Role,
+            Department: TempEmployeeOnboarding.Department.key,
+            Email: TempEmployeeOnboarding.Email,
+            PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
+            EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
+            Status: "Pending",
+          })
+          .then(async (res: any) => {
+            try {
+              // Using Promise.all to handle multiple asynchronous requests in parallel
+              await Promise.all(
+                questions.map(async (question: any) => {
+                  // Add each question to the EmployeeResponse list
+                  console.log(question.Id);
 
-        console.log("Employee details saved successfully to SharePoint!");
+                  await sp.web.lists.getByTitle("EmployeeResponse").items.add({
+                    EmployeeIDId: res.data.ID, // Employee ID
+                    QuestionIDId: question.Id, // Question ID from questions array
+                    EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
+                  });
+                })
+              );
+              console.log("Employee responses saved successfully.");
+            } catch (err) {
+              console.error("Error saving employee responses:", err);
+            }
+          })
+          .catch((err: any) => {
+            console.error("Error during the initial promise:", err);
+          });
       }
 
       fetchQuestions();
@@ -245,188 +369,213 @@ const Onboarding = (props: any) => {
   };
 
   return (
-    <div>
-      <ConfirmDialog />
-      <Toast ref={toast} />
-      <div className={styles.OnboardingContainer}>
-        <p>Employee Onboarding</p>
-        <div className={styles.OnboardingRightContainer}>
-          <InputText placeholder="Search" />
-
-          <Button
-            label="Add"
-            icon="pi pi-plus"
-            onClick={() => {
-              setTempEmployeeOnboarding([]);
-              setUpdate(false);
-              setVisible(true);
-            }}
-          />
-        </div>
-      </div>
-
-      <DataTable
-        value={EmployeeOnboarding}
-        tableStyle={{ minWidth: "50rem" }}
-        className="employeeConfig"
-      >
-        <Column
-          field="Employee.EmployeeTitle"
-          header="Name"
-          body={peopleTemplate}
+    <>
+      {showResponseView ? (
+        <EmployeeResponseView
+          setShowResponseView={setShowResponseView}
+          setSelectedEmp={SelectedEmp}
         />
-        <Column field="Role" header="Role" />
-        <Column field="Department" header="Department" />
-        <Column field="Email" header="EMail" />
-        <Column field="Status" header="Status" body={stsTemplate} />
-        <Column
-          field="Action"
-          header="Action"
-          body={(Rowdata: any) => ActionIcons(Rowdata)}
-        />
-      </DataTable>
-      <Dialog
-        header={
-          <div style={{ textAlign: "center", width: "100%" }}>New Employee</div>
-        }
-        visible={visible}
-        style={{
-          width: "30%",
-          padding: "10px",
-          backgroundColor: "white",
-          borderRadius: "10px",
-          display: "flex",
-          justifyContent: "center !important",
-        }}
-        onHide={() => setVisible(false)}
-      >
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Name</div>
-          <div
-            className={`${styles.addDialogInput} ${styles.peoplePickerWrapper}`}
+      ) : (
+        <div>
+          <ConfirmDialog />
+          <Toast ref={toast} />
+          <div className={styles.OnboardingContainer}>
+            <p>Employee Onboarding</p>
+            <div className={styles.OnboardingRightContainer}>
+              <InputText placeholder="Search" />
+
+              <Button
+                label="Add"
+                icon="pi pi-plus"
+                onClick={() => {
+                  setTempEmployeeOnboarding([]);
+                  setUpdate(false);
+                  setVisible(true);
+                }}
+              />
+            </div>
+          </div>
+
+          <DataTable
+            value={EmployeeOnboarding}
+            tableStyle={{ minWidth: "50rem" }}
+            className="employeeConfig"
           >
-            <PeoplePicker
-              context={props.context}
-              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-              personSelectionLimit={1}
-              showtooltip={false}
-              ensureUser={true}
-              placeholder={""}
-              styles={{
-                root: {
-                  width: "100%",
-                },
-              }}
-              // styles={{ root: "100%" }}
-              onChange={(selectedPeople: any[]) => {
-                console.log(selectedPeople);
-
-                handleChange("Employee", selectedPeople[0]); // Pass selectedPeople and rowData
-              }}
-              //   styles={multiPeoplePickerStyle}
-              //   showHiddenInUI={true}
-              principalTypes={[PrincipalType.User]}
-              defaultSelectedUsers={
-                TempEmployeeOnboarding?.Employee?.EmployeeEMail
-                  ? [TempEmployeeOnboarding?.Employee?.EmployeeEMail]
-                  : []
-              }
-              resolveDelay={1000}
+            <Column
+              field="Employee.EmployeeTitle"
+              header="Name"
+              body={peopleTemplate}
             />
-
-            {/* <InputText
-            placeholder="Enter name"
-            value={TempEmployeeOnboarding?.Name || ""}
-            onChange={(e) => {
-              handleChange("Name", e.target.value);
+            <Column field="Role" header="Role" />
+            <Column field="Department.key" header="Department" />
+            <Column field="Email" header="EMail" />
+            <Column field="Status" header="Status" body={stsTemplate} />
+            <Column
+              field="Action"
+              header="Action"
+              body={(Rowdata: any) => ActionIcons(Rowdata)}
+            />
+          </DataTable>
+          <Dialog
+            header={
+              <div style={{ textAlign: "center", width: "100%" }}>
+                New Employee
+              </div>
+            }
+            visible={visible}
+            style={{
+              width: "30%",
+              padding: "10px",
+              backgroundColor: "white",
+              borderRadius: "10px",
+              display: "flex",
+              justifyContent: "center !important",
             }}
-          /> */}
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Role</div>
-          <div className={styles.addDialogInput}>
-            <InputText
-              placeholder="Enter Role"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeOnboarding?.Role || ""}
-              onChange={(e) => {
-                handleChange("Role", e.target.value);
-              }}
-            />
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Department</div>
-          <div className={styles.addDialogInput}>
-            <InputText
-              placeholder="Enter Department"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeOnboarding?.Department || ""}
-              onChange={(e) => {
-                handleChange("Department", e.target.value);
-              }}
-            />
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Email</div>
-          <div className={styles.addDialogInput}>
-            <InputText
-              placeholder="Enter Email"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeOnboarding?.Email || ""}
-              onChange={(e) => {
-                handleChange("Email", e.target.value);
-              }}
-            />
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>PhoneNumber</div>
-          <div className={styles.addDialogInput}>
-            <InputText
-              placeholder="Enter PhoneNumber"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeOnboarding?.PhoneNumber || ""}
-              onChange={(e) => {
-                handleChange("PhoneNumber", e.target.value);
-              }}
-            />
-          </div>
-        </div>
+            onHide={() => setVisible(false)}
+          >
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Name</div>
+              <div
+                className={`${styles.addDialogInput} ${styles.peoplePickerWrapper}`}
+              >
+                <div>
+                  <PeoplePicker
+                    context={props.context}
+                    webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                    personSelectionLimit={1}
+                    showtooltip={false}
+                    ensureUser={true}
+                    placeholder={""}
+                    styles={{
+                      root: {
+                        width: "100%",
+                      },
+                    }}
+                    // styles={{ root: "100%" }}
+                    onChange={
+                      (selectedPeople: any[]) => {
+                        console.log(selectedPeople);
+                        if (selectedPeople.length !== 0) {
+                          handleChange("Employee", selectedPeople[0]);
+                        } else {
+                          handleChange("Employee", []);
+                        }
+                      }
+                      // Pass selectedPeople and rowData
+                    }
+                    principalTypes={[PrincipalType.User]}
+                    defaultSelectedUsers={
+                      TempEmployeeOnboarding?.Employee?.EmployeeEMail
+                        ? [TempEmployeeOnboarding?.Employee?.EmployeeEMail]
+                        : []
+                    }
+                    resolveDelay={1000}
+                  />
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Please contact admin if you do not find the mail address.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Role</div>
+              <div className={styles.addDialogInput}>
+                <InputText
+                  placeholder="Enter Role"
+                  style={{ width: "100%", color: "black" }}
+                  value={TempEmployeeOnboarding?.Role || ""}
+                  onChange={(e) => {
+                    handleChange("Role", e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Department</div>
+              <div className={styles.addDialogInput}>
+                <Dropdown
+                  value={
+                    TempEmployeeOnboarding?.Department?.key
+                      ? Departments?.filter(
+                          (val: any) =>
+                            val.key === TempEmployeeOnboarding?.Department?.key
+                        )[0] || ""
+                      : ""
+                  }
+                  onChange={(e) => {
+                    console.log(TempEmployeeOnboarding?.Department, "Value");
+                    handleChange("Department", e.value);
+                    console.log(e.value.key);
+                  }}
+                  options={Departments || []}
+                  optionLabel="name"
+                  placeholder="Select a Department"
+                  className="w-full md:w-14rem"
+                />
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Email</div>
+              <div className={styles.addDialogInput}>
+                <InputText
+                  placeholder="Enter Email"
+                  style={{ width: "100%", color: "black" }}
+                  //value={TempEmployeeOnboarding?.Email || ""}
+                  value={TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""}
+                  onChange={(e) => {
+                    handleChange("Email", e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>PhoneNumber</div>
+              <div className={styles.addDialogInput}>
+                <InputText
+                  placeholder="Enter PhoneNumber"
+                  style={{ width: "100%", color: "black" }}
+                  value={TempEmployeeOnboarding?.PhoneNumber || ""}
+                  onChange={(e) => {
+                    handleChange("PhoneNumber", e.target.value);
+                  }}
+                />
+              </div>
+            </div>
 
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogBtnContainer}>
-            <Button
-              //  style={{ marginRight: 14, width: "100px" }}
-              label="Cancel"
-              style={{
-                height: "30px",
-                backgroundColor: "#cfcfcf",
-                color: "#000",
-                border: "none",
-                width: "100px",
-              }}
-              //  icon="pi pi-plus"
-              onClick={() => setVisible(false)}
-            />
-            <Button
-              label="Save"
-              style={{
-                height: "30px",
-                color: "#ffff",
-                backgroundColor: "#233b83",
-                border: "none",
-                width: "100px",
-              }}
-              //   icon="pi pi-plus"
-              onClick={() => saveEmployeeDetailsToSP()}
-            />
-          </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogBtnContainer}>
+                <Button
+                  //  style={{ marginRight: 14, width: "100px" }}
+                  label="Cancel"
+                  style={{
+                    height: "30px",
+                    backgroundColor: "#cfcfcf",
+                    color: "#000",
+                    border: "none",
+                    width: "100px",
+                  }}
+                  //  icon="pi pi-plus"
+                  onClick={() => setVisible(false)}
+                />
+                <Button
+                  label="Save"
+                  style={{
+                    height: "30px",
+                    color: "#ffff",
+                    backgroundColor: "#233b83",
+                    border: "none",
+                    width: "100px",
+                  }}
+                  disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
+                  //   icon="pi pi-plus"
+                  onClick={() => saveEmployeeDetailsToSP()}
+                />
+              </div>
+            </div>
+          </Dialog>
         </div>
-      </Dialog>
-    </div>
+      )}
+    </>
   );
 };
 

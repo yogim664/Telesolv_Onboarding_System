@@ -257,10 +257,16 @@
 
 .pendingSts {
   background: #d8e5f0;
-  padding: 4px;
+  padding: 6px 4px;
   border-radius: 6px;
   text-align: center;
   color: #1e71b9;
   font-weight: 500;
   font-size: 12px;
+}
+.ResponseHeader {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
 }
