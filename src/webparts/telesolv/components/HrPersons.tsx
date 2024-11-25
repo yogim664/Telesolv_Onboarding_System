@@ -53,6 +53,7 @@ const HrPersons = (props: any) => {
       detail: string,
       life: 3000,
     });
+    setisEdit(true);
   };
 
   const handleChange = (selectedPeople: any[], rowData: any) => {

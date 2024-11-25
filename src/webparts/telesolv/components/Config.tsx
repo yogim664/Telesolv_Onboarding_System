@@ -86,7 +86,10 @@ const Config = (props: any) => {
       Id: null,
       QuestionNo: newQuestionNo,
       QuestionTitle: "",
-      Options: [],
+      Options: [
+        { key: "Yes", name: "Yes" },
+        { key: "No", name: "No" },
+      ],
       Answer: "",
       isEdit: true,
       isDelete: false,
@@ -102,19 +105,6 @@ const Config = (props: any) => {
       }))
     );
   };
-
-  // const deleteQuestion = (id: number, qIndex: number) => {
-  //   const updatedQuestions = questions;
-  //   let _tempArr = [];
-  //   _tempArr = updatedQuestions.map((question: any, index: number) =>
-  //     index === qIndex ? { ...question, isDelete: true } : question
-  //   );
-  //   console.log(_tempArr);
-
-  //   setQuestions([..._tempArr]);
-  //   handleReArrange(qIndex);
-  //   // moveQuestionUp(qIndex, true, _tempArr);
-  // };
 
   // Update the state with the modified questions array
 
@@ -223,6 +213,7 @@ const Config = (props: any) => {
         QuestionTitle: previousQuestion.QuestionTitle,
         Options: previousQuestion.Options,
         Answer: previousQuestion.Answer,
+        isChanged: true,
       };
 
       updatedQuestions[index - 1] = {
@@ -232,6 +223,7 @@ const Config = (props: any) => {
         QuestionTitle: currentQuestion.QuestionTitle,
         Options: currentQuestion.Options,
         Answer: currentQuestion.Answer,
+        isChanged: true,
       };
     } else {
       updatedQuestions[index] = {
@@ -241,6 +233,7 @@ const Config = (props: any) => {
         QuestionTitle: updatedQuestions[0].QuestionTitle,
         Options: updatedQuestions[0].Options,
         Answer: updatedQuestions[0].Answer,
+        isChanged: true,
       };
     }
     // }
@@ -251,7 +244,9 @@ const Config = (props: any) => {
   };
 
   // MoveDown
+  // !BackUp
   const moveQuestionDownn = (index: any) => {
+    // !Maasi
     // Check if the index is valid and not the last question
     if (index < 0 || index >= questions.length - 1) return;
 
@@ -275,6 +270,7 @@ const Config = (props: any) => {
       QuestionTitle: nextQuestion.QuestionTitle,
       Options: nextQuestion.Options,
       Answer: nextQuestion.Answer,
+      isChanged: true,
     };
 
     updatedQuestions[index + 1] = {
@@ -286,13 +282,68 @@ const Config = (props: any) => {
       QuestionTitle: currentQuestion.QuestionTitle,
       Options: currentQuestion.Options,
       Answer: currentQuestion.Answer,
+      isChanged: true,
     };
 
     console.log("After Move:", updatedQuestions);
 
     // Update the state with the new order of questions
     setQuestions(updatedQuestions);
+    // !Maasi
   };
+
+  // const validation = async (): Promise<void> => {
+  //   let errmsg: string = "";
+  //   let err: boolean = false;
+
+  //   if (questions.some((_item: any) => _item.QuestionTitle.trim() === "")) {
+  //     err = true;
+  //     errmsg = "Enter Question Title";
+  //   } else if (questions.some((_item: any) => !_item.Options.length)) {
+  //     err = true;
+  //     errmsg = "Enter Options";
+  //   } else if (questions.some((_item: any) => _item.Answer === "")) {
+  //     err = true;
+  //     errmsg = "Select Answer";
+  //   }
+
+  //   if (!err) {
+  //     const postQuestions: any[] =
+  //       questions?.filter(
+  //         (_item: any) =>
+  //           _item.Id && (_item.isEdit || _item.isChanged) && !_item.isDelete
+  //       ) || [];
+
+  //     postQuestions?.length && (await updateQuestionsToSP(postQuestions));
+
+  //     const saveQuestions: any[] =
+  //       questions?.filter((_item: any) => !_item.Id && !_item.isDelete) || [];
+
+  //     saveQuestions?.length && (await saveQuestionsToSP(saveQuestions));
+
+  //     const deleteQuestions: any[] =
+  //       questions?.filter((_Item: any) => _Item.Id && _Item.isDelete) || [];
+
+  //     console.log(deleteQuestions);
+  //     deleteQuestions?.length && (await deleteQuestionsToSP(deleteQuestions));
+
+  //     await toast.current?.show({
+  //       severity: "warn",
+  //       summary: "Rejected",
+  //       detail: errmsg,
+  //       life: 3000,
+  //     });
+  //   } else {
+  //     toast.current?.show({
+  //       severity: "warn",
+  //       summary: "Rejected",
+  //       detail: errmsg,
+  //       life: 3000,
+  //     });
+  //   }
+  // };
+
+  // Post into list SP
 
   const validation = async (): Promise<void> => {
     let errmsg: string = "";
@@ -310,24 +361,52 @@ const Config = (props: any) => {
     }
 
     if (!err) {
-      const postQuestions: any[] =
-        questions?.filter(
-          (_item: any) => _item.Id && _item.isEdit && !_item.isDelete
-        ) || [];
+      try {
+        const postQuestions: any[] =
+          questions?.filter(
+            (_item: any) =>
+              _item.Id && (_item.isEdit || _item.isChanged) && !_item.isDelete
+          ) || [];
 
-      postQuestions?.length && (await updateQuestionsToSP(postQuestions));
+        const saveQuestions: any[] =
+          questions?.filter((_item: any) => !_item.Id && !_item.isDelete) || [];
 
-      const saveQuestions: any[] =
-        questions?.filter((_item: any) => !_item.Id && !_item.isDelete) || [];
+        const deleteQuestions: any[] =
+          questions?.filter((_Item: any) => _Item.Id && _Item.isDelete) || [];
 
-      saveQuestions?.length && (await saveQuestionsToSP(saveQuestions));
+        // Execute all operations in parallel
+        await Promise.all([
+          postQuestions?.length
+            ? updateQuestionsToSP(postQuestions)
+            : Promise.resolve(),
+          saveQuestions?.length
+            ? saveQuestionsToSP(saveQuestions)
+            : Promise.resolve(),
+          deleteQuestions?.length
+            ? deleteQuestionsToSP(deleteQuestions)
+            : Promise.resolve(),
+        ]);
 
-      const deleteQuestions: any[] =
-        questions?.filter((_Item: any) => _Item.Id && _Item.isDelete) || [];
+        // Show success toast after all operations are complete
+        toast.current?.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Questions processed successfully!",
+          life: 3000,
+        });
+      } catch (error) {
+        console.error("Error processing questions:", error);
 
-      console.log(deleteQuestions);
-      deleteQuestions?.length && (await deleteQuestionsToSP(deleteQuestions));
+        // Show error toast if any operation fails
+        toast.current?.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to process questions.",
+          life: 3000,
+        });
+      }
     } else {
+      // Show warning toast if validation fails
       toast.current?.show({
         severity: "warn",
         summary: "Rejected",
@@ -337,7 +416,6 @@ const Config = (props: any) => {
     }
   };
 
-  // Post into list SP
   const saveQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
@@ -435,7 +513,7 @@ const Config = (props: any) => {
           };
         }),
       }));
-
+      formattedItems.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
       console.log("Fetched Items:", formattedItems);
 
       // Return the formatted array
@@ -499,11 +577,28 @@ const Config = (props: any) => {
                     <i
                       className="pi pi-arrow-up"
                       onClick={() => moveQuestionUp(qIndex, false, questions)}
-                      style={{ cursor: "pointer", color: "#233b83" }}
+                      style={{
+                        // cursor: qIndex === 0 ? "not-allowed" : "pointer",
+                        cursor: "pointer",
+                        color: "#233b83",
+
+                        //  color: qIndex === 0 ? "#ccc" : "#233b83",
+                        //   pointerEvents: qIndex === 0 ? "none" : "auto",
+                      }}
                     />
                     <i
                       className="pi pi-arrow-down"
-                      style={{ cursor: "pointer", color: "#233b83" }}
+                      style={{
+                        cursor: "pointer",
+                        color: "#233b83",
+
+                        // cursor: qIndex === 0 ? "not-allowed" : "pointer",
+                        // color:
+                        //   qIndex === questions.length - 1 ? "#ccc" : "#233b83",
+
+                        // pointerEvents:
+                        //   qIndex === questions.length - 1 ? "none" : "auto",
+                      }}
                       onClick={() => moveQuestionDownn(qIndex)}
                     />
                   </div>
@@ -546,7 +641,7 @@ const Config = (props: any) => {
                               inputId={`${question.QuestionNo}-${category.key}`}
                               name={`category-${question.QuestionNo}`}
                               value={category.name}
-                              style={{ margin: "2px" }}
+                              style={{ margin: "2px", color: "#233b83" }}
                               onChange={(e) => {
                                 console.log(e, "radio");
 
