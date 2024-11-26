@@ -60,8 +60,7 @@ const Config = (props: any) => {
       header: "Confirmation",
       message: (
         <div className="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
-          <i className="pi pi-exclamation-circle text-6xl text-primary-500"></i>
-          <span>Please confirm to proceed moving forward.</span>
+          <span>Are you sure you want to delete this question?</span>
         </div>
       ),
       accept: () => accept(id, qIndex),
@@ -391,7 +390,7 @@ const Config = (props: any) => {
         toast.current?.show({
           severity: "success",
           summary: "Success",
-          detail: "Questions processed successfully!",
+          detail: "Questions saved successfully!",
           life: 3000,
         });
       } catch (error) {
@@ -540,219 +539,214 @@ const Config = (props: any) => {
 
       <TabView className="CongifTab">
         <TabPanel header="Checkpoints" className="MainTab">
-          {questions
-            .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
-            .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
-            .map((question: any, qIndex: any) => (
-              <div key={question.QuestionNo} className="question-block">
-                <div className={styles.CheckPointSection}>
-                  <div className={styles.leftSection}>
-                    {/* <i className="pi pi-comment" /> */}
-                    <img src={cmtImg} alt="logo" />
+          {questions.filter(
+            (val: any) => !val.isDelete && val.QuestionNo !== 10000
+          ).length > 0 ? (
+            questions
+              .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
+              .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
+              .map((question: any, qIndex: any) => (
+                <div key={question.QuestionNo} className="question-block">
+                  <div className={styles.CheckPointSection}>
+                    <div className={styles.leftSection}>
+                      {/* <i className="pi pi-comment" /> */}
+                      <img src={cmtImg} alt="logo" />
 
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "16px",
-                        fontFamily: "interSemibold",
-                      }}
-                    >
-                      Question {question.QuestionNo}
-                    </span>
+                      <span
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "16px",
+                          fontFamily: "interSemibold",
+                        }}
+                      >
+                        Question {question.QuestionNo}
+                      </span>
+                    </div>
+                    <div className={styles.RightSection}>
+                      <i
+                        className="pi  pi-pencil"
+                        style={{ fontSize: "1rem" }}
+                        onClick={() => handleEditToggle(question.Id)}
+                      />
+                      <i
+                        className="pi pi-trash"
+                        onClick={() => {
+                          showTemplate(question.Id, qIndex);
+                        }}
+                        // deleteQuestion(question.Id)}}
+                        style={{ cursor: "pointer", color: "red" }}
+                      />
+                      <i
+                        className="pi pi-arrow-up"
+                        onClick={() => moveQuestionUp(qIndex, false, questions)}
+                        style={{
+                          // cursor: qIndex === 0 ? "not-allowed" : "pointer",
+                          cursor: "pointer",
+                          color: "#233b83",
+
+                          //  color: qIndex === 0 ? "#ccc" : "#233b83",
+                          //   pointerEvents: qIndex === 0 ? "none" : "auto",
+                        }}
+                      />
+                      <i
+                        className="pi pi-arrow-down"
+                        style={{
+                          cursor: "pointer",
+                          color: "#233b83",
+
+                          // cursor: qIndex === 0 ? "not-allowed" : "pointer",
+                          // color:
+                          //   qIndex === questions.length - 1 ? "#ccc" : "#233b83",
+
+                          // pointerEvents:
+                          //   qIndex === questions.length - 1 ? "none" : "auto",
+                        }}
+                        onClick={() => moveQuestionDownn(qIndex)}
+                      />
+                    </div>
                   </div>
-                  <div className={styles.RightSection}>
-                    <i
-                      className="pi  pi-pencil"
-                      style={{ fontSize: "1rem" }}
-                      onClick={() => handleEditToggle(question.Id)}
-                    />
-                    <i
-                      className="pi pi-trash"
-                      onClick={() => {
-                        showTemplate(question.Id, qIndex);
+
+                  <div className={styles.QuestionSection}>
+                    <InputText
+                      className={styles.questionInput}
+                      value={question?.QuestionTitle}
+                      placeholder="Enter here"
+                      onChange={(e) => {
+                        handleQuestionChange(
+                          //   question?.Id,
+                          qIndex,
+                          e.target.value,
+                          "Question"
+                        );
+                        console.log(qIndex);
                       }}
-                      // deleteQuestion(question.Id)}}
-                      style={{ cursor: "pointer", color: "red" }}
+                      disabled={!question.isEdit}
                     />
-                    <i
-                      className="pi pi-arrow-up"
-                      onClick={() => moveQuestionUp(qIndex, false, questions)}
-                      style={{
-                        // cursor: qIndex === 0 ? "not-allowed" : "pointer",
-                        cursor: "pointer",
-                        color: "#233b83",
-
-                        //  color: qIndex === 0 ? "#ccc" : "#233b83",
-                        //   pointerEvents: qIndex === 0 ? "none" : "auto",
-                      }}
-                    />
-                    <i
-                      className="pi pi-arrow-down"
-                      style={{
-                        cursor: "pointer",
-                        color: "#233b83",
-
-                        // cursor: qIndex === 0 ? "not-allowed" : "pointer",
-                        // color:
-                        //   qIndex === questions.length - 1 ? "#ccc" : "#233b83",
-
-                        // pointerEvents:
-                        //   qIndex === questions.length - 1 ? "none" : "auto",
-                      }}
-                      onClick={() => moveQuestionDownn(qIndex)}
-                    />
-                  </div>
-                </div>
-
-                <div className="QuestionSection">
-                  <InputText
-                    value={question?.QuestionTitle}
-                    placeholder="Enter here"
-                    style={{ width: "35%", color: "#233b83" }}
-                    onChange={(e) => {
-                      handleQuestionChange(
-                        //   question?.Id,
-                        qIndex,
-                        e.target.value,
-                        "Question"
-                      );
-                      console.log(qIndex);
-                    }}
-                    disabled={!question.isEdit}
-                  />
-                  <div className={styles.QuestionTag}>
-                    Note: Choose any one option that triggers the workflow
-                  </div>
-                  {question.Options.length > 0 && (
-                    <div className="flex flex-column gap-3">
-                      {question?.Options?.map((category: any, aIndex: any) => (
-                        <div
-                          key={category.key}
-                          className="flex align-items-center"
-                        >
-                          <div
-                            style={{
-                              margin: "10px",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            <RadioButton
-                              inputId={`${question.QuestionNo}-${category.key}`}
-                              name={`category-${question.QuestionNo}`}
-                              value={category.name}
-                              style={{ margin: "2px", color: "#233b83" }}
-                              onChange={(e) => {
-                                console.log(e, "radio");
-
-                                handleQuestionChange(
-                                  qIndex,
-                                  e.target.value,
-                                  "Radio",
-                                  aIndex
-                                );
-
-                                //handleOptionChange(question.Answer, e.value)
-                              }}
-                              checked={question.Answer.key === category.name}
-                              disabled={!question.isEdit}
-                            />
-
-                            <label
-                              htmlFor={`${question.Answer.name}-${category.key}`}
-                              style={{ paddingLeft: "10px", width: "15%" }}
-                              className="ml-2"
+                    <div className={styles.QuestionTag}>
+                      Note: Choose any one option that triggers the workflow
+                    </div>
+                    {question.Options.length > 0 && (
+                      <div className="flex flex-column gap-3">
+                        {question?.Options?.map(
+                          (category: any, aIndex: any) => (
+                            <div
+                              key={category.key}
+                              className="flex align-items-center"
                             >
-                              {category.name}
-                            </label>
-                            {question.Answer.key === category.name && (
-                              <span
-                                style={{
-                                  marginLeft: "50px",
-                                  backgroundColor: "#E2FBE9",
-                                  color: "green",
-                                  fontSize: "10px",
-                                  padding: 6,
-                                  borderRadius: 4,
-                                }}
-                              >
-                                Options that trigger to work flow
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                              <div className={styles.optionSection}>
+                                <div className={styles.optionChoice}>
+                                  <RadioButton
+                                    className={styles.radioBtn}
+                                    inputId={`${question.QuestionNo}-${category.key}`}
+                                    name={`category-${question.QuestionNo}`}
+                                    value={category.name}
+                                    onChange={(e) => {
+                                      console.log(e, "radio");
+
+                                      handleQuestionChange(
+                                        qIndex,
+                                        e.target.value,
+                                        "Radio",
+                                        aIndex
+                                      );
+
+                                      //handleOptionChange(question.Answer, e.value)
+                                    }}
+                                    checked={
+                                      question.Answer.key === category.name
+                                    }
+                                    disabled={!question.isEdit}
+                                  />
+
+                                  <label
+                                    htmlFor={`${question.Answer.name}-${category.key}`}
+                                    style={{
+                                      paddingLeft: "10px",
+                                      width: "15%",
+                                    }}
+                                    className="ml-2"
+                                  >
+                                    {category.name}
+                                  </label>
+                                </div>
+                                {question.Answer.key === category.name && (
+                                  <span className={styles.flowTriggerIndicator}>
+                                    Option that trigger to work flow
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Conditionally render the NewOptionContainer */}
+                  {selectedQuestionId === qIndex && (
+                    <div className={styles.NewOptionContainer}>
+                      <InputText
+                        placeholder="Enter your new option"
+                        value={newOptionText}
+                        style={{ marginLeft: "2.5rem", marginTop: 10 }}
+                        onChange={(e) => setNewOptionText(e.target.value)}
+                      />
+                      <i
+                        className="pi pi-check"
+                        style={{ color: "Green" }}
+                        onClick={() => handleAddNewOption(qIndex)}
+                      />
+
+                      <i
+                        className="pi pi-times"
+                        style={{ color: "red" }}
+                        onClick={() => setSelectedQuestionId(null)}
+                      />
                     </div>
                   )}
-                </div>
-
-                {/* Conditionally render the NewOptionContainer */}
-                {selectedQuestionId === qIndex && (
-                  <div className={styles.NewOptionContainer}>
-                    <InputText
-                      placeholder="Enter your new option"
-                      value={newOptionText}
-                      style={{ marginLeft: "2.5rem", marginTop: 10 }}
-                      onChange={(e) => setNewOptionText(e.target.value)}
-                    />
-                    <i
-                      className="pi pi-check"
-                      style={{ color: "Green" }}
-                      onClick={() => handleAddNewOption(qIndex)}
-                    />
-
-                    <i
-                      className="pi pi-times"
-                      style={{ color: "red" }}
-                      onClick={() => setSelectedQuestionId(null)}
-                    />
+                  <div
+                    className={styles.AddOptionContainer}
+                    onClick={() => {
+                      handleAddOptionClick(qIndex);
+                      console.log(qIndex);
+                    }}
+                    style={{
+                      cursor: question.isEdit ? "pointer" : "not-allowed",
+                      pointerEvents: question.isEdit ? "auto" : "none",
+                      opacity: question.isEdit ? 1 : 0.5,
+                    }}
+                  >
+                    <i className="pi pi-plus" style={{ color: "#233b83" }} />
+                    <span style={{ color: "#233b83" }}> Add Option</span>
                   </div>
-                )}
-                <div
-                  className={styles.AddOptionContainer}
-                  onClick={() => {
-                    handleAddOptionClick(qIndex);
-                    console.log(qIndex);
-                  }}
-                  style={{
-                    cursor: question.isEdit ? "pointer" : "not-allowed",
-                    pointerEvents: question.isEdit ? "auto" : "none",
-                    opacity: question.isEdit ? 1 : 0.5,
-                  }}
-                >
-                  <i className="pi pi-plus" style={{ color: "#233b83" }} />
-                  <span style={{ color: "#233b83" }}> Add Option</span>
                 </div>
-              </div>
-            ))}
+              ))
+          ) : (
+            <div className={styles.noQuestionFound}>
+              No questions have been added yet. Please click the{" "}
+              <b>&nbsp;Add New Question&nbsp;</b> button to add one!
+            </div>
+          )}
 
           <div
             className={styles.addNewQuestionSection}
             onClick={addNewQuestion}
           >
-            <i className="pi pi-plus-circle" style={{ color: "#233b83" }} />
-            <span style={{ color: "#233b83" }}>Add new question</span>
+            <div className={styles.addNewQuestionBtn}>
+              <i className="pi pi-plus-circle" style={{ color: "#233b83" }} />
+              <span style={{ color: "#233b83" }}>Add new question</span>
+            </div>
           </div>
           {questions.length > 0 && (
             <div className={styles.ConfigBtns}>
               <Button
+                className={styles.cancelBtn}
                 label="Cancel"
-                style={{
-                  height: "30px",
-                  backgroundColor: "#cfcfcf",
-                  color: "#000",
-                  border: "none",
-                }}
                 onClick={() => setSelectedQuestionId(null)}
               />
               <Button
                 label="Save"
-                style={{
-                  height: "30px",
-                  color: "#ffff",
-                  backgroundColor: "#233b83",
-                  border: "none",
-                }}
+                className={styles.saveBtn}
                 onClick={() => {
                   validation();
                 }}
