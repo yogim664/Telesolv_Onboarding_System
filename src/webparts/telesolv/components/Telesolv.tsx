@@ -17,7 +17,7 @@ import EmployeeForm from "./EmployeeForm";
 //import HrScreen from "./HrScreen";
 const Telesolve = (props: any): JSX.Element => {
   // State to manage visibility
-  const [activeIndex, setActiveIndex] = React.useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [ShowEmpScreen, setShowEmpScreen] = useState<boolean>(false);
   // const [ShowHrScreen, setShowHrScreen] = useState<boolean>(false);
 
@@ -31,6 +31,7 @@ const Telesolve = (props: any): JSX.Element => {
       ) : (
         <div style={{ padding: 10 }}>
           <button
+            style={{ display: "none" }}
             onClick={() => {
               // setShowHrScreen(true);
               setShowEmpScreen(true);
