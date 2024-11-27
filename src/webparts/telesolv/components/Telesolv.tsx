@@ -72,6 +72,7 @@ const Telesolve = (props: any): JSX.Element => {
             <Onboarding context={props.context} />
           ) : (
             <Config context={props.context} />
+            // <Onboarding context={props.context} />
           )}
         </div>
       )}

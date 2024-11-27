@@ -136,7 +136,8 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
     }
 }
 
-.p-dialog .p-dialog-header::after {
+
+/* .p-dialog .p-dialog-header::after {
     content: "";
     width: 64px;
     height: 64px;
@@ -148,7 +149,7 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
     background-repeat: no-repeat;
     background-size: contain;
     animation: depth-animation 0.2s ease-in-out;
-}
+} */
 
 .p-dialog .p-dialog-footer button {
     margin: 0 !important;
@@ -166,7 +167,7 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
 
 .p-dialog-title {
     text-align: center;
-    margin-bottom: 52px;
+    /* margin-bottom: 52px; */
 }
 
 .p-dialog-header-icons {
@@ -184,4 +185,12 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
 
 .ms-PickerPersona-container {
     background-color: #e8e8e8 !important;
+}
+
+.p-datatable .p-datatable-thead>tr>th {
+    border: none !important;
+}
+
+.p-datatable .p-datatable-tbody>tr>td {
+    padding: 6px !important;
 }

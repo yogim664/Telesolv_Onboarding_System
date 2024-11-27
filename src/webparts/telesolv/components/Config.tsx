@@ -37,9 +37,9 @@ const Config = (props: any) => {
 
   const accept = (id: any, qIndex: number) => {
     toast.current?.show({
-      severity: "info",
-      summary: "Confirmed",
-      detail: "You have accepted",
+      severity: "error",
+      summary: "Deleted",
+      detail: "Question deleted successfully!",
       life: 3000,
     });
     deleteQuestion(id, qIndex);
@@ -671,7 +671,7 @@ const Config = (props: any) => {
                                 </div>
                                 {question.Answer.key === category.name && (
                                   <span className={styles.flowTriggerIndicator}>
-                                    Option that trigger to work flow
+                                    Option that trigger to workflow
                                   </span>
                                 )}
                               </div>
