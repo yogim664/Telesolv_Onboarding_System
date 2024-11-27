@@ -119,17 +119,6 @@
   }
 }
 
-.OnboardingContainer {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  margin: 10px 0px;
-  justify-content: space-between;
-  .OnboardingRightContainer {
-    display: flex;
-    gap: 20px;
-  }
-}
 
 .addDialog {
   background-color: white;
@@ -270,16 +259,6 @@
   margin: 16px 0px;
 }
 
-.pendingSts {
-  background: #d8e5f0;
-  padding: 6px 4px;
-  border-radius: 6px;
-  text-align: center;
-  color: #1e71b9;
-  font-weight: 500;
-  font-size: 12px;
-}
-
 .ResponseHeader {
   display: flex;
   justify-content: flex-start;
@@ -340,8 +319,3 @@
         margin: 2px;
       }
     }
-  }
-}
-.ProgressBar {
-  margin: 10px;
-}
