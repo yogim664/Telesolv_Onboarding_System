@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as React from "react";
-import styles from "./Telesolv.module.scss";
+// import styles from "./Telesolv.module.scss";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
@@ -18,7 +18,7 @@ import { useRef } from "react";
 import EmployeeResponseView from "./EmployeeResponseView";
 import "../assets/style/employeeConfig.css";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-
+import styles from "./EmployeeOnboarding.module.scss";
 import { useState } from "react";
 import { sp } from "@pnp/sp";
 import { useEffect } from "react";
@@ -36,6 +36,7 @@ const Onboarding = (props: any) => {
   const [showResponseView, setShowResponseView] = useState(false);
   const [questions, setQuestions] = useState<any>([]);
   const [Departments, setDepartments] = useState<any>([]);
+  const [SearchTerms, setSearchTerms] = useState<string>("");
 
   const [TempEmployeeOnboarding, setTempEmployeeOnboarding] = useState<any>({
     Employee: {
@@ -76,6 +77,35 @@ const Onboarding = (props: any) => {
   useEffect(() => {
     getAllTitles();
   }, []);
+
+  // const filterItems =
+  //   SearchTerms.trim() === ""
+  //     ? EmployeeOnboarding
+  //     : EmployeeOnboarding.filter((item: any) =>
+  //         item.Department.toLowerCase().includes(SearchTerms.toLowerCase())
+  //       );
+
+  const filterItems =
+    SearchTerms.trim() === ""
+      ? EmployeeOnboarding
+      : EmployeeOnboarding.filter(
+          (item: any) =>
+            item.Department.key
+              .toLowerCase()
+              .includes(SearchTerms.toLowerCase()) ||
+            item.Role.toLowerCase().includes(SearchTerms.toLowerCase()) ||
+            item.Employee.EmployeeTitle.toLowerCase().includes(
+              SearchTerms.toLowerCase()
+            ) ||
+            item.Employee.EmployeeEMail.toLowerCase().includes(
+              SearchTerms.toLowerCase()
+            )
+        );
+
+  useEffect(() => {
+    console.log("Search Terms:", SearchTerms);
+    console.log("Filtered Items:", filterItems);
+  }, [SearchTerms, filterItems]);
 
   const handleChange = (key: string, value: any) => {
     const curObj: any = { ...TempEmployeeOnboarding };
@@ -241,6 +271,7 @@ const Onboarding = (props: any) => {
     }
   };
   console.log(questions);
+
   useEffect(() => {
     fetchQuestions();
   }, []);
@@ -250,7 +281,7 @@ const Onboarding = (props: any) => {
       <div style={{ display: "flex", gap: 6 }}>
         <i
           className="pi pi-eye"
-          style={{ fontSize: "1rem", color: "green" }}
+          style={{ fontSize: "1.25rem", color: "green" }}
           onClick={() => {
             setShowResponseView(true);
             setSelectedEmp(Rowdata);
@@ -258,7 +289,7 @@ const Onboarding = (props: any) => {
         />
         <i
           className="pi pi-pencil"
-          style={{ fontSize: "1rem", color: "#233b83" }}
+          style={{ fontSize: "1.25rem", color: "#233b83" }}
           onClick={() => {
             setVisible(true);
             setUpdate(true);
@@ -269,7 +300,7 @@ const Onboarding = (props: any) => {
         />
         <i
           className="pi pi-trash"
-          style={{ fontSize: "1rem", color: "red" }}
+          style={{ fontSize: "1.25rem", color: "red" }}
           onClick={() => {
             console.log("Worked");
             confirm2(Rowdata.Id);
@@ -359,12 +390,7 @@ const Onboarding = (props: any) => {
         <img
           src={`/_layouts/15/userphoto.aspx?size=S&username=${rowData?.Employee.EmployeeEMail}`}
           alt={user.EmployeeTitle}
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: "50%",
-            marginRight: "10px",
-          }}
+          className={styles.userImageInTable}
         />
         <span>{user.EmployeeTitle}</span>
       </div>
@@ -386,11 +412,19 @@ const Onboarding = (props: any) => {
           <ConfirmDialog />
           <Toast ref={toast} />
           <div className={styles.OnboardingContainer}>
-            <p>Employee Onboarding</p>
+            <h2 className={styles.pageTitle}>Employee Onboarding</h2>
             <div className={styles.OnboardingRightContainer}>
-              <InputText placeholder="Search" />
-
+              <InputText
+                placeholder="Search"
+                onChange={(e) => {
+                  setSearchTerms(e.target.value);
+                  console.log(e.target.value);
+                  console.log(SearchTerms);
+                  console.log(filterItems);
+                }}
+              />
               <Button
+                className={styles.addNewBtn}
                 label="Add"
                 icon="pi pi-plus"
                 onClick={() => {
@@ -403,9 +437,10 @@ const Onboarding = (props: any) => {
           </div>
 
           <DataTable
-            value={EmployeeOnboarding}
+            className={styles.onboardingDataTable}
+            //  value={EmployeeOnboarding}
+            value={filterItems}
             tableStyle={{ minWidth: "50rem" }}
-            className="employeeConfig"
           >
             <Column
               field="Employee.EmployeeTitle"
@@ -414,7 +449,7 @@ const Onboarding = (props: any) => {
             />
             <Column field="Role" header="Role" />
             <Column field="Department.key" header="Department" />
-            <Column field="Email" header="EMail" />
+            <Column field="Employee.EmployeeEMail" header="Email" />
             <Column field="Status" header="Status" body={stsTemplate} />
             <Column
               field="Action"
@@ -422,163 +457,168 @@ const Onboarding = (props: any) => {
               body={(Rowdata: any) => ActionIcons(Rowdata)}
             />
           </DataTable>
-          <Dialog
-            header={
-              <div style={{ textAlign: "center", width: "100%" }}>
-                New Employee
-              </div>
-            }
-            visible={visible}
-            style={{
-              width: "30%",
-              padding: "10px",
-              backgroundColor: "white",
-              borderRadius: "10px",
-              display: "flex",
-              justifyContent: "center !important",
-            }}
-            onHide={() => setVisible(false)}
-          >
-            <div className={styles.addDialog}>
-              <div className={styles.addDialogHeader}>Name</div>
-              <div
-                className={`${styles.addDialogInput} ${styles.peoplePickerWrapper}`}
-              >
-                <div>
-                  <PeoplePicker
-                    context={props.context}
-                    webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-                    personSelectionLimit={1}
-                    showtooltip={false}
-                    ensureUser={true}
-                    placeholder={""}
-                    styles={{
-                      root: {
-                        width: "100%",
-                      },
-                    }}
-                    // styles={{ root: "100%" }}
-                    onChange={
-                      (selectedPeople: any[]) => {
-                        console.log(selectedPeople);
-                        if (selectedPeople.length !== 0) {
-                          handleChange("Employee", selectedPeople[0]);
-                        } else {
-                          handleChange("Employee", []);
+          <div className={styles.actionDialog}>
+            <Dialog
+              header={
+                <div style={{ textAlign: "center", width: "100%" }}>
+                  New Employee
+                </div>
+              }
+              visible={visible}
+              style={{
+                width: "30%",
+                padding: "10px",
+                backgroundColor: "white",
+                borderRadius: "10px",
+                display: "flex",
+                justifyContent: "center !important",
+              }}
+              onHide={() => setVisible(false)}
+            >
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Name</div>
+                <div
+                  className={`${styles.addDialogInput} ${styles.peoplePickerWrapper}`}
+                >
+                  <div>
+                    <PeoplePicker
+                      context={props.context}
+                      webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                      personSelectionLimit={1}
+                      showtooltip={false}
+                      ensureUser={true}
+                      placeholder={""}
+                      styles={{
+                        root: {
+                          width: "100%",
+                        },
+                      }}
+                      // styles={{ root: "100%" }}
+                      onChange={
+                        (selectedPeople: any[]) => {
+                          console.log(selectedPeople);
+                          if (selectedPeople.length !== 0) {
+                            handleChange("Employee", selectedPeople[0]);
+                          } else {
+                            handleChange("Employee", []);
+                          }
                         }
+                        // Pass selectedPeople and rowData
                       }
-                      // Pass selectedPeople and rowData
-                    }
-                    principalTypes={[PrincipalType.User]}
-                    defaultSelectedUsers={
-                      TempEmployeeOnboarding?.Employee?.EmployeeEMail
-                        ? [TempEmployeeOnboarding?.Employee?.EmployeeEMail]
-                        : []
-                    }
-                    resolveDelay={1000}
-                  />
-                  <div style={{ display: "flex", justifyContent: "end" }}>
-                    Please contact admin if you do not find the mail address.
+                      principalTypes={[PrincipalType.User]}
+                      defaultSelectedUsers={
+                        TempEmployeeOnboarding?.Employee?.EmployeeEMail
+                          ? [TempEmployeeOnboarding?.Employee?.EmployeeEMail]
+                          : []
+                      }
+                      resolveDelay={1000}
+                    />
+                    <div className={styles.addEmpInfo}>
+                      Please contact admin if you do not find the mail address.
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className={styles.addDialog}>
-              <div className={styles.addDialogHeader}>Role</div>
-              <div className={styles.addDialogInput}>
-                <InputText
-                  placeholder="Enter Role"
-                  style={{ width: "100%", color: "black" }}
-                  value={TempEmployeeOnboarding?.Role || ""}
-                  onChange={(e) => {
-                    handleChange("Role", e.target.value);
-                  }}
-                />
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Role</div>
+                <div className={styles.addDialogInput}>
+                  <InputText
+                    placeholder="Enter Role"
+                    style={{ width: "100%", color: "black" }}
+                    value={TempEmployeeOnboarding?.Role || ""}
+                    onChange={(e) => {
+                      handleChange("Role", e.target.value);
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className={styles.addDialog}>
-              <div className={styles.addDialogHeader}>Department</div>
-              <div className={styles.addDialogInput}>
-                <Dropdown
-                  value={
-                    TempEmployeeOnboarding?.Department?.key
-                      ? Departments?.filter(
-                          (val: any) =>
-                            val.key === TempEmployeeOnboarding?.Department?.key
-                        )[0] || ""
-                      : ""
-                  }
-                  onChange={(e) => {
-                    console.log(TempEmployeeOnboarding?.Department, "Value");
-                    handleChange("Department", e.value);
-                    console.log(e.value.key);
-                  }}
-                  options={Departments || []}
-                  optionLabel="name"
-                  placeholder="Select a Department"
-                  className="w-full md:w-14rem"
-                />
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Department</div>
+                <div className={styles.addDialogInput}>
+                  <Dropdown
+                    value={
+                      TempEmployeeOnboarding?.Department?.key
+                        ? Departments?.filter(
+                            (val: any) =>
+                              val.key ===
+                              TempEmployeeOnboarding?.Department?.key
+                          )[0] || ""
+                        : ""
+                    }
+                    onChange={(e) => {
+                      console.log(TempEmployeeOnboarding?.Department, "Value");
+                      handleChange("Department", e.value);
+                      console.log(e.value.key);
+                    }}
+                    options={Departments || []}
+                    optionLabel="name"
+                    placeholder="Select a Department"
+                    className="w-full md:w-14rem"
+                  />
+                </div>
               </div>
-            </div>
-            <div className={styles.addDialog}>
-              <div className={styles.addDialogHeader}>Email</div>
-              <div className={styles.addDialogInput}>
-                <InputText
-                  placeholder="Enter Email"
-                  style={{ width: "100%", color: "black" }}
-                  //value={TempEmployeeOnboarding?.Email || ""}
-                  value={TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""}
-                  onChange={(e) => {
-                    handleChange("Email", e.target.value);
-                  }}
-                />
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Email</div>
+                <div className={styles.addDialogInput}>
+                  <InputText
+                    placeholder="Enter Email"
+                    style={{ width: "100%", color: "black" }}
+                    //value={TempEmployeeOnboarding?.Email || ""}
+                    value={
+                      TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""
+                    }
+                    onChange={(e) => {
+                      handleChange("Email", e.target.value);
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className={styles.addDialog}>
-              <div className={styles.addDialogHeader}>PhoneNumber</div>
-              <div className={styles.addDialogInput}>
-                <InputText
-                  placeholder="Enter PhoneNumber"
-                  style={{ width: "100%", color: "black" }}
-                  value={TempEmployeeOnboarding?.PhoneNumber || ""}
-                  onChange={(e) => {
-                    handleChange("PhoneNumber", e.target.value);
-                  }}
-                />
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>PhoneNumber</div>
+                <div className={styles.addDialogInput}>
+                  <InputText
+                    placeholder="Enter PhoneNumber"
+                    style={{ width: "100%", color: "black" }}
+                    value={TempEmployeeOnboarding?.PhoneNumber || ""}
+                    onChange={(e) => {
+                      handleChange("PhoneNumber", e.target.value);
+                    }}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className={styles.addDialog}>
-              <div className={styles.addDialogBtnContainer}>
-                <Button
-                  //  style={{ marginRight: 14, width: "100px" }}
-                  label="Cancel"
-                  style={{
-                    height: "30px",
-                    backgroundColor: "#cfcfcf",
-                    color: "#000",
-                    border: "none",
-                    width: "100px",
-                  }}
-                  //  icon="pi pi-plus"
-                  onClick={() => setVisible(false)}
-                />
-                <Button
-                  label="Save"
-                  style={{
-                    height: "30px",
-                    color: "#ffff",
-                    backgroundColor: "#233b83",
-                    border: "none",
-                    width: "100px",
-                  }}
-                  disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
-                  //   icon="pi pi-plus"
-                  onClick={() => saveEmployeeDetailsToSP()}
-                />
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogBtnContainer}>
+                  <Button
+                    //  style={{ marginRight: 14, width: "100px" }}
+                    label="Cancel"
+                    style={{
+                      height: "30px",
+                      backgroundColor: "#cfcfcf",
+                      color: "#000",
+                      border: "none",
+                      width: "100px",
+                    }}
+                    //  icon="pi pi-plus"
+                    onClick={() => setVisible(false)}
+                  />
+                  <Button
+                    label="Save"
+                    style={{
+                      height: "30px",
+                      color: "#ffff",
+                      backgroundColor: "#233b83",
+                      border: "none",
+                      width: "100px",
+                    }}
+                    disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
+                    //   icon="pi pi-plus"
+                    onClick={() => saveEmployeeDetailsToSP()}
+                  />
+                </div>
               </div>
-            </div>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
       )}
     </>

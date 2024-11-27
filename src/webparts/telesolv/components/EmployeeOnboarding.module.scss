@@ -1,0 +1,97 @@
+.pendingSts {
+    background: #d8e5f0;
+    padding: 6px 4px;
+    border-radius: 6px;
+    text-align: center;
+    color: #1e71b9;
+    font-weight: 500;
+    font-size: 12px;
+    width: 160px;
+}
+
+.OnboardingContainer {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    margin: 10px 0px;
+    justify-content: space-between;
+    .OnboardingRightContainer {
+        display: flex;
+        gap: 12px;
+    }
+}
+
+.addDialog {
+    background-color: white;
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: center !important;
+    margin: 16px;
+    .addEmpInfo {
+        display: flex;
+        justify-content: end;
+        font-size: 12px;
+        color: #837023 !important;
+    }
+    .addDialogHeader {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 30%;
+    }
+    .addDialogInput {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 70% !important;
+    }
+    .peoplePickerWrapper {
+        div:first-child {
+            width: 100%;
+        }
+    }
+}
+
+.addDialogBtnContainer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pageTitle {
+    color: #233b83;
+    font-weight: 500;
+}
+
+.addNewBtn {
+    background-color: #233b83 !important;
+    padding: 8px 16px !important;
+    border: none !important;
+}
+
+.OnboardingContainer {
+    width: 75%;
+    margin: auto;
+}
+
+.onboardingDataTable {
+    width: 75%;
+    margin: auto;
+    th {
+        background-color: #f0f8ff;
+        color: #233b83 !important;
+    }
+    .userImageInTable {
+        border-radius: 6px;
+        width: 26px;
+        height: 26px;
+        margin: 10px;
+    }
+}
+
+.actionDialog {
+    .p-dialog-header::after {
+        content: none !important;
+    }
+}
