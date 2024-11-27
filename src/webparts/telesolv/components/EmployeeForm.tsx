@@ -195,7 +195,6 @@ const EmployeeForm = (): JSX.Element => {
             <div className="QuestionSection">
               <div className={styles.EmployeeQuestionContainer}>
                 <div style={{ width: "100%" }}>
-                  {/* Render individual properties */}
                   {ListItems.length &&
                     ListItems.sort(
                       (a: any, b: any) => a.QuestionNo - b.QuestionNo
@@ -211,56 +210,60 @@ const EmployeeForm = (): JSX.Element => {
                               justifyContent: "space-between",
                             }}
                           >
-                            <div>
-                              {_item.Options.length &&
-                                _item.Options?.map(
-                                  (category: any, aIndex: number) => (
-                                    <div
-                                      key={category.key}
-                                      className="flex align-items-center"
-                                    >
+                            {_item.Response.key === _item.Answer ? (
+                              <div>Hi</div>
+                            ) : (
+                              <div>
+                                {_item.Options.length &&
+                                  _item.Options?.map(
+                                    (category: any, aIndex: number) => (
                                       <div
-                                        style={{
-                                          margin: "10px",
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
+                                        key={category.key}
+                                        className="flex align-items-center"
                                       >
-                                        <RadioButton
-                                          inputId={`${_item.QuestionNo}-${category.key}`}
-                                          name={`category-${_item.QuestionNo}`}
-                                          value={category.name}
-                                          style={{ margin: "2px" }}
-                                          onChange={(e) => {
-                                            handleQuestionChange(
-                                              qIndex,
-                                              // _item.QuestionNo,
-                                              e.target.value,
-                                              "Radio",
-                                              aIndex
-                                            );
+                                        <div
+                                          style={{
+                                            margin: "10px",
+                                            display: "flex",
+                                            alignItems: "center",
                                           }}
-                                          //  checked={_item.Answer === category.name}
-                                          checked={
-                                            // _item.Answer &&
-                                            _item.Response.name ===
-                                            category.name
-                                          }
-                                          //  disabled={!_item.isEdit}
-                                        />
-
-                                        <label
-                                          htmlFor={`${_item.QuestionNo}-${category.key}`}
-                                          style={{ paddingLeft: "10px" }}
-                                          className="ml-2"
                                         >
-                                          {category.name}
-                                        </label>
+                                          <RadioButton
+                                            inputId={`${_item.QuestionNo}-${category.key}`}
+                                            name={`category-${_item.QuestionNo}`}
+                                            value={category.name}
+                                            style={{ margin: "2px" }}
+                                            onChange={(e) => {
+                                              handleQuestionChange(
+                                                qIndex,
+                                                // _item.QuestionNo,
+                                                e.target.value,
+                                                "Radio",
+                                                aIndex
+                                              );
+                                            }}
+                                            //  checked={_item.Answer === category.name}
+                                            checked={
+                                              // _item.Answer &&
+                                              _item.Response.name ===
+                                              category.name
+                                            }
+                                            //  disabled={!_item.isEdit}
+                                          />
+
+                                          <label
+                                            htmlFor={`${_item.QuestionNo}-${category.key}`}
+                                            style={{ paddingLeft: "10px" }}
+                                            className="ml-2"
+                                          >
+                                            {category.name}
+                                          </label>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )
-                                )}
-                            </div>
+                                    )
+                                  )}
+                              </div>
+                            )}
 
                             {(_item.Status === "To be resolved" ||
                               _item.Status === "Resolved") && (
