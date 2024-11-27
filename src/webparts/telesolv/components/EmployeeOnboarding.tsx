@@ -296,7 +296,7 @@ const Onboarding = (props: any) => {
             Email: TempEmployeeOnboarding.Email,
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
-            Status: "Pending",
+            //    Status: "Pending",
           });
 
         console.log("Employee details updated successfully in SharePoint!");
@@ -308,9 +308,9 @@ const Onboarding = (props: any) => {
             Role: TempEmployeeOnboarding.Role,
             Department: TempEmployeeOnboarding.Department.key,
             Email: TempEmployeeOnboarding.Email,
+            Status: "Pending",
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
-            Status: "Pending",
           })
           .then(async (res: any) => {
             try {
@@ -319,9 +319,15 @@ const Onboarding = (props: any) => {
                 questions.map(async (question: any) => {
                   // Add each question to the EmployeeResponse list
                   console.log(question.Id);
+                  console.log(question.Answer, "Answer");
 
                   await sp.web.lists.getByTitle("EmployeeResponse").items.add({
                     EmployeeIDId: res.data.ID, // Employee ID
+                    Title: question.QuestionTitle,
+                    Sno: question.QuestionNo,
+                    Status: "Pending",
+
+                    Answer: question.Answer.key,
                     QuestionIDId: question.Id, // Question ID from questions array
                     EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
                   });
