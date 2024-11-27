@@ -13,17 +13,40 @@ import { Button } from "primereact/button";
 import { useEffect, useState, useRef } from "react";
 import { Toast } from "primereact/toast";
 import { sp } from "@pnp/sp";
+import { ProgressBar } from "primereact/progressbar";
+
 const logoImg: string = require("../assets/Images/Logo.svg");
 const cmtImg: string = require("../assets/Images/Comment.png");
 
 const EmployeeForm = (): JSX.Element => {
   const [ListItems, setListItems] = useState<any[]>([]);
+  const [ProgressPercent, setProgressPercent] = useState<number>(0);
+
   const [comment, setComment] = useState("");
   const toast = useRef<Toast>(null);
 
   //Set Value into Comments
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setComment(e.target.value); // Update the comment state with the input value
+  };
+
+  // Define a function to calculate progress percentage
+  const calculateProgressPercentage = (_tempArr: any) => {
+    console.log(ListItems, "Progess");
+
+    const totalItems = _tempArr.length;
+    console.log(totalItems, "totalItems");
+
+    const completedItems = _tempArr.filter(
+      (item: any) => item.Status === "Completed" || item.Status === "Solved"
+    ).length;
+    console.log(completedItems, "completedItems");
+
+    const progressPercentage =
+      totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+    console.log(progressPercentage, "%");
+
+    setProgressPercent(Math.round(progressPercentage));
   };
 
   //Get EmployeeResponse
@@ -60,6 +83,7 @@ const EmployeeForm = (): JSX.Element => {
                   name: item.Response,
                 }
               : "",
+            isAnswered: item.Response ? true : false,
           };
         });
 
@@ -71,6 +95,8 @@ const EmployeeForm = (): JSX.Element => {
         } else {
           setComment("");
         }
+
+        calculateProgressPercentage(_tempArr);
       })
       .catch((err) => {
         console.error("Error in questionConfig:", err);
@@ -139,16 +165,21 @@ const EmployeeForm = (): JSX.Element => {
           .items.getById(item.Id)
           .update({
             Response: item.Response ? item.Response.key : "",
+            Status:
+              item.Response.key === item.Answer
+                ? "Completed"
+                : "To be resolved",
+
             // Response: "Text",
             ResponseComments: comment,
           })
           .then(() => {
             // Optionally, show success toast
-            if (ListItems.length - 1 == i) {
+            if (ListItems.length - 1 === i) {
               toast.current?.show({
                 severity: "success",
-                summary: "Success",
-                detail: "Questions updated successfully!",
+                summary: "Ssuccess",
+                detail: "Response updated successfully!",
                 life: 3000,
               });
             }
@@ -192,6 +223,13 @@ const EmployeeForm = (): JSX.Element => {
                 onboarding process
               </span>
             </div>
+            {ListItems.length ===
+            ListItems.filter((item: any) => item.isAnswered === true).length ? (
+              <div className={styles.ProgressBar}>
+                <ProgressBar value={ProgressPercent} />
+              </div>
+            ) : null}
+
             <div className="QuestionSection">
               <div className={styles.EmployeeQuestionContainer}>
                 <div style={{ width: "100%" }}>
@@ -210,8 +248,8 @@ const EmployeeForm = (): JSX.Element => {
                               justifyContent: "space-between",
                             }}
                           >
-                            {_item.Response.key === _item.Answer ? (
-                              <div>Hi</div>
+                            {_item.isAnswered === true ? (
+                              <div>Response : {_item.Response.key}</div>
                             ) : (
                               <div>
                                 {_item.Options.length &&
@@ -271,13 +309,15 @@ const EmployeeForm = (): JSX.Element => {
                                 style={{
                                   display: "flex",
                                   justifyContent: "center",
-                                  width: "25%",
+                                  width: "15%",
+                                  borderRadius: "10px",
+                                  backgroundColor: "#ffebc0",
                                 }}
                               >
                                 <span
                                   style={{
-                                    backgroundColor: "green",
-                                    color: "red",
+                                    // backgroundColor: "green",
+                                    color: "#8F6200",
                                   }}
                                 >
                                   {_item.Status}

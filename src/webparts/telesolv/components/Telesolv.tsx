@@ -31,7 +31,7 @@ const Telesolve = (props: any): JSX.Element => {
       ) : (
         <div style={{ padding: 10 }}>
           <button
-            style={{ display: "none" }}
+            // style={{ display: "none" }}
             onClick={() => {
               // setShowHrScreen(true);
               setShowEmpScreen(true);
