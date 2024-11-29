@@ -464,8 +464,9 @@ const Onboarding = (props: any) => {
               field="Employee.EmployeeTitle"
               header="Name"
               body={peopleTemplate}
+              style={{ width: "200px" }}
             />
-            <Column field="Role" header="Role" />
+            <Column field="Role" header="Role" style={{ width: "125px" }} />
             <Column field="Department.key" header="Department" />
             <Column field="Employee.EmployeeEMail" header="Email" />
             <Column field="Status" header="Status" body={stsTemplate} />

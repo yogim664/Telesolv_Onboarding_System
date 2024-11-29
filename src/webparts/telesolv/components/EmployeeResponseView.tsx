@@ -19,17 +19,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   const SeelectedEmp = props.setSelectedEmp;
   console.log(SeelectedEmp.Employee.EmployeeTitle);
 
-  // style variables
-  // const peoplePickerStyles = {
-  //   root: {
-  //     ".ms-BasePicker-text": {
-  //       border: "none",
-  //       "::after": {
-  //         backgroundColor: "transparent !important",
-  //       },
-  //     },
-  //   },
-  // };
   const peopleTemplate = (rowData: any) => {
     const assignees = rowData.Assigenee || []; // Access Assignees from the rowData
 
