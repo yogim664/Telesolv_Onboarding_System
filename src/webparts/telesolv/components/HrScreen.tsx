@@ -14,6 +14,17 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { InputTextarea } from "primereact/inputtextarea";
+import { Paginator } from "primereact/paginator";
+
+interface IPageSync {
+  first: number;
+  rows: number;
+}
+
+const defaultPagination: IPageSync = {
+  first: 0,
+  rows: 5,
+};
 
 const HrScreen = (): JSX.Element => {
   const [ListItems, setListItems] = useState<any[]>([]);
@@ -21,6 +32,7 @@ const HrScreen = (): JSX.Element => {
   const [visible, setVisible] = useState(false);
 
   const toast = useRef<Toast>(null);
+  const [SearchTerms, setSearchTerms] = useState<string>("");
   const [TempEmployeeDetails, setTempEmployeeDetails] = useState<any>({
     Employee: {},
     Id: null,
@@ -31,7 +43,9 @@ const HrScreen = (): JSX.Element => {
     Comments: "",
   });
   const [statusChoices, setStatusChoices] = useState<any[]>([]);
-  //const [selectedStatus, setSelectedStatus] = useState<any>(null);
+  const [PageNationRows, setPageNationRows] = useState<IPageSync>({
+    ...defaultPagination,
+  });
 
   const handleChange = (key: string, value: any) => {
     const curObj: any = { ...TempEmployeeDetails };
@@ -40,24 +54,6 @@ const HrScreen = (): JSX.Element => {
     console.log(curObj);
     console.log(TempEmployeeDetails);
   };
-
-  //   const getStsChoices = (): void => {
-  //     sp.web.lists
-  //       .getByTitle("EmployeeResponse")
-  //       .fields.getByInternalNameOrTitle("Status")
-  //       .select("Choices,ID")
-  //       .get()
-  //       .then((data: any) => {
-  //         let ChoicesCollection: any[] = [];
-  //         data.Choices.forEach((_val: any) => {
-  //           ChoicesCollection.push({
-  //             Key: _val,
-  //             Choices: _val,
-  //           });
-  //         });
-  //       })
-  //       .catch((err) => console.log(err, getStsChoices));
-  //   };
 
   const getStsChoices = (): void => {
     sp.web.lists
@@ -230,6 +226,28 @@ const HrScreen = (): JSX.Element => {
     }
   };
 
+  const onPageChange = (event: any) => {
+    setPageNationRows({
+      first: event?.first || defaultPagination.first,
+      rows: event?.rows || defaultPagination.rows,
+    });
+  };
+
+  const filterItems =
+    SearchTerms.trim() === ""
+      ? ListItems
+      : ListItems.filter(
+          (item: any) =>
+            item.QuestionTitle.toLowerCase().includes(
+              SearchTerms.toLowerCase()
+            ) ||
+            item.Role.toLowerCase().includes(SearchTerms.toLowerCase()) ||
+            item.Employee.Name.toLowerCase().includes(
+              SearchTerms.toLowerCase()
+            ) ||
+            item.Status.key.toLowerCase().includes(SearchTerms.toLowerCase())
+        );
+
   useEffect(() => {
     questionConfig();
   }, []);
@@ -254,28 +272,12 @@ const HrScreen = (): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Role</div>
           <div className={styles.addDialogInput}>
-            {/* <InputText
-              placeholder="Enter Department"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeOnboarding?.Task || ""}
-              onChange={(e) => {
-                handleChange("Department", e.target.value);
-              }}
-            /> */}
             {TempEmployeeDetails?.Role}
           </div>
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Department</div>
           <div className={styles.addDialogInput}>
-            {/* <InputText
-              placeholder="Enter Email"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeDetails?.Department || ""}
-              onChange={(e) => {
-                handleChange("Department", e.target.value);
-              }}
-            /> */}
             {TempEmployeeDetails?.Department}
           </div>
         </div>
@@ -288,28 +290,12 @@ const HrScreen = (): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Task</div>
           <div className={styles.addDialogInput}>
-            {/* <InputText
-              placeholder="Enter PhoneNumber"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeDetails?.task || ""}
-              onChange={(e) => {
-                handleChange("PhoneNumber", e.target.value);
-              }}
-            /> */}
             {TempEmployeeDetails?.QuestionTitle}
           </div>
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Comments</div>
           <div className={styles.addDialogInput}>
-            {/* <InputText
-              placeholder="Enter PhoneNumber"
-              style={{ width: "100%", color: "black" }}
-              value={TempEmployeeDetails?.task || ""}
-              onChange={(e) => {
-                handleChange("PhoneNumber", e.target.value);
-              }}
-            /> */}
             {TempEmployeeDetails?.Comments}
           </div>
         </div>
@@ -398,14 +384,26 @@ const HrScreen = (): JSX.Element => {
         </div>
       </div>
       <div className={styles.OnboardingContainer}>
-        <p>Task details</p>
+        <h2 style={{ color: "#233b83", fontWeight: "500" }}>Task details</h2>
         <div className={styles.OnboardingRightContainer}>
-          <InputText placeholder="Search" />
+          <InputText
+            placeholder="Search"
+            onChange={(e) => {
+              setSearchTerms(e.target.value);
+              console.log(e.target.value);
+              console.log(SearchTerms);
+              console.log(filterItems);
+            }}
+          />
         </div>
       </div>
 
       <DataTable
-        value={ListItems}
+        //  value={filterItems}
+        value={filterItems?.slice(
+          PageNationRows.first,
+          PageNationRows.first + PageNationRows.rows
+        )}
         tableStyle={{ minWidth: "50rem" }}
         className="employeeConfig"
       >
@@ -420,6 +418,13 @@ const HrScreen = (): JSX.Element => {
         />{" "}
         *
       </DataTable>
+      <Paginator
+        first={PageNationRows.first}
+        rows={PageNationRows.rows}
+        totalRecords={ListItems.length}
+        // rowsPerPageOptions={[10, 20, 30]}
+        onPageChange={onPageChange}
+      />
       <Toast ref={toast} />
     </div>
   );

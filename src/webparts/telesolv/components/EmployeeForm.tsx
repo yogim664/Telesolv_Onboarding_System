@@ -14,6 +14,7 @@ import { useEffect, useState, useRef } from "react";
 import { Toast } from "primereact/toast";
 import { sp } from "@pnp/sp";
 import { ProgressBar } from "primereact/progressbar";
+//import styles from "./EmployeeOnboarding.module.scss";
 
 const logoImg: string = require("../assets/Images/Logo.svg");
 const cmtImg: string = require("../assets/Images/Comment.png");
@@ -38,7 +39,7 @@ const EmployeeForm = (): JSX.Element => {
     console.log(totalItems, "totalItems");
 
     const completedItems = _tempArr.filter(
-      (item: any) => item.Status === "Completed" || item.Status === "Solved"
+      (item: any) => item.Status === "Completed" || item.Status === "Resolved"
     ).length;
     console.log(completedItems, "completedItems");
 
@@ -303,27 +304,33 @@ const EmployeeForm = (): JSX.Element => {
                               </div>
                             )}
 
-                            {(_item.Status === "To be resolved" ||
-                              _item.Status === "Resolved") && (
-                              <div
+                            {/* {(_item.Status === "To be resolved" ||
+                              _item.Status === "Resolved") && ( */}
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                width: "15%",
+                                borderRadius: "10px",
+                                backgroundColor:
+                                  _item.Status === "Completed"
+                                    ? " #caf0cc"
+                                    : "#ffebc0",
+                              }}
+                            >
+                              <span
                                 style={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  width: "15%",
-                                  borderRadius: "10px",
-                                  backgroundColor: "#ffebc0",
+                                  // backgroundColor: "green",
+                                  color:
+                                    _item.Status === "Completed"
+                                      ? "#437426"
+                                      : "#8f621f",
                                 }}
                               >
-                                <span
-                                  style={{
-                                    // backgroundColor: "green",
-                                    color: "#8F6200",
-                                  }}
-                                >
-                                  {_item.Status}
-                                </span>
-                              </div>
-                            )}
+                                {_item.Status}
+                              </span>
+                            </div>
+                            {/* )} */}
                           </div>
                         </div>
                       ))}

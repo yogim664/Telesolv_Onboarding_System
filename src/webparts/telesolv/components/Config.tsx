@@ -45,15 +45,6 @@ const Config = (props: any) => {
     deleteQuestion(id, qIndex);
   };
 
-  const reject = () => {
-    toast.current?.show({
-      severity: "warn",
-      summary: "Rejected",
-      detail: "You have rejected",
-      life: 3000,
-    });
-  };
-
   const showTemplate = (id: any, qIndex: number) => {
     confirmDialog({
       group: "templating",
@@ -64,7 +55,6 @@ const Config = (props: any) => {
         </div>
       ),
       accept: () => accept(id, qIndex),
-      reject,
     });
   };
 
