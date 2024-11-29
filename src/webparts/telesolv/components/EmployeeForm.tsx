@@ -14,6 +14,7 @@ import { useEffect, useState, useRef } from "react";
 import { Toast } from "primereact/toast";
 import { sp } from "@pnp/sp";
 import { ProgressBar } from "primereact/progressbar";
+//import styles from "./EmployeeOnboarding.module.scss";
 
 const logoImg: string = require("../assets/Images/Logo.svg");
 const cmtImg: string = require("../assets/Images/Comment.png");

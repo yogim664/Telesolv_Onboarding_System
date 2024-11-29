@@ -1,0 +1,20 @@
+.p-paginator {
+  color: #233b83 !important;
+  button {
+    border-radius: 50% !important;
+    border: none !important;
+  }
+  .p-highlight {
+    background: #233b83 !important;
+    border: none !important;
+  }
+  .p-icon {
+    color: #233b83 !important;
+  }
+}
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 12px 6px;
+}
+.p-datatable .p-column-header-content {
+  padding-left: 0px !important;
+}
