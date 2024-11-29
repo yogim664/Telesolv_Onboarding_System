@@ -13,12 +13,14 @@ import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
+import { Paginator } from "primereact/paginator";
 import { Toast } from "primereact/toast";
 import { useRef } from "react";
 import EmployeeResponseView from "./EmployeeResponseView";
 import "../assets/style/employeeConfig.css";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import styles from "./EmployeeOnboarding.module.scss";
+import "../assets/style/EmployeeOnboarding.css";
 import { useState } from "react";
 import { sp } from "@pnp/sp";
 import { useEffect } from "react";
@@ -27,6 +29,16 @@ import {
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Dropdown } from "primereact/dropdown";
+
+interface IPageSync {
+  first: number;
+  rows: number;
+}
+
+const defaultPagination: IPageSync = {
+  first: 0,
+  rows: 5,
+};
 
 const Onboarding = (props: any) => {
   const [visible, setVisible] = useState(false);
@@ -37,6 +49,9 @@ const Onboarding = (props: any) => {
   const [questions, setQuestions] = useState<any>([]);
   const [Departments, setDepartments] = useState<any>([]);
   const [SearchTerms, setSearchTerms] = useState<string>("");
+  const [PageNationRows, setPageNationRows] = useState<IPageSync>({
+    ...defaultPagination,
+  });
 
   const [TempEmployeeOnboarding, setTempEmployeeOnboarding] = useState<any>({
     Employee: {
@@ -78,12 +93,12 @@ const Onboarding = (props: any) => {
     getAllTitles();
   }, []);
 
-  // const filterItems =
-  //   SearchTerms.trim() === ""
-  //     ? EmployeeOnboarding
-  //     : EmployeeOnboarding.filter((item: any) =>
-  //         item.Department.toLowerCase().includes(SearchTerms.toLowerCase())
-  //       );
+  const onPageChange = (event: any) => {
+    setPageNationRows({
+      first: event?.first || defaultPagination.first,
+      rows: event?.rows || defaultPagination.rows,
+    });
+  };
 
   const filterItems =
     SearchTerms.trim() === ""
@@ -439,7 +454,10 @@ const Onboarding = (props: any) => {
           <DataTable
             className={styles.onboardingDataTable}
             //  value={EmployeeOnboarding}
-            value={filterItems}
+            value={filterItems?.slice(
+              PageNationRows.first,
+              PageNationRows.first + PageNationRows.rows
+            )}
             tableStyle={{ minWidth: "50rem" }}
           >
             <Column
@@ -457,6 +475,14 @@ const Onboarding = (props: any) => {
               body={(Rowdata: any) => ActionIcons(Rowdata)}
             />
           </DataTable>
+          <Paginator
+            first={PageNationRows.first}
+            rows={PageNationRows.rows}
+            totalRecords={EmployeeOnboarding.length}
+            // rowsPerPageOptions={[10, 20, 30]}
+            onPageChange={onPageChange}
+          />
+
           <div className={styles.actionDialog}>
             <Dialog
               header={
@@ -494,17 +520,14 @@ const Onboarding = (props: any) => {
                         },
                       }}
                       // styles={{ root: "100%" }}
-                      onChange={
-                        (selectedPeople: any[]) => {
-                          console.log(selectedPeople);
-                          if (selectedPeople.length !== 0) {
-                            handleChange("Employee", selectedPeople[0]);
-                          } else {
-                            handleChange("Employee", []);
-                          }
+                      onChange={(selectedPeople: any[]) => {
+                        console.log(selectedPeople);
+                        if (selectedPeople.length !== 0) {
+                          handleChange("Employee", selectedPeople[0]);
+                        } else {
+                          handleChange("Employee", []);
                         }
-                        // Pass selectedPeople and rowData
-                      }
+                      }}
                       principalTypes={[PrincipalType.User]}
                       defaultSelectedUsers={
                         TempEmployeeOnboarding?.Employee?.EmployeeEMail
@@ -550,6 +573,7 @@ const Onboarding = (props: any) => {
                       handleChange("Department", e.value);
                       console.log(e.value.key);
                     }}
+                    style={{ width: "100%" }}
                     options={Departments || []}
                     optionLabel="name"
                     placeholder="Select a Department"
@@ -593,7 +617,7 @@ const Onboarding = (props: any) => {
                     //  style={{ marginRight: 14, width: "100px" }}
                     label="Cancel"
                     style={{
-                      height: "30px",
+                      height: "34px",
                       backgroundColor: "#cfcfcf",
                       color: "#000",
                       border: "none",
@@ -605,7 +629,7 @@ const Onboarding = (props: any) => {
                   <Button
                     label="Save"
                     style={{
-                      height: "30px",
+                      height: "34px",
                       color: "#ffff",
                       backgroundColor: "#233b83",
                       border: "none",
