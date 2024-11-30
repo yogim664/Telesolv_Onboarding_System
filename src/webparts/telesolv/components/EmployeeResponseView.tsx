@@ -4,7 +4,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { sp } from "@pnp/sp";
-import styles from "./Telesolv.module.scss";
+// import styles from "./Telesolv.module.scss";
+import styles from "./EmployeeResponse.module.scss";
 import { useEffect, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -135,16 +136,17 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   }, []);
 
   return (
-    <div style={{ padding: 10 }}>
+    <div className={styles.employeeResponseSection}>
       <div className={styles.ResponseHeader}>
         <i
-          className="pi pi-arrow-circle-left"
-          style={{ fontSize: "3rem", color: "#233b83" }}
+          className={`pi pi-arrow-circle-left ${styles.backIcon}`}
           onClick={() => {
             props.setShowResponseView(false);
           }}
         />
-        {SeelectedEmp.Employee.EmployeeTitle}
+        <h2 className={styles.userName}>
+          {SeelectedEmp.Employee.EmployeeTitle}
+        </h2>
       </div>
       <div>
         <DataTable
