@@ -1,3 +1,16 @@
 .ProgressBar {
   margin: 10px;
 }
+
+.p-progressbar-value {
+  background: #233b83 !important;
+}
+.QuestionSection::-webkit-scrollbar {
+  width: 10px;
+  background-color: #f5f5f5;
+}
+
+.QuestionSection::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: rgba(128, 128, 128, 0.348);
+}

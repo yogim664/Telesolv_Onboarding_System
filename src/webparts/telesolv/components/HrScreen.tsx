@@ -44,7 +44,10 @@ const HrScreen = (): JSX.Element => {
   const toast = useRef<Toast>(null);
   const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
   const [TempEmployeeDetails, setTempEmployeeDetails] = useState<any>({
-    Employee: {},
+    Employee: {
+      Name: "",
+      Email: "",
+    },
     Id: null,
     Role: "",
     Department: "",
@@ -209,7 +212,7 @@ const HrScreen = (): JSX.Element => {
   };
   const ActionIcons = (Rowdata: any) => {
     return (
-      <div style={{ display: "flex", gap: 6 }}>
+      <div style={{ display: "flex", gap: 6, width: "100%", paddingLeft: 14 }}>
         <i
           className="pi pi-pencil"
           style={{ fontSize: "1rem", color: "#233b83" }}
@@ -279,7 +282,7 @@ const HrScreen = (): JSX.Element => {
       <Dialog
         header="Employee Details"
         visible={visible}
-        style={{ width: "50vw" }}
+        style={{ width: "34vw", borderRadius: "4px" }}
         onHide={() => {
           if (!visible) return;
           setVisible(false);
@@ -306,7 +309,7 @@ const HrScreen = (): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Email</div>
           <div className={styles.addDialogInput}>
-            {`TempEmployeeDetails?.Employee.Email`}
+            {TempEmployeeDetails?.Employee.Email}
           </div>
         </div>
         <div className={styles.addDialog}>
@@ -333,6 +336,7 @@ const HrScreen = (): JSX.Element => {
                     )?.[0]
                   : ""
               }
+              style={{ width: "100%" }}
               onChange={(e) => {
                 handleChange("Status", e.value);
                 console.log(e.value.key);
@@ -362,7 +366,8 @@ const HrScreen = (): JSX.Element => {
 
             <InputTextarea
               placeholder="Enter comments"
-              //   onChange={(e) => handleChange(Comment, e.value)}
+              style={{ resize: "none", width: "100%", height: "100px" }}
+              autoResize={false}
               onChange={(e) => handleChange("Comments", e.target.value)}
             />
           </div>
@@ -374,7 +379,7 @@ const HrScreen = (): JSX.Element => {
               //  style={{ marginRight: 14, width: "100px" }}
               label="Cancel"
               style={{
-                height: "30px",
+                height: "36px",
                 backgroundColor: "#cfcfcf",
                 color: "#000",
                 border: "none",
@@ -386,7 +391,7 @@ const HrScreen = (): JSX.Element => {
             <Button
               label="Save"
               style={{
-                height: "30px",
+                height: "36px",
                 color: "#ffff",
                 backgroundColor: "#233b83",
                 border: "none",
@@ -407,7 +412,7 @@ const HrScreen = (): JSX.Element => {
         </div>
       </div>
       <div className={styles.OnboardingContainer}>
-        <h2 style={{ color: "#233b83", fontWeight: "500" }}>Task details</h2>
+        <h2 style={{ color: "#233b83", fontWeight: "bolder" }}>Task details</h2>
         <div className={styles.OnboardingRightContainer}>
           <Dropdown
             value={
@@ -440,6 +445,12 @@ const HrScreen = (): JSX.Element => {
 
           <i
             className="pi pi-refresh"
+            style={{
+              backgroundColor: "#223b83",
+              padding: 8,
+              borderRadius: 4,
+              color: "#fff",
+            }}
             onClick={() => {
               filData.dropDown = "";
               filData.search = "";
@@ -458,13 +469,33 @@ const HrScreen = (): JSX.Element => {
         tableStyle={{ minWidth: "50rem" }}
         className="employeeConfig"
       >
-        <Column field="QuestionTitle" header="Task" />
-        <Column field="QuestionTitle" header="To" body={personColumnToPerson} />
-        <Column field="Status" header="Status" body={stsTemplate} />
-        <Column field="Role" header="Role" />
+        <Column
+          field="QuestionTitle"
+          header="Task"
+          style={{ width: "25%", marginLeft: "10px" }}
+        />
+        <Column
+          field="QuestionTitle"
+          header="To"
+          body={personColumnToPerson}
+          style={{ width: "25%" }}
+        />
+        <Column field="Role" header="Role" style={{ width: "15%" }} />
+        <Column
+          field="Department"
+          header="Department"
+          style={{ width: "15%" }}
+        />
+        <Column
+          field="Status"
+          header="Status"
+          body={stsTemplate}
+          style={{ width: "10%" }}
+        />
         <Column
           field="Action"
           header="Action"
+          style={{ width: "10%", textAlign: "center" }}
           body={(Rowdata: any) => ActionIcons(Rowdata)}
         />{" "}
         *
