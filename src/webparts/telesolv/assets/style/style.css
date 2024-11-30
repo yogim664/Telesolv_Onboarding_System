@@ -1,141 +1,158 @@
 .CanvasComponent.LCS .CanvasZone:not(.CanvasZone--fullWidth) .ControlZone {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .ControlZone {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .CanvasSection {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .CanvasComponent.LCS .CanvasSection-col {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .spAppAndPropertyPanelContainer .sp-appBar {
-    display: none;
+  display: none;
 }
 
-.CanvasComponent.LCS .CanvasSection--read:not(.CanvasSection--fullWidth) .ControlZone {
-    margin-top: 0 !important;
+.CanvasComponent.LCS
+  .CanvasSection--read:not(.CanvasSection--fullWidth)
+  .ControlZone {
+  margin-top: 0 !important;
 }
 
 div[data-automation-id="CanvasZone-SectionContainer"] {
-    margin: 0 !important;
-    margin-top: 33px !important;
+  margin: 0 !important;
+  margin-top: 33px !important;
 }
 
 .CanvasZone-SectionContainer {
-    background-color: var(--body-bgcolor) !important;
+  background-color: var(--body-bgcolor) !important;
 }
-
 
 /* reset width in deloyment */
 
 .CanvasComponent .CanvasZone {
-    max-width: 100% !important;
-    padding: 0px !important;
+  max-width: 100% !important;
+  padding: 0px !important;
 }
 
 #workbenchPageContent {
-    width: 100% !important;
-    max-width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
 }
-
 
 /* font faces */
 
 @font-face {
-    font-family: "interThin";
-    src: url("../fonts/InterGF/Inter-Thin.ttf");
+  font-family: "interThin";
+  src: url("../fonts/InterGF/Inter-Thin.ttf");
 }
 
 @font-face {
-    font-family: "interRegular";
-    src: url("../fonts/InterGF/Inter-Regular.ttf");
+  font-family: "interRegular";
+  src: url("../fonts/InterGF/Inter-Regular.ttf");
 }
 
 @font-face {
-    font-family: "interBold";
-    src: url("../fonts/InterGF/Inter-Bold.ttf");
+  font-family: "interBold";
+  src: url("../fonts/InterGF/Inter-Bold.ttf");
 }
 
 @font-face {
-    font-family: "interSemibold";
-    src: url("../fonts/InterGF/Inter-SemiBold.ttf");
+  font-family: "interSemibold";
+  src: url("../fonts/InterGF/Inter-SemiBold.ttf");
 }
 
 @font-face {
-    font-family: "interLight";
-    src: url("../fonts/InterGF/Inter-Light.ttf");
+  font-family: "interLight";
+  src: url("../fonts/InterGF/Inter-Light.ttf");
 }
 
 @font-face {
-    font-family: "interExtralight";
-    src: url("../fonts/InterGF/Inter-ExtraLight.ttf");
+  font-family: "interExtralight";
+  src: url("../fonts/InterGF/Inter-ExtraLight.ttf");
 }
 
 @font-face {
-    font-family: "interExtraBold";
-    src: url("../fonts/InterGF/Inter-ExtraBold.ttf");
+  font-family: "interExtraBold";
+  src: url("../fonts/InterGF/Inter-ExtraBold.ttf");
 }
 
 @font-face {
-    font-family: "interBlack";
-    src: url("../fonts/InterGF/Inter-Black.ttf");
+  font-family: "interBlack";
+  src: url("../fonts/InterGF/Inter-Black.ttf");
 }
 
 @font-face {
-    font-family: "interMedium";
-    src: url("../fonts/InterGF/Inter-Medium.ttf");
+  font-family: "interMedium";
+  src: url("../fonts/InterGF/Inter-Medium.ttf");
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+div,
+span,
+input,
+textarea,
+label,
+ul,
+ol,
+th,
+td {
+  font-family: interLight !important;
 }
 
 .p-toast-message-content {
-    align-items: center !important;
+  align-items: center !important;
 }
 
 .p-confirm-dialog-accept {
-    background-color: #233b83 !important;
-    outline: 0px !important;
-    padding: 8px 24px;
+  background-color: #233b83 !important;
+  outline: 0px !important;
+  padding: 8px 24px;
 }
 
 .p-confirm-dialog-reject {
-    background-color: #cfcfcf;
-    color: #000;
-    outline: 0px !important;
-    padding: 8px 24px;
+  background-color: #cfcfcf;
+  color: #000;
+  outline: 0px !important;
+  padding: 8px 24px;
 }
 
 .p-dialog .p-dialog-header,
 .p-dialog .p-dialog-footer {
-    border: none !important;
+  border: none !important;
 }
 
 .p-dialog .p-dialog-header {
-    position: relative;
+  position: relative;
 }
 
 .p-dialog-title {
-    color: #233b83 !important;
+  color: #233b83 !important;
 }
 
 @keyframes depth-animation {
-    from {
-        width: 32px;
-        height: 32px;
-    }
-    to {
-        width: 64px;
-        height: 64px;
-    }
+  from {
+    width: 32px;
+    height: 32px;
+  }
+  to {
+    width: 64px;
+    height: 64px;
+  }
 }
-
 
 /* .p-dialog .p-dialog-header::after {
     content: "";
@@ -152,45 +169,45 @@ div[data-automation-id="CanvasZone-SectionContainer"] {
 } */
 
 .p-dialog .p-dialog-footer button {
-    margin: 0 !important;
+  margin: 0 !important;
 }
 
 .p-dialog-footer {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 12px;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px;
 }
 
 .p-dialog-header {
-    justify-content: center;
+  justify-content: center;
 }
 
 .p-dialog-title {
-    text-align: center;
-    /* margin-bottom: 52px; */
+  text-align: center;
+  /* margin-bottom: 52px; */
 }
 
 .p-dialog-header-icons {
-    display: none !important;
+  display: none !important;
 }
 
 .ms-BasePicker-text {
-    border: 1px solid #ced4da;
-    border-radius: 4px !important;
+  border: 1px solid #ced4da;
+  border-radius: 4px !important;
 }
 
 .is-disabled.ms-PickerItem-removeButton {
-    display: none !important;
+  display: none !important;
 }
 
 .ms-PickerPersona-container {
-    background-color: #e8e8e8 !important;
+  background-color: #e8e8e8 !important;
 }
 
-.p-datatable .p-datatable-thead>tr>th {
-    border: none !important;
+.p-datatable .p-datatable-thead > tr > th {
+  border: none !important;
 }
 
-.p-datatable .p-datatable-tbody>tr>td {
-    padding: 6px !important;
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 6px !important;
 }

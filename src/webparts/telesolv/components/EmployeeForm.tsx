@@ -14,6 +14,7 @@ import { useEffect, useState, useRef } from "react";
 import { Toast } from "primereact/toast";
 import { sp } from "@pnp/sp";
 import { ProgressBar } from "primereact/progressbar";
+
 //import styles from "./EmployeeOnboarding.module.scss";
 
 const logoImg: string = require("../assets/Images/Logo.svg");
@@ -231,7 +232,10 @@ const EmployeeForm = (): JSX.Element => {
               </div>
             ) : null}
 
-            <div className="QuestionSection">
+            <div
+              className="QuestionSection"
+              style={{ height: "45vh", overflow: "auto" }}
+            >
               <div className={styles.EmployeeQuestionContainer}>
                 <div style={{ width: "100%" }}>
                   {ListItems.length &&
@@ -241,7 +245,9 @@ const EmployeeForm = (): JSX.Element => {
 
                       .map((_item: any, qIndex: any) => (
                         <div className={styles.question}>
-                          <span>{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</span>
+                          <span
+                            style={{ fontWeight: "600" }}
+                          >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</span>
 
                           <div
                             style={{
@@ -304,33 +310,34 @@ const EmployeeForm = (): JSX.Element => {
                               </div>
                             )}
 
-                            {/* {(_item.Status === "To be resolved" ||
-                              _item.Status === "Resolved") && ( */}
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                width: "15%",
-                                borderRadius: "10px",
-                                backgroundColor:
-                                  _item.Status === "Completed"
-                                    ? " #caf0cc"
-                                    : "#ffebc0",
-                              }}
-                            >
-                              <span
+                            {_item.Response.key !== null && (
+                              <div
                                 style={{
-                                  // backgroundColor: "green",
-                                  color:
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  width: "15%",
+                                  borderRadius: "4px",
+                                  height: "24px",
+                                  alignItems: "center",
+                                  backgroundColor:
                                     _item.Status === "Completed"
-                                      ? "#437426"
-                                      : "#8f621f",
+                                      ? " #caf0cc"
+                                      : "#ffebc0",
                                 }}
                               >
-                                {_item.Status}
-                              </span>
-                            </div>
-                            {/* )} */}
+                                <span
+                                  style={{
+                                    // backgroundColor: "green",
+                                    color:
+                                      _item.Status === "Completed"
+                                        ? "#437426"
+                                        : "#8f621f",
+                                  }}
+                                >
+                                  {_item.Status}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -338,7 +345,10 @@ const EmployeeForm = (): JSX.Element => {
               </div>
               <div className={styles.commentsContainer}>
                 <div className={styles.commentsContainerHeader}>
-                  <img src={cmtImg} alt="logo" /> Comments
+                  <img src={cmtImg} alt="logo" />
+                  <span style={{ fontWeight: "bolder", fontSize: "large" }}>
+                    Comments
+                  </span>
                 </div>
                 <InputTextarea
                   placeholder="Enter comments"

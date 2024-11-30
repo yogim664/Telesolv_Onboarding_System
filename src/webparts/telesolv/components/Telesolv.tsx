@@ -14,8 +14,8 @@ import { TabView, TabPanel } from "primereact/tabview";
 import Onboarding from "./EmployeeOnboarding";
 import "../assets/style/Tabs.css";
 import { useState } from "react";
-//import EmployeeForm from "./EmployeeForm";
-import HrScreen from "./HrScreen";
+import EmployeeForm from "./EmployeeForm";
+//import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
@@ -32,8 +32,8 @@ const Telesolve = (props: any): JSX.Element => {
 
   // State to manage visibility
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  //const [ShowEmpScreen, setShowEmpScreen] = useState<boolean>(false);
-  const [ShowHrScreen, setShowHrScreen] = useState<boolean>(false);
+  const [ShowEmpScreen, setShowEmpScreen] = useState<boolean>(true);
+  //const [ShowHrScreen, setShowHrScreen] = useState<boolean>(true);
 
   //HR Director
 
@@ -79,64 +79,60 @@ const Telesolve = (props: any): JSX.Element => {
 
   return (
     <>
-      {
-        //ShowEmpScreen ? (
-        ShowHrScreen ? (
-          <HrScreen
-          // <EmployeeForm
+      {ShowEmpScreen ? (
+        // <HrScreen
+        // setShowResponseView={setShowResponseView}
+        // ShowEmpScreen={ShowEmpScreen}
+        //  />
+        <EmployeeForm />
+      ) : (
+        <div style={{ padding: 10 }}>
+          <button
+            // style={{ display: "none" }}
+            onClick={() => {
+              // setShowHrScreen(true);
+              setShowEmpScreen(true);
+            }}
+          >
+            Click here
+          </button>
 
-          //  setShowResponseView={setShowResponseView}
-          // ShowEmpScreen={ShowEmpScreen}
-          />
-        ) : (
-          <div style={{ padding: 10 }}>
-            <button
-              // style={{ display: "none" }}
-              onClick={() => {
-                setShowHrScreen(true);
-                //  setShowEmpScreen(true);
-              }}
-            >
-              Click here
-            </button>
-
-            <div className={styles.navBar}>
-              <div className={styles.navRightContainers}>
-                <img src={logoImg} alt="logo" />
-              </div>
-
-              <div className={styles.navLeftContainers}>
-                {/* <p>Configration</p>
-          <p>Onboarding</p> */}
-                <TabView
-                  activeIndex={activeIndex}
-                  onTabChange={(e) => setActiveIndex(e.index)}
-                  className="MainTab"
-                >
-                  <TabPanel
-                    header="Configuration"
-                    style={{ fontFamily: "interRegular" }}
-                  >
-                    {}
-                  </TabPanel>
-                  <TabPanel
-                    header="Onboarding"
-                    style={{ fontFamily: "interRegular" }}
-                  >
-                    {}
-                  </TabPanel>
-                </TabView>
-              </div>
+          <div className={styles.navBar}>
+            <div className={styles.navRightContainers}>
+              <img src={logoImg} alt="logo" />
             </div>
-            {activeIndex !== 0 ? (
-              <Onboarding context={props.context} />
-            ) : (
-              <Config context={props.context} />
-              // <Onboarding context={props.context} />
-            )}
+
+            <div className={styles.navLeftContainers}>
+              {/* <p>Configration</p>
+          <p>Onboarding</p> */}
+              <TabView
+                activeIndex={activeIndex}
+                onTabChange={(e) => setActiveIndex(e.index)}
+                className="MainTab"
+              >
+                <TabPanel
+                  header="Configuration"
+                  style={{ fontFamily: "interRegular" }}
+                >
+                  {}
+                </TabPanel>
+                <TabPanel
+                  header="Onboarding"
+                  style={{ fontFamily: "interRegular" }}
+                >
+                  {}
+                </TabPanel>
+              </TabView>
+            </div>
           </div>
-        )
-      }
+          {activeIndex !== 0 ? (
+            <Onboarding context={props.context} />
+          ) : (
+            <Config context={props.context} />
+            // <Onboarding context={props.context} />
+          )}
+        </div>
+      )}
     </>
   );
 };
