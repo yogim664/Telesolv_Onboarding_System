@@ -293,7 +293,7 @@ const Onboarding = (props: any) => {
 
   const ActionIcons = (Rowdata: any) => {
     return (
-      <div style={{ display: "flex", gap: 6 }}>
+      <div className={styles.dashboardActionIcons}>
         <i
           className="pi pi-eye"
           style={{ fontSize: "1.25rem", color: "green" }}
