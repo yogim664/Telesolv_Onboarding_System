@@ -21,9 +21,19 @@ interface IPageSync {
   rows: number;
 }
 
+interface IFilData {
+  dropDown: string;
+  search: string;
+}
+
 const defaultPagination: IPageSync = {
   first: 0,
   rows: 5,
+};
+
+let filData: IFilData = {
+  dropDown: "",
+  search: "",
 };
 
 const HrScreen = (): JSX.Element => {
@@ -32,7 +42,7 @@ const HrScreen = (): JSX.Element => {
   const [visible, setVisible] = useState(false);
 
   const toast = useRef<Toast>(null);
-  const [SearchTerms, setSearchTerms] = useState<string>("");
+  const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
   const [TempEmployeeDetails, setTempEmployeeDetails] = useState<any>({
     Employee: {},
     Id: null,
@@ -46,6 +56,7 @@ const HrScreen = (): JSX.Element => {
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
+  const [filArray, setFilArray] = useState<any[]>([]);
 
   const handleChange = (key: string, value: any) => {
     const curObj: any = { ...TempEmployeeDetails };
@@ -53,6 +64,31 @@ const HrScreen = (): JSX.Element => {
     setTempEmployeeDetails(curObj);
     console.log(curObj);
     console.log(TempEmployeeDetails);
+  };
+
+  const filterFun = (masData: any[]) => {
+    let temp: any = [...masData];
+
+    if (filData?.search) {
+      temp = temp?.filter(
+        (val: any) =>
+          val?.QuestionTitle.toLowerCase().includes(
+            filData?.search.toLowerCase()
+          ) ||
+          val?.Role.toLowerCase().includes(filData?.search.toLowerCase()) ||
+          val?.Employee.Name.toLowerCase().includes(
+            filData?.search.toLowerCase()
+          )
+      );
+    }
+
+    if (filData?.dropDown) {
+      temp = temp?.filter((val: any) =>
+        val?.Status.key.toLowerCase().includes(filData?.dropDown.toLowerCase())
+      );
+    }
+
+    setFilArray([...temp]);
   };
 
   const getStsChoices = (): void => {
@@ -121,7 +157,8 @@ const HrScreen = (): JSX.Element => {
           };
         });
         console.log("Transformed array:", _tempArr); // Log transformed array
-        setListItems(_tempArr); // Update state
+        setListItems(_tempArr);
+        filterFun([..._tempArr]);
         getStsChoices();
       })
       .catch((err) => {
@@ -233,21 +270,6 @@ const HrScreen = (): JSX.Element => {
     });
   };
 
-  const filterItems =
-    SearchTerms.trim() === ""
-      ? ListItems
-      : ListItems.filter(
-          (item: any) =>
-            item.QuestionTitle.toLowerCase().includes(
-              SearchTerms.toLowerCase()
-            ) ||
-            item.Role.toLowerCase().includes(SearchTerms.toLowerCase()) ||
-            item.Employee.Name.toLowerCase().includes(
-              SearchTerms.toLowerCase()
-            ) ||
-            item.Status.key.toLowerCase().includes(SearchTerms.toLowerCase())
-        );
-
   useEffect(() => {
     questionConfig();
   }, []);
@@ -337,6 +359,7 @@ const HrScreen = (): JSX.Element => {
               placeholder="Select a City"
               className="w-full md:w-14rem"
             /> */}
+
             <InputTextarea
               placeholder="Enter comments"
               //   onChange={(e) => handleChange(Comment, e.value)}
@@ -386,21 +409,49 @@ const HrScreen = (): JSX.Element => {
       <div className={styles.OnboardingContainer}>
         <h2 style={{ color: "#233b83", fontWeight: "500" }}>Task details</h2>
         <div className={styles.OnboardingRightContainer}>
+          <Dropdown
+            value={
+              SearchTerms.dropDown
+                ? statusChoices?.filter(
+                    (choice: any) => choice.key === SearchTerms.dropDown
+                  )?.[0]
+                : null
+            } // Use `find` instead of `filter`
+            onChange={(e) => {
+              filData.dropDown = e.value.key;
+              setSearchTerms({ ...filData });
+              filterFun([...ListItems]);
+            }}
+            options={statusChoices || []}
+            optionLabel="name"
+            placeholder="Select a Status"
+            className="w-full md:w-14rem"
+          />
+
           <InputText
             placeholder="Search"
+            value={SearchTerms.search}
             onChange={(e) => {
-              setSearchTerms(e.target.value);
-              console.log(e.target.value);
-              console.log(SearchTerms);
-              console.log(filterItems);
+              filData.search = e.target.value;
+              setSearchTerms({ ...filData });
+              filterFun([...ListItems]);
+            }}
+          />
+
+          <i
+            className="pi pi-refresh"
+            onClick={() => {
+              filData.dropDown = "";
+              filData.search = "";
+              setSearchTerms({ ...filData });
+              filterFun([...ListItems]);
             }}
           />
         </div>
       </div>
 
       <DataTable
-        //  value={filterItems}
-        value={filterItems?.slice(
+        value={filArray?.slice(
           PageNationRows.first,
           PageNationRows.first + PageNationRows.rows
         )}
