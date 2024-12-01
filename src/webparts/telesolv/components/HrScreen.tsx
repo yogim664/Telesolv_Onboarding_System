@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as React from "react";
 const logoImg: string = require("../assets/Images/Logo.svg");
-import styles from "./Telesolv.module.scss";
+// import styles from "./Telesolv.module.scss";
+import styles from "./HrScreen.module.scss";
 import { useState, useEffect, useRef } from "react";
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
@@ -278,7 +279,7 @@ const HrScreen = (): JSX.Element => {
   }, []);
 
   return (
-    <div style={{ padding: 10 }}>
+    <>
       <Dialog
         header="Employee Details"
         visible={visible}
@@ -447,7 +448,7 @@ const HrScreen = (): JSX.Element => {
             className="pi pi-refresh"
             style={{
               backgroundColor: "#223b83",
-              padding: 8,
+              padding: 10,
               borderRadius: 4,
               color: "#fff",
             }}
@@ -466,8 +467,8 @@ const HrScreen = (): JSX.Element => {
           PageNationRows.first,
           PageNationRows.first + PageNationRows.rows
         )}
-        tableStyle={{ minWidth: "50rem" }}
-        className="employeeConfig"
+        // tableStyle={{ minWidth: "50rem" }}
+        className={styles.employeeConfig}
       >
         <Column
           field="QuestionTitle"
@@ -508,7 +509,7 @@ const HrScreen = (): JSX.Element => {
         onPageChange={onPageChange}
       />
       <Toast ref={toast} />
-    </div>
+    </>
   );
 };
 export default HrScreen;

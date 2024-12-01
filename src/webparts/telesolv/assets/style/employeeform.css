@@ -1,16 +1,28 @@
 .ProgressBar {
-  margin: 10px;
+    margin: 10px;
+}
+
+.p-progressbar {
+    height: 3rem !important;
+    border-radius: 16px !important;
 }
 
 .p-progressbar-value {
-  background: #233b83 !important;
+    background: #c6d4ff !important;
 }
+
+.p-progressbar-label {
+    color: #233b83 !important;
+    font-weight: 700;
+    font-size: 14px;
+}
+
 .QuestionSection::-webkit-scrollbar {
-  width: 10px;
-  background-color: #f5f5f5;
+    width: 10px;
+    background-color: #f5f5f5;
 }
 
 .QuestionSection::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: rgba(128, 128, 128, 0.348);
+    border-radius: 10px;
+    background-color: rgba(128, 128, 128, 0.348);
 }
