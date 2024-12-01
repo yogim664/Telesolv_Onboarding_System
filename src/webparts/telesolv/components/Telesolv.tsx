@@ -15,7 +15,7 @@ import Onboarding from "./EmployeeOnboarding";
 import "../assets/style/Tabs.css";
 import { useState } from "react";
 import EmployeeForm from "./EmployeeForm";
-//import HrScreen from "./HrScreen";
+import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
@@ -32,8 +32,10 @@ const Telesolve = (props: any): JSX.Element => {
 
   // State to manage visibility
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [ShowEmpScreen, setShowEmpScreen] = useState<boolean>(true);
-  //const [ShowHrScreen, setShowHrScreen] = useState<boolean>(true);
+  const [ShowHrPerson, setShowHrPerson] = useState<boolean>(true);
+
+  const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
+    useState<boolean>(true);
 
   //HR Director
 
@@ -52,6 +54,7 @@ const Telesolve = (props: any): JSX.Element => {
   const groupId = "0127711a-e331-4698-8e2e-47617926b1d0";
   getGroupUsers(groupId).then((users) => {
     const HrDirector = users.some((user) => user.mail === CurUser.Email);
+    setShowHrDirectorScreen(HrDirector);
     console.log(HrDirector, "HR Director");
   });
 
@@ -69,29 +72,28 @@ const Telesolve = (props: any): JSX.Element => {
     }
   }
 
-  // Example usage
-
   const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
   getHRGroupUsers(HRgroupId).then((users) => {
     const HrPerson = users.some((user) => user.mail === CurUser.Email);
     console.log(HrPerson, "HR Director");
+    setShowHrPerson(HrPerson);
   });
 
   return (
     <>
-      {ShowEmpScreen ? (
-        // <HrScreen
-        // setShowResponseView={setShowResponseView}
-        // ShowEmpScreen={ShowEmpScreen}
-        //  />
-        <EmployeeForm />
-      ) : (
+      {ShowHrPerson ? (
+        <HrScreen />
+      ) : // setShowResponseView={setShowResponseView}
+      // ShowEmpScreen={ShowEmpScreen}
+      //  />
+      // <EmployeeForm />
+      ShowHrDirectorScreen ? (
         <div style={{ padding: 10 }}>
           <button
-            // style={{ display: "none" }}
+            style={{ display: "none" }}
             onClick={() => {
               // setShowHrScreen(true);
-              setShowEmpScreen(true);
+              // setShowEmpScreen(true);
             }}
           >
             Click here
@@ -132,6 +134,8 @@ const Telesolve = (props: any): JSX.Element => {
             // <Onboarding context={props.context} />
           )}
         </div>
+      ) : (
+        <EmployeeForm />
       )}
     </>
   );
