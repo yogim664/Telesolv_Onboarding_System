@@ -13,7 +13,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
 import { useEffect, useState, useRef } from "react";
 import { Toast } from "primereact/toast";
-import { sp } from "@pnp/sp";
+import { sp } from "@pnp/sp/presets/all";
 import { ProgressBar } from "primereact/progressbar";
 
 //import styles from "./EmployeeOnboarding.module.scss";
@@ -21,7 +21,9 @@ import { ProgressBar } from "primereact/progressbar";
 const logoImg: string = require("../assets/Images/Logo.svg");
 const cmtImg: string = require("../assets/Images/Comment.png");
 
-const EmployeeForm = (): JSX.Element => {
+const EmployeeForm = (props: any): JSX.Element => {
+  console.log(props);
+
   const [ListItems, setListItems] = useState<any[]>([]);
   const [ProgressPercent, setProgressPercent] = useState<number>(0);
 
@@ -52,18 +54,31 @@ const EmployeeForm = (): JSX.Element => {
     setProgressPercent(Math.round(progressPercentage));
   };
 
+  const CurUser = {
+    Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
+    Email: props?.context?._pageContext?._user?.email || "Unknown Email",
+    ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
+  };
+
   //Get EmployeeResponse
   const questionConfig = () => {
     sp.web.lists
       .getByTitle("EmployeeResponse")
       .items.select(
-        "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,QuestionID/Sno,QuestionID/Options"
+        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options, Employee/ID, Employee/EMail"
       )
-      .expand("QuestionID")
+      .expand("QuestionID, Employee")
       .get()
       .then((_items: any) => {
+        console.log(_items, "REsponse");
+        const temp: any = _items?.filter(
+          (val: any) =>
+            val?.Employee?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
+        );
+        console.log(temp, "temp");
+
         // Transform fetched items
-        const _tempArr = _items.map((item: any) => {
+        const _tempArr = temp?.map((item: any) => {
           let options = [];
           try {
             options = JSON.parse(item.QuestionID?.Options || "[]");
@@ -85,7 +100,10 @@ const EmployeeForm = (): JSX.Element => {
                   key: item.Response,
                   name: item.Response,
                 }
-              : "",
+              : {
+                  key: null,
+                  name: null,
+                },
             isAnswered: item.Response ? true : false,
           };
         });
@@ -186,6 +204,7 @@ const EmployeeForm = (): JSX.Element => {
                 life: 3000,
               });
             }
+            questionConfig();
           })
           .catch((err) => console.log(err, "updateQuestionsToSP"))
       );
@@ -305,7 +324,7 @@ const EmployeeForm = (): JSX.Element => {
                               </div>
                             )}
 
-                            {_item.Response.key !== null && (
+                            {_item.isAnswered === true && (
                               <div
                                 className={styles.responseStatus}
                                 style={{

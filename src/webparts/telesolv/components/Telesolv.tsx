@@ -32,10 +32,10 @@ const Telesolve = (props: any): JSX.Element => {
 
   // State to manage visibility
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [ShowHrPerson, setShowHrPerson] = useState<boolean>(true);
+  const [ShowHrPerson, setShowHrPerson] = useState<boolean>(false);
 
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   //HR Director
 
@@ -82,7 +82,7 @@ const Telesolve = (props: any): JSX.Element => {
   return (
     <>
       {ShowHrPerson ? (
-        <HrScreen />
+        <HrScreen context={props.context} />
       ) : // setShowResponseView={setShowResponseView}
       // ShowEmpScreen={ShowEmpScreen}
       //  />
@@ -136,10 +136,7 @@ const Telesolve = (props: any): JSX.Element => {
         </div>
       ) : (
         <>
-          <HrScreen />
-          <div style={{ display: "none" }}>
-            <EmployeeForm />
-          </div>
+          <EmployeeForm context={props.context} />
         </>
       )}
     </>

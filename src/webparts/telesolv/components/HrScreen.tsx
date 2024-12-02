@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -37,9 +38,15 @@ let filData: IFilData = {
   search: "",
 };
 
-const HrScreen = (): JSX.Element => {
-  const [ListItems, setListItems] = useState<any[]>([]);
+const HrScreen = (props: any): JSX.Element => {
+  const CurUser = {
+    Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
+    Email: props?.context?._pageContext?._user?.email || "Unknown Email",
+    ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
+  };
 
+  const [ListItems, setListItems] = useState<any[]>([]);
+  const [AssigenedQuestion, setAssigenedQuestion] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
 
   const toast = useRef<Toast>(null);
@@ -122,21 +129,21 @@ const HrScreen = (): JSX.Element => {
     getStsChoices();
   }, []);
 
-  const questionConfig = () => {
-    sp.web.lists
+  const questionConfig = async (assArray: any[] = []): Promise<void> => {
+    await sp.web.lists
       .getByTitle("EmployeeResponse")
       .items.select(
-        "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,QuestionID/Sno,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
+        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role"
       )
       .expand("QuestionID,Employee,EmployeeID")
       .get()
-      .then((_items: any) => {
+      .then(async (_items: any) => {
         console.log("Fetched items:", _items); // Log fetched items
 
-        const _tempArr = _items.map((item: any) => {
-          console.log("Processing item:", item); // Log individual item
+        const _tempArr = await _items?.map((item: any) => {
           return {
             Id: item.Id,
+            QuestionID: item?.QuestionIDId || null,
             QuestionNo: item.QuestionID?.Sno || "N/A",
             QuestionTitle: item.QuestionID?.Title || "No Title",
             Role: item.EmployeeID?.Role || "No Role",
@@ -160,13 +167,49 @@ const HrScreen = (): JSX.Element => {
             },
           };
         });
-        console.log("Transformed array:", _tempArr); // Log transformed array
-        setListItems(_tempArr);
-        filterFun([..._tempArr]);
+        console.log("Transformed array: ", _tempArr);
+
+        const tempAssigenQuestion = await Promise.all(
+          _tempArr?.filter((item: any) =>
+            assArray?.some((val: any) => val?.ID === item?.QuestionID)
+          ) || []
+        );
+        console.log("tempAssigenQuestion: ", tempAssigenQuestion);
+
+        setListItems(tempAssigenQuestion);
+        filterFun([...tempAssigenQuestion]);
         getStsChoices();
       })
       .catch((err) => {
         console.error("Error in questionConfig:", err); // Log error
+      });
+  };
+
+  const AssigendPerson = async (): Promise<void> => {
+    await sp.web.lists
+      .getByTitle("CheckpointConfig")
+      .items.select("*, Assigened/ID, Assigened/EMail")
+      .expand("Assigened")
+      .get()
+      .then(async (_items: any) => {
+        console.log(_items, "Response");
+
+        // Filter based on current user's email
+        const temp: any =
+          _items?.filter((val: any) =>
+            val?.Assigened?.some(
+              (user: any) =>
+                user?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
+            )
+          ) || [];
+
+        console.log(temp, "Filtered assigen person");
+        setAssigenedQuestion(temp);
+        console.log(AssigenedQuestion, "AssigenQuestion");
+        await questionConfig(temp);
+      })
+      .catch((error: any) => {
+        console.error("Error fetching items:", error);
       });
   };
 
@@ -188,6 +231,7 @@ const HrScreen = (): JSX.Element => {
       </div>
     );
   };
+
   const stsTemplate = (rowData: any) => {
     let color: string = "";
     let bgColor: string = "";
@@ -211,6 +255,7 @@ const HrScreen = (): JSX.Element => {
       </div>
     );
   };
+
   const ActionIcons = (Rowdata: any) => {
     return (
       <div style={{ display: "flex", gap: 6, width: "100%", paddingLeft: 14 }}>
@@ -228,7 +273,6 @@ const HrScreen = (): JSX.Element => {
   };
 
   // update sp
-
   const updateQuestionsToSP: any = async (TempEmployeeDetails: any) => {
     try {
       // Map and update each item in SharePoint
@@ -248,7 +292,8 @@ const HrScreen = (): JSX.Element => {
             detail: "Questions updated successfully!",
             life: 3000,
           });
-          questionConfig();
+          // questionConfig();
+          AssigendPerson();
         })
         .catch((err) => console.log(err, "updateQuestionsToSP"));
       // );
@@ -275,7 +320,7 @@ const HrScreen = (): JSX.Element => {
   };
 
   useEffect(() => {
-    questionConfig();
+    AssigendPerson();
   }, []);
 
   return (
