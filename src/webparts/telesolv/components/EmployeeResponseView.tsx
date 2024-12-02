@@ -150,9 +150,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       </div>
       <div>
         <DataTable
+          className={styles.employeeResponseDataTable}
           value={questions}
           tableStyle={{ minWidth: "50rem" }}
-          className="employeeConfig"
         >
           <Column field="QuestionTitle" header="Questions" />
           <Column field="Answer" header="Answer" />
