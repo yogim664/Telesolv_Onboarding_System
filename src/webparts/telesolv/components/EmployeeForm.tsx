@@ -6,7 +6,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as React from "react";
 import { RadioButton } from "primereact/radiobutton"; // Importing PrimeReact RadioButton
-import styles from "./Telesolv.module.scss";
+import styles from "./EmployeeForm.module.scss";
+// import styles from "./Telesolv.module.scss";
 import "../assets/style/employeeform.css";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
@@ -219,11 +220,11 @@ const EmployeeForm = (): JSX.Element => {
         <div className={styles.Bgstyle}>
           <div className={styles.EmployeeAnsContainer}>
             <div className={styles.EmployeeAnsContainerheader}>
-              <p>Let's get started</p>
-              <span>
+              <h2>Let's get started</h2>
+              <h4>
                 Fill in the check points below to get started with your
                 onboarding process
-              </span>
+              </h4>
             </div>
             {ListItems.length ===
             ListItems.filter((item: any) => item.isAnswered === true).length ? (
@@ -232,10 +233,7 @@ const EmployeeForm = (): JSX.Element => {
               </div>
             ) : null}
 
-            <div
-              className="QuestionSection"
-              style={{ height: "45vh", overflow: "auto" }}
-            >
+            <div className="QuestionSection">
               <div className={styles.EmployeeQuestionContainer}>
                 <div style={{ width: "100%" }}>
                   {ListItems.length &&
@@ -245,18 +243,15 @@ const EmployeeForm = (): JSX.Element => {
 
                       .map((_item: any, qIndex: any) => (
                         <div className={styles.question}>
-                          <span
-                            style={{ fontWeight: "600" }}
-                          >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</span>
-
                           <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                            }}
-                          >
+                            className={styles.questionTitle}
+                          >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</div>
+
+                          <div className={styles.employeeResponse}>
                             {_item.isAnswered === true ? (
-                              <div>Response : {_item.Response.key}</div>
+                              <div className={styles.responseAnswer}>
+                                {_item.Response.key}
+                              </div>
                             ) : (
                               <div>
                                 {_item.Options.length &&
@@ -312,13 +307,8 @@ const EmployeeForm = (): JSX.Element => {
 
                             {_item.Response.key !== null && (
                               <div
+                                className={styles.responseStatus}
                                 style={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  width: "15%",
-                                  borderRadius: "4px",
-                                  height: "24px",
-                                  alignItems: "center",
                                   backgroundColor:
                                     _item.Status === "Completed"
                                       ? " #caf0cc"
@@ -358,9 +348,9 @@ const EmployeeForm = (): JSX.Element => {
               </div>
             </div>
             <div className={styles.employeeFormFooter}>
-              <Button style={{ backgroundColor: "#6060604D" }}>Cancel</Button>
+              <Button className={styles.cancelBtn}>Cancel</Button>
               <Button
-                style={{ backgroundColor: "#233B83", color: "#fff" }}
+                className={styles.primaryBtn}
                 onClick={() => {
                   validation();
                 }}

@@ -135,7 +135,12 @@ const Telesolve = (props: any): JSX.Element => {
           )}
         </div>
       ) : (
-        <EmployeeForm />
+        <>
+          <HrScreen />
+          <div style={{ display: "none" }}>
+            <EmployeeForm />
+          </div>
+        </>
       )}
     </>
   );
