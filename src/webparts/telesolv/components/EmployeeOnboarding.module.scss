@@ -15,12 +15,13 @@
     display: flex !important;
     align-items: flex-start;
     justify-content: center !important;
-    margin: 16px;
+    margin: 24px 16px;
     .addEmpInfo {
         display: flex;
         justify-content: end;
         font-size: 12px;
         color: #837023 !important;
+        font-weight: 600;
     }
     .addDialogHeader {
         align-items: center;
@@ -34,10 +35,8 @@
         justify-content: flex-start;
         width: 70% !important;
     }
-    .peoplePickerWrapper {
-        div:first-child {
-            width: 100%;
-        }
+    .peoplePicker {
+        width: 100% !important;
     }
 }
 
@@ -111,4 +110,13 @@
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.noDataFound {
+    display: flex;
+    justify-content: center;
+    color: #233b83;
+    font-weight: 500;
+    height: 100px;
+    font-weight: 600;
 }

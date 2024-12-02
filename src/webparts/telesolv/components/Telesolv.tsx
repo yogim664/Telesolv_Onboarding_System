@@ -105,8 +105,6 @@ const Telesolve = (props: any): JSX.Element => {
             </div>
 
             <div className={styles.navLeftContainers}>
-              {/* <p>Configration</p>
-          <p>Onboarding</p> */}
               <TabView
                 activeIndex={activeIndex}
                 onTabChange={(e) => setActiveIndex(e.index)}
@@ -131,7 +129,6 @@ const Telesolve = (props: any): JSX.Element => {
             <Onboarding context={props.context} />
           ) : (
             <Config context={props.context} />
-            // <Onboarding context={props.context} />
           )}
         </div>
       ) : (

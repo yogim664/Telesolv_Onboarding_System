@@ -149,24 +149,28 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         </h2>
       </div>
       <div>
-        <DataTable
-          className={styles.employeeResponseDataTable}
-          value={questions}
-          tableStyle={{ minWidth: "50rem" }}
-        >
-          <Column field="QuestionTitle" header="Questions" />
-          <Column field="Answer" header="Answer" />
-          <Column field="Status" header="Status" body={stsTemplate} />
-          <Column
-            field="Assigenee"
-            header="HR Person"
-            body={peopleTemplate}
-            style={{
-              width: "65%",
-            }}
-          />
-          <Column field="Comments" header="Comments" />
-        </DataTable>
+        {questions.length > 0 ? (
+          <DataTable
+            className={styles.employeeResponseDataTable}
+            value={questions}
+            tableStyle={{ minWidth: "50rem" }}
+          >
+            <Column field="QuestionTitle" header="Questions" />
+            <Column field="Answer" header="Answer" />
+            <Column field="Status" header="Status" body={stsTemplate} />
+            <Column
+              field="Assigenee"
+              header="HR Person"
+              body={peopleTemplate}
+              style={{
+                width: "65%",
+              }}
+            />
+            <Column field="Comments" header="Comments" />
+          </DataTable>
+        ) : (
+          <div className={styles.noDataFound}>No data found!</div>
+        )}
       </div>
     </div>
   );

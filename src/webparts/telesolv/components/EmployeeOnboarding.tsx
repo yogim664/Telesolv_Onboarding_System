@@ -144,7 +144,6 @@ const Onboarding = (props: any) => {
     confirmDialog({
       message: "Do you want to delete this record?",
       header: "Delete Confirmation",
-      icon: "pi pi-info-circle",
       defaultFocus: "reject",
       acceptClassName: "p-button-danger",
       accept: () => accept(id),
@@ -441,7 +440,7 @@ const Onboarding = (props: any) => {
               <Button
                 className={styles.addNewBtn}
                 label="Add"
-                icon="pi pi-plus"
+                icon="pi pi-plus-circle"
                 onClick={() => {
                   setTempEmployeeOnboarding([]);
                   setUpdate(false);
@@ -451,31 +450,35 @@ const Onboarding = (props: any) => {
             </div>
           </div>
 
-          <DataTable
-            className={styles.onboardingDataTable}
-            //  value={EmployeeOnboarding}
-            value={filterItems?.slice(
-              PageNationRows.first,
-              PageNationRows.first + PageNationRows.rows
-            )}
-            tableStyle={{ minWidth: "50rem" }}
-          >
-            <Column
-              field="Employee.EmployeeTitle"
-              header="Name"
-              body={peopleTemplate}
-              style={{ width: "200px" }}
-            />
-            <Column field="Role" header="Role" style={{ width: "125px" }} />
-            <Column field="Department.key" header="Department" />
-            <Column field="Employee.EmployeeEMail" header="Email" />
-            <Column field="Status" header="Status" body={stsTemplate} />
-            <Column
-              field="Action"
-              header="Action"
-              body={(Rowdata: any) => ActionIcons(Rowdata)}
-            />
-          </DataTable>
+          {filterItems.length > 0 ? (
+            <DataTable
+              className={styles.onboardingDataTable}
+              //  value={EmployeeOnboarding}
+              value={filterItems?.slice(
+                PageNationRows.first,
+                PageNationRows.first + PageNationRows.rows
+              )}
+              tableStyle={{ minWidth: "50rem" }}
+            >
+              <Column
+                field="Employee.EmployeeTitle"
+                header="Name"
+                body={peopleTemplate}
+                style={{ width: "200px" }}
+              />
+              <Column field="Role" header="Role" style={{ width: "125px" }} />
+              <Column field="Department.key" header="Department" />
+              <Column field="Employee.EmployeeEMail" header="Email" />
+              <Column field="Status" header="Status" body={stsTemplate} />
+              <Column
+                field="Action"
+                header="Action"
+                body={(Rowdata: any) => ActionIcons(Rowdata)}
+              />
+            </DataTable>
+          ) : (
+            <div className={styles.noDataFound}>No data found!</div>
+          )}
           <Paginator
             first={PageNationRows.first}
             rows={PageNationRows.rows}
@@ -504,10 +507,8 @@ const Onboarding = (props: any) => {
             >
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>Name</div>
-                <div
-                  className={`${styles.addDialogInput} ${styles.peoplePickerWrapper}`}
-                >
-                  <div>
+                <div className={`${styles.addDialogInput}`}>
+                  <div className={styles.peoplePicker}>
                     <PeoplePicker
                       context={props.context}
                       webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}

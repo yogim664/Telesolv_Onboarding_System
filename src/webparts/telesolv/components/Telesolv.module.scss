@@ -124,7 +124,7 @@
     display: flex !important;
     align-items: center;
     justify-content: center !important;
-    margin: 16px;
+    margin: 24px 16px;
     .addDialogHeader {
         align-items: center;
         display: flex;
@@ -138,11 +138,6 @@
         display: flex;
         justify-content: flex-start;
         width: 70% !important;
-    }
-    .peoplePickerWrapper {
-        div:first-child {
-            width: 100%;
-        }
     }
 }
 
@@ -312,8 +307,8 @@
         text-align: right;
         margin-top: 6px;
         color: #837023;
-        font-size: 14px;
-        font-weight: 400;
+        font-size: 12px;
+        font-weight: 600;
     }
     .optionSection {
         display: flex;
@@ -330,7 +325,6 @@
 
 .ProgressBar {
     margin: 10px;
-    // background: #233b83;
 }
 
 .pendingSts {
