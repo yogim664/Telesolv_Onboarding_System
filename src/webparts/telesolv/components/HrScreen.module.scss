@@ -1,10 +1,10 @@
-.OnboardingContainer {
+.HrPersonContainer {
     display: flex;
     width: 80%;
     align-items: center;
     margin: 10px auto;
     justify-content: space-between;
-    .OnboardingRightContainer {
+    .HrPersonRightContainer {
         display: flex;
         gap: 8px;
         justify-content: center;
@@ -35,7 +35,7 @@
     display: flex !important;
     align-items: center;
     justify-content: center !important;
-    margin: 16px;
+    margin: 24px 16px;
     .addDialogHeader {
         align-items: center;
         display: flex;
@@ -49,11 +49,6 @@
         display: flex;
         justify-content: flex-start;
         width: 70% !important;
-    }
-    .peoplePickerWrapper {
-        div:first-child {
-            width: 100%;
-        }
     }
 }
 

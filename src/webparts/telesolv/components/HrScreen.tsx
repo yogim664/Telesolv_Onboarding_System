@@ -153,8 +153,8 @@ const HrScreen = (props: any): JSX.Element => {
             Status: item.Status
               ? { key: item?.Status, name: item?.Status }
               : "",
-
-            Comments: item.Comments || "No Comments",
+            ResponseComments: item.ResponseComments || "",
+            Comments: item.Comments || "",
             Response: item.Response
               ? {
                   key: item.Response,
@@ -283,6 +283,7 @@ const HrScreen = (props: any): JSX.Element => {
         .items.getById(TempEmployeeDetails.Id)
         .update({
           Status: TempEmployeeDetails.Status.key,
+          Comments: TempEmployeeDetails.Comments,
         })
         .then(() => {
           setVisible(false);
@@ -367,7 +368,8 @@ const HrScreen = (props: any): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Comments</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.Comments}
+            {/* {TempEmployeeDetails?.Comments} */}
+            {TempEmployeeDetails?.ResponseComments}
           </div>
         </div>
 
@@ -412,6 +414,10 @@ const HrScreen = (props: any): JSX.Element => {
 
             <InputTextarea
               placeholder="Enter comments"
+              // value={TempEmployeeDetails?.comments || ""}
+              value={
+                TempEmployeeDetails.Comments ? TempEmployeeDetails.Comments : ""
+              }
               style={{ resize: "none", width: "100%", height: "100px" }}
               autoResize={false}
               onChange={(e) => handleChange("Comments", e.target.value)}
@@ -457,9 +463,9 @@ const HrScreen = (props: any): JSX.Element => {
           </div>
         </div>
       </div>
-      <div className={styles.OnboardingContainer}>
+      <div className={styles.HrPersonContainer}>
         <h2 style={{ color: "#233b83", fontWeight: "bolder" }}>Task details</h2>
-        <div className={styles.OnboardingRightContainer}>
+        <div className={styles.HrPersonRightContainer}>
           <Dropdown
             value={
               SearchTerms.dropDown
