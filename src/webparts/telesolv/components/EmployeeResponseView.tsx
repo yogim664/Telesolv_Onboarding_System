@@ -125,7 +125,36 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   };
 
   const stsTemplate = (rowData: any) => {
-    return <div className={styles.pendingSts}>{rowData.Status}</div>;
+    return (
+      <div
+        style={{
+          //    background: "#d8e5f0",
+          background:
+            rowData.Status === "Satisfactory"
+              ? " #caf0cc"
+              : rowData.Status === "Resolved"
+              ? "#ffebc0"
+              : "#d8e5f0",
+          padding: "6px 4px",
+          borderRadius: "6px",
+          textAlign: "center",
+          //   color: "#1e71b9",
+          color:
+            rowData.Status === "Satisfactory"
+              ? "#437426"
+              : rowData.Status === "Resolved"
+              ? "#8f621f"
+              : "#1e71b9",
+          fontWeight: "600",
+          fontSize: "14px",
+          width: "160px",
+        }}
+      >
+        {rowData.Status}
+      </div>
+    );
+
+    // <div className={styles.pendingSts}>{rowData.Status}</div>;
   };
 
   useEffect(() => {

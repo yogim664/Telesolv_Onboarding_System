@@ -195,6 +195,9 @@ const Onboarding = (props: any) => {
         isDelete: true,
       });
       showSuccess("Delete Sucessfuly");
+
+      fetchQuestions();
+
       console.log("Employee details updated successfully in SharePoint!");
     } catch (error) {
       console.error("Error saving questions:", error);
@@ -209,13 +212,14 @@ const Onboarding = (props: any) => {
 
   //Get data from sp list
 
-  const EmployeeOnboardingDetails = async () => {
+  const EmployeeOnboardingDetails = async (formattedQuestions: any) => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle("EmployeeOnboarding")
         .items.select("*,Employee/ID,Employee/EMail,Employee/Title")
         .expand("Employee")
+        .filter("isDelete ne 1")
         .get();
       console.log(items, "items");
 
@@ -240,7 +244,22 @@ const Onboarding = (props: any) => {
 
         Email: item.Email ? item.Email : "",
         PhoneNumber: item.PhoneNumber ? item.PhoneNumber : "",
-        Status: item.Status ? item.Status : "",
+
+        Status:
+          formattedQuestions.filter(
+            (Qitem: any) => Qitem.Employee.EmployeeId === item.Employee.ID
+          ).length !==
+          //formattedQuestions.length
+          formattedQuestions.filter(
+            (Qitem: any) =>
+              (Qitem.Status === "Satisfactory" ||
+                Qitem.Status === "Resolved") &&
+              Qitem.Employee.EmployeeId === item.Employee.ID
+          ).length
+            ? "Pending"
+            : "Satisfactory",
+
+        //    Status: item.Status ? item.Status : "",
         SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
       }));
       console.log("Fetched Items:", formattedItems);
@@ -259,11 +278,11 @@ const Onboarding = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle("CheckpointConfig")
-        .items.select("*,Assigened/ID,Assigened/EMail")
+        .items.select("*,Assigened/ID, Assigened/EMail")
         .expand("Assigened")
         .filter("isDelete ne 1")
         .get();
-      console.log(items, "items");
+      console.log(items, "COnfigitems");
 
       // Map the items to create an array of values
       const formattedQuestions = items.map((item: any) => ({
@@ -272,6 +291,7 @@ const Onboarding = (props: any) => {
         QuestionNo: item.Sno,
         QuestionTitle: item.Title,
         isDelete: item.isDelete,
+        Status: item.Status,
         Answer: item.Answer
           ? {
               key: item.Answer,
@@ -297,15 +317,70 @@ const Onboarding = (props: any) => {
     }
   };
 
+  const EmployeeDetails = async () => {
+    try {
+      // Fetch items from the SharePoint list
+      const items = await sp.web.lists
+        .getByTitle("EmployeeResponse")
+
+        .items.select(
+          "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
+        )
+        .expand("QuestionID,Employee,EmployeeID")
+        .get();
+      console.log(items, "items");
+
+      // Map the items to create an array of values
+
+      // Map the items to create an array of values
+      // Format EmployeeResponse items and link to assigned values
+      const formattedResponseItems = items.map((item: any) => {
+        return {
+          QuestionID: item.QuestionID?.ID,
+          QuestionTitle: item.QuestionID?.Title,
+          Answer: item.QuestionID?.Answer,
+          Status: item.Status,
+          Comments: item.Comments,
+          Employee: {
+            EmployeeName: item.Employee ? item.Employee.Title : "",
+            EmployeeEmail: item.Employee ? item.Employee.EMail : "",
+            EmployeeId: item.Employee.ID || null,
+          },
+          Role: item.EmployeeID?.Role || "No Role",
+          Department: item.EmployeeID?.Department || "No Department",
+        };
+      });
+
+      console.log("Fetched Items:", formattedResponseItems);
+
+      // Return the formatted array
+      return formattedResponseItems;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
+  };
+
   const fetchQuestions = async () => {
     try {
-      // Fetch employee onboarding details
-      const fetchedItems = await EmployeeOnboardingDetails();
-      setEmployeeOnboarding(fetchedItems); // Store the data in state
-      setfilterData(fetchedItems);
       // Fetch question configuration and store it in state
       const formattedQuestions = await questionConfig();
-      setQuestions(formattedQuestions);
+      let temp: any[] = await Promise.all(formattedQuestions);
+      console.log("temp: ", temp);
+      setQuestions(temp);
+
+      // Fetch employee onboarding details
+      const fetchedItems = await EmployeeDetails();
+      let temp2: any[] = await Promise.all(fetchedItems);
+      console.log("temp3: ", temp2);
+
+      // Fetch employee onboarding details
+      const formattedResponseItems = await EmployeeOnboardingDetails(temp2);
+      let temp3: any[] = await Promise.all(formattedResponseItems);
+      console.log("temp2: ", temp2);
+
+      setEmployeeOnboarding(temp3); // Store the data in state
+      setfilterData(temp3);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -439,7 +514,25 @@ const Onboarding = (props: any) => {
     );
   };
   const stsTemplate = (rowData: any) => {
-    return <div className={styles.pendingSts}>{rowData.Status}</div>;
+    return (
+      <div
+        style={{
+          //    background: "#d8e5f0",
+          background:
+            rowData.Status === "Satisfactory" ? " #caf0cc" : "#d8e5f0",
+          padding: "6px 4px",
+          borderRadius: "6px",
+          textAlign: "center",
+          //   color: "#1e71b9",
+          color: rowData.Status === "Satisfactory" ? "#437426" : "#1e71b9",
+          fontWeight: "600",
+          fontSize: "14px",
+          width: "160px",
+        }}
+      >
+        {rowData.Status}
+      </div>
+    );
   };
 
   return (
