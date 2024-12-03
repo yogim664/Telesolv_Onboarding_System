@@ -441,7 +441,6 @@ const HrScreen = (props: any): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Comment</div>
           <div className={styles.addDialogInput}>
-            =
             <InputTextarea
               placeholder="Enter comments"
               // value={TempEmployeeDetails?.comments || ""}
@@ -497,6 +496,7 @@ const HrScreen = (props: any): JSX.Element => {
         <h2 style={{ color: "#233b83", fontWeight: "bolder" }}>Task details</h2>
         <div className={styles.HrPersonRightContainer}>
           <Dropdown
+            className={`w-full md:w-14rem ${styles.filterDepartment}`}
             value={
               SearchTerms.dept
                 ? Departments?.find(
@@ -512,10 +512,10 @@ const HrScreen = (props: any): JSX.Element => {
             options={Departments || []}
             optionLabel="name"
             placeholder="Select a Department"
-            className="w-full md:w-14rem"
           />
 
           <Dropdown
+            className={`${styles.filterStatus} w-full md:w-14rem`}
             value={
               SearchTerms.status
                 ? statusChoices?.filter(
@@ -529,10 +529,10 @@ const HrScreen = (props: any): JSX.Element => {
             options={statusChoices || []}
             optionLabel="name"
             placeholder="Select a Status"
-            className="w-full md:w-14rem"
           />
 
           <InputText
+            className={styles.filterOverAll}
             placeholder="Search"
             value={SearchTerms.search}
             onChange={(e) => {

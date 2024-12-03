@@ -228,3 +228,19 @@ td {
 .HRPersonPeopleSearch .ms-BasePicker-text {
     height: 38px;
 }
+
+[class^="OnboardingRightContainer"] .ms-BasePicker-text {
+    height: 38px;
+}
+
+i {
+    cursor: pointer !important;
+}
+
+[class^="filterEmployee"] .ms-BasePicker-input::placeholder {
+    color: #818181;
+    font-size: 17px;
+    font-weight: 300;
+    position: relative;
+    top: -3px;
+}

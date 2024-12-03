@@ -560,35 +560,31 @@ const Onboarding = (props: any) => {
                 onChange={(e) => {
                   filterFunc("dept", e.value.key);
                 }}
-                style={{ width: "100%" }}
                 options={Departments || []}
                 optionLabel="name"
                 placeholder="Select a Department"
-                className="w-full md:w-14rem"
+                className={`${styles.filterDepartment} w-full md:w-14rem`}
               />
-              <PeoplePicker
-                context={props.context}
-                webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-                //   titleText="Select People"
-                personSelectionLimit={100}
-                showtooltip={false}
-                ensureUser={true}
-                placeholder={""}
-                // peoplePickerCntrlclassName={styles.}
-                onChange={(selectedPeople: any[]) => {
-                  filterFunc("Employee", selectedPeople); // Pass selectedPeople and rowData
-                }}
-                //  styles={peoplePickerStyles}
-                //   showHiddenInUI={true}
-                principalTypes={[PrincipalType.User]}
-                // defaultSelectedUsers={rowData?.Assigened?.map(
-                //   (val: any) => val.Email
-                // )}
-                defaultSelectedUsers={filterkeys.Employee}
-                resolveDelay={1000}
-              />
+              <div className={styles.filterEmployee}>
+                <PeoplePicker
+                  context={props.context}
+                  webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                  personSelectionLimit={100}
+                  showtooltip={false}
+                  ensureUser={true}
+                  placeholder={"Search Employee"}
+                  onChange={(selectedPeople: any[]) => {
+                    filterFunc("Employee", selectedPeople); // Pass selectedPeople and rowData
+                  }}
+                  principalTypes={[PrincipalType.User]}
+                  defaultSelectedUsers={filterkeys.Employee}
+                  resolveDelay={1000}
+                />
+              </div>
 
               <InputText
+                placeholder={"Search Role"}
+                className={styles.filterRole}
                 onChange={(e) => {
                   filterFunc("search", e.target.value);
                 }}
