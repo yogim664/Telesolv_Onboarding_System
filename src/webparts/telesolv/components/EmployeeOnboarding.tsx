@@ -64,6 +64,7 @@ const Onboarding = (props: any) => {
     Department: { key: "", name: "" },
     Email: "",
     PhoneNumber: "",
+    SecondaryEmail: "",
   });
 
   //Get Departments
@@ -216,6 +217,7 @@ const Onboarding = (props: any) => {
         Email: item.Email ? item.Email : "",
         PhoneNumber: item.PhoneNumber ? item.PhoneNumber : "",
         Status: item.Status ? item.Status : "",
+        SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
       }));
       console.log("Fetched Items:", formattedItems);
 
@@ -341,6 +343,7 @@ const Onboarding = (props: any) => {
             Email: TempEmployeeOnboarding.Email,
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
+            SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
             //    Status: "Pending",
           });
 
@@ -356,6 +359,7 @@ const Onboarding = (props: any) => {
             Status: "Pending",
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
+            SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
           })
           .then(async (res: any) => {
             try {
@@ -538,12 +542,45 @@ const Onboarding = (props: any) => {
                       }
                       resolveDelay={1000}
                     />
+
                     <div className={styles.addEmpInfo}>
                       Please contact admin if you do not find the mail address.
                     </div>
                   </div>
                 </div>
               </div>
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Email</div>
+                <div className={styles.addDialogInput}>
+                  <InputText
+                    placeholder="Enter Email"
+                    style={{ width: "100%", color: "black" }}
+                    //value={TempEmployeeOnboarding?.Email || ""}
+                    value={
+                      TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""
+                    }
+                    onChange={(e) => {
+                      handleChange("Email", e.target.value);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Secondary Email</div>
+                <div className={styles.addDialogInput}>
+                  <InputText
+                    placeholder="Enter Secondary Email"
+                    style={{ width: "100%", color: "black" }}
+                    //value={TempEmployeeOnboarding?.Email || ""}
+                    value={TempEmployeeOnboarding?.SecondaryEmail || ""}
+                    onChange={(e) => {
+                      handleChange("SecondaryEmail", e.target.value);
+                    }}
+                  />
+                </div>
+              </div>
+
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>Role</div>
                 <div className={styles.addDialogInput}>
@@ -583,22 +620,7 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
-              <div className={styles.addDialog}>
-                <div className={styles.addDialogHeader}>Email</div>
-                <div className={styles.addDialogInput}>
-                  <InputText
-                    placeholder="Enter Email"
-                    style={{ width: "100%", color: "black" }}
-                    //value={TempEmployeeOnboarding?.Email || ""}
-                    value={
-                      TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""
-                    }
-                    onChange={(e) => {
-                      handleChange("Email", e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
+
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>PhoneNumber</div>
                 <div className={styles.addDialogInput}>

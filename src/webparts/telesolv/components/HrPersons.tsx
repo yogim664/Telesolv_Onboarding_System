@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -7,13 +8,14 @@ import { DataTable } from "primereact/datatable";
 import "../assets/style/HrPersonStyle.css";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Toast } from "primereact/toast";
 import {
   PeoplePicker,
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { sp } from "@pnp/sp";
+import { InputText } from "primereact/inputtext";
 
 const HrPersons = (props: any) => {
   const [hrperson, setHRperon] = React.useState<any>([]);
@@ -31,9 +33,58 @@ const HrPersons = (props: any) => {
     },
   };
 
-  React.useEffect(() => {
-    setHRperon([...props.Question]);
-  }, [props]);
+  // Get items to SP
+  const questionConfig = async () => {
+    try {
+      // Fetch items from the SharePoint list
+      const items = await sp.web.lists
+        .getByTitle("CheckpointConfig")
+        .items.select("*,Assigened/ID,Assigened/EMail")
+        .expand("Assigened")
+        .filter("isDelete ne 1")
+        .get();
+      console.log(items, "items");
+
+      // Map the items to create an array of values
+      const formattedItems = items.map((item: any) => ({
+        Id: item.Id,
+        isEdit: false,
+        QuestionNo: item.Sno,
+        QuestionTitle: item.Title,
+        isDelete: item.isDelete,
+        TaskName: item.TaskName,
+        Answer: item.Answer
+          ? {
+              key: item.Answer,
+              name: item.Answer,
+            }
+          : null,
+        Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
+        Assigened: item.Assigened?.map((Assigened: any) => {
+          return {
+            id: Assigened.ID,
+            Email: Assigened.EMail,
+          };
+        }),
+      }));
+      formattedItems.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+      console.log("Fetched Items:", formattedItems);
+
+      // Return the formatted array
+      return formattedItems;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const fetchedItems = await questionConfig();
+      setHRperon(fetchedItems); // Store in state
+    };
+    fetchQuestions();
+  }, []);
 
   const toast = useRef<any>(null); // Create a reference for the Toast component
 
@@ -56,17 +107,18 @@ const HrPersons = (props: any) => {
     setisEdit(true);
   };
 
-  const handleChange = (selectedPeople: any[], rowData: any) => {
+  const handleChange = (value: any, rowData: any, field: string) => {
     const updatedQuestions: any = hrperson.map((question: any) =>
       question.Id === rowData.Id
         ? {
             ...question,
-            Assigened: selectedPeople.map((val) => {
-              return {
-                id: val.id,
-                Email: val.secondaryText,
-              };
-            }),
+            [field]:
+              field === "Assigned"
+                ? value.map((val: any) => ({
+                    id: val.id,
+                    Email: val.secondaryText,
+                  }))
+                : value,
           }
         : question
     );
@@ -82,15 +134,9 @@ const HrPersons = (props: any) => {
 
         // Check if the Assigened field is empty
         if (!assignedValues || assignedValues.length === 0) {
-          // Call the showErrorToast function to display the error
-          showError(
-            //  `Assigened field is empty for person with Id: ${hrperson[i].Id}`
-            "Assigened field is empty "
-          );
+          showError("Assigned field is empty");
           return; // Exit the function if Assigened is empty for any person
         }
-
-        console.log(assignedValues.map((val: any) => val));
 
         if (hrperson[i].Id) {
           await sp.web.lists
@@ -100,13 +146,14 @@ const HrPersons = (props: any) => {
               AssigenedId: {
                 results: assignedValues.map((val: any) => val.id),
               },
+              TaskName: hrperson[i].TaskName,
             })
             .then((res) => {
               console.log(res);
             });
         }
       }
-      showSuccess("Submitted success");
+      showSuccess("Submitted successfully");
       console.log("Questions saved or updated successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving or updating questions:", error);
@@ -125,7 +172,7 @@ const HrPersons = (props: any) => {
         placeholder={""}
         // peoplePickerCntrlclassName={styles.}
         onChange={(selectedPeople: any[]) => {
-          handleChange(selectedPeople, rowData); // Pass selectedPeople and rowData
+          handleChange(selectedPeople, rowData, "Assigned"); // Pass selectedPeople and rowData
         }}
         styles={peoplePickerStyles}
         //   showHiddenInUI={true}
@@ -137,13 +184,27 @@ const HrPersons = (props: any) => {
     );
   };
 
+  const peopleTask = (rowData: any) => {
+    return (
+      <InputText
+        value={rowData.TaskName || ""}
+        disabled={isEdit}
+        onChange={(e) => handleChange(e.target.value, rowData, "TaskName")}
+        style={{
+          border: isEdit ? "none" : "",
+        }}
+      />
+    );
+  };
+
   return (
     <div>
       <Toast ref={toast} />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
           <Button
-            label="Edit"
+            // label="Edit"
+            label={isEdit ? "Edit" : "Cancel"}
             outlined
             icon="pi pi-pencil"
             style={{
@@ -152,7 +213,13 @@ const HrPersons = (props: any) => {
               backgroundColor: "#233b83",
               border: "none",
             }}
-            onClick={() => setisEdit(false)}
+            //  onClick={() => setisEdit(!isEdit)}
+            onClick={() => {
+              setisEdit(!isEdit);
+              // if (isEdit) {
+
+              // }
+            }}
           />
         </div>
         <DataTable
@@ -166,6 +233,8 @@ const HrPersons = (props: any) => {
               width: "40%",
             }}
           ></Column>
+          <Column field="TaskName" header="TaskName" body={peopleTask}></Column>
+          .
           <Column
             field="Assigenee"
             header="HR Person"

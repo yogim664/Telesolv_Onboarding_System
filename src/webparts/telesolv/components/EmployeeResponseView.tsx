@@ -65,7 +65,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         )
         .expand("QuestionID,Employee,EmployeeID")
         // .filter(`EmployeeID eq ${SeelectedEmp.Employee.EmployeeId}.toString()`)
-        .filter(`Employee/ID eq ${employeeIdString}`)
+        .filter(
+          `Employee/ID eq ${employeeIdString} and Status ne 'Satisfactory'`
+        )
         .get();
       console.log(items, "items");
 
@@ -160,7 +162,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             <Column field="Status" header="Status" body={stsTemplate} />
             <Column
               field="Assigenee"
-              header="HR Person"
+              header="Assigned to"
               body={peopleTemplate}
               style={{
                 width: "65%",

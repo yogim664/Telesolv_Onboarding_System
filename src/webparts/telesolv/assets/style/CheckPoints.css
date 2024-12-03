@@ -21,3 +21,6 @@
 .CongifTab .p-tabview-selected a {
   border-radius: 6px;
 }
+.ChangeOptionContainer {
+  display: flex;
+}

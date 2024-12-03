@@ -24,9 +24,17 @@ interface IPageSync {
 }
 
 interface IFilData {
-  dropDown: string;
+  dept: string;
   search: string;
+  status: string;
 }
+
+// Define the IFilDrp interface
+// interface IFilDrp {
+//   dept: string;
+//   search: string;
+//   status: string;
+// }
 
 const defaultPagination: IPageSync = {
   first: 0,
@@ -34,9 +42,16 @@ const defaultPagination: IPageSync = {
 };
 
 let filData: IFilData = {
-  dropDown: "",
+  dept: "",
   search: "",
+  status: "",
 };
+
+// let filDrp: IFilDrp = {
+//   dept: "",
+//   search: "",
+//   status: "",
+// };
 
 const HrScreen = (props: any): JSX.Element => {
   const CurUser = {
@@ -48,7 +63,7 @@ const HrScreen = (props: any): JSX.Element => {
   const [ListItems, setListItems] = useState<any[]>([]);
   const [AssigenedQuestion, setAssigenedQuestion] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
-
+  const [Departments, setDepartments] = useState<any>([]);
   const toast = useRef<Toast>(null);
   const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
   const [TempEmployeeDetails, setTempEmployeeDetails] = useState<any>({
@@ -77,29 +92,66 @@ const HrScreen = (props: any): JSX.Element => {
     console.log(TempEmployeeDetails);
   };
 
-  const filterFun = (masData: any[]) => {
+  const filterFun = (masData: any[], key: string, val: string) => {
     let temp: any = [...masData];
+    let _tempFilterkey: any = { ...SearchTerms };
 
-    if (filData?.search) {
+    _tempFilterkey[key] = val;
+
+    if (_tempFilterkey?.dept) {
+      temp = temp?.filter((value: any) =>
+        value?.Department?.toLowerCase()?.includes(
+          _tempFilterkey.dept.toLowerCase()
+        )
+      );
+    }
+
+    if (_tempFilterkey?.status) {
+      temp = temp?.filter((value: any) =>
+        value?.Status.key
+          .toLowerCase()
+          .includes(_tempFilterkey.status.toLowerCase())
+      );
+    }
+    if (_tempFilterkey?.search) {
       temp = temp?.filter(
-        (val: any) =>
-          val?.QuestionTitle.toLowerCase().includes(
-            filData?.search.toLowerCase()
+        (value: any) =>
+          value?.QuestionTitle.toLowerCase().includes(
+            _tempFilterkey.search.toLowerCase()
           ) ||
-          val?.Role.toLowerCase().includes(filData?.search.toLowerCase()) ||
-          val?.Employee.Name.toLowerCase().includes(
-            filData?.search.toLowerCase()
+          value?.Role.toLowerCase().includes(
+            _tempFilterkey.search.toLowerCase()
+          ) ||
+          value?.Employee.Name.toLowerCase().includes(
+            _tempFilterkey.search.toLowerCase()
           )
       );
     }
 
-    if (filData?.dropDown) {
-      temp = temp?.filter((val: any) =>
-        val?.Status.key.toLowerCase().includes(filData?.dropDown.toLowerCase())
-      );
-    }
-
+    setSearchTerms({ ..._tempFilterkey });
     setFilArray([...temp]);
+  };
+
+  //Get Departments
+  // Function to fetch Title values
+  const getAllTitles = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle("Department") // Replace 'Departments' with your list name
+        .items.select("Title") // Fetch only the Title column
+        .get();
+
+      // Format the fetched items for react-select
+      const titleValues = items.map((item: any) => ({
+        key: item.Title, // Unique identifier
+        name: item.Title, // Display name
+      }));
+      console.log(titleValues, "dep");
+      setDepartments([...titleValues]);
+      console.log(Departments, "SetDep");
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
   };
 
   const getStsChoices = (): void => {
@@ -127,6 +179,7 @@ const HrScreen = (props: any): JSX.Element => {
   // Call the function on component mount
   useEffect(() => {
     getStsChoices();
+    getAllTitles();
   }, []);
 
   const questionConfig = async (assArray: any[] = []): Promise<void> => {
@@ -177,7 +230,8 @@ const HrScreen = (props: any): JSX.Element => {
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
 
         setListItems(tempAssigenQuestion);
-        filterFun([...tempAssigenQuestion]);
+        setFilArray(tempAssigenQuestion);
+        // filterFun([...tempAssigenQuestion]);
         getStsChoices();
       })
       .catch((err) => {
@@ -400,18 +454,7 @@ const HrScreen = (props: any): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Comment</div>
           <div className={styles.addDialogInput}>
-            {/* <Dropdown
-              value={TempEmployeeDetails.Status}
-              onChange={(e) => {
-                setSelectedStatus(e.value);
-                console.log(selectedStatus); // Note: "selectedStatus" might not immediately reflect the updated value here due to React's state updates being asynchronous.
-              }}
-              options={statusChoices}
-              optionLabel="name"
-              placeholder="Select a City"
-              className="w-full md:w-14rem"
-            /> */}
-
+            =
             <InputTextarea
               placeholder="Enter comments"
               // value={TempEmployeeDetails?.comments || ""}
@@ -468,16 +511,33 @@ const HrScreen = (props: any): JSX.Element => {
         <div className={styles.HrPersonRightContainer}>
           <Dropdown
             value={
-              SearchTerms.dropDown
+              SearchTerms.dept
+                ? Departments?.find(
+                    (choice: any) => choice.key === SearchTerms.dept
+                  ) || null
+                : null
+            }
+            onChange={(e) => {
+              //   const updatedFilDep = { ...filDrp, dropDown: e.value.key };
+              filterFun([...ListItems], "dept", e.value.key); // Call filter function with the updated ListItems
+            }}
+            style={{ width: "100%" }}
+            options={Departments || []}
+            optionLabel="name"
+            placeholder="Select a Department"
+            className="w-full md:w-14rem"
+          />
+
+          <Dropdown
+            value={
+              SearchTerms.status
                 ? statusChoices?.filter(
-                    (choice: any) => choice.key === SearchTerms.dropDown
+                    (choice: any) => choice.key === SearchTerms.status
                   )?.[0]
                 : null
             } // Use `find` instead of `filter`
             onChange={(e) => {
-              filData.dropDown = e.value.key;
-              setSearchTerms({ ...filData });
-              filterFun([...ListItems]);
+              filterFun([...ListItems], "status", e.value.key);
             }}
             options={statusChoices || []}
             optionLabel="name"
@@ -489,9 +549,7 @@ const HrScreen = (props: any): JSX.Element => {
             placeholder="Search"
             value={SearchTerms.search}
             onChange={(e) => {
-              filData.search = e.target.value;
-              setSearchTerms({ ...filData });
-              filterFun([...ListItems]);
+              filterFun([...ListItems], "search", e.target.value);
             }}
           />
 
@@ -504,10 +562,11 @@ const HrScreen = (props: any): JSX.Element => {
               color: "#fff",
             }}
             onClick={() => {
-              filData.dropDown = "";
+              filData.dept = "";
+              filData.status = "";
               filData.search = "";
               setSearchTerms({ ...filData });
-              filterFun([...ListItems]);
+              setFilArray(ListItems);
             }}
           />
         </div>

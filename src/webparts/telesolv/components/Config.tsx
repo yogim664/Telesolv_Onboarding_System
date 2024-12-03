@@ -32,7 +32,14 @@ const Config = (props: any) => {
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [newOptionText, setNewOptionText] = useState("");
 
+  const [selectedOptionDetails, setselectedOptionDetails] = useState({
+    qIndex: null,
+    aIndex: null,
+  });
+
   const [questions, setQuestions] = useState<any>([]);
+  const [changeOption, setchangeOption] = useState<any>([]);
+
   const toast = useRef<Toast>(null);
 
   const accept = (id: any, qIndex: number) => {
@@ -56,6 +63,35 @@ const Config = (props: any) => {
       ),
       accept: () => accept(id, qIndex),
     });
+  };
+
+  const handleChangeOption = (qIndex: any, aIndex: any, e: any) => {
+    console.log("qIndex", qIndex, aIndex, e);
+    setchangeOption(e);
+    console.log(changeOption);
+  };
+
+  const optionChange = (qIndex: number, aIndex: number) => {
+    const updatedQuestions = questions.map((question: any, index: number) =>
+      index === qIndex
+        ? {
+            ...question,
+            Options: question.Options.map((option: any, oIndex: number) =>
+              oIndex === aIndex
+                ? { ...option, name: changeOption } // Update with the state variable `changeOption`
+                : option
+            ),
+          }
+        : question
+    );
+
+    setQuestions(updatedQuestions);
+    setselectedOptionDetails({
+      qIndex: null,
+      aIndex: null,
+    });
+    //setChangeOption(null); // Reset the changeOption state after updating
+    setSelectedQuestionId(null); // Hide the input container
   };
 
   const addNewQuestion = () => {
@@ -280,57 +316,6 @@ const Config = (props: any) => {
     setQuestions(updatedQuestions);
     // !Maasi
   };
-
-  // const validation = async (): Promise<void> => {
-  //   let errmsg: string = "";
-  //   let err: boolean = false;
-
-  //   if (questions.some((_item: any) => _item.QuestionTitle.trim() === "")) {
-  //     err = true;
-  //     errmsg = "Enter Question Title";
-  //   } else if (questions.some((_item: any) => !_item.Options.length)) {
-  //     err = true;
-  //     errmsg = "Enter Options";
-  //   } else if (questions.some((_item: any) => _item.Answer === "")) {
-  //     err = true;
-  //     errmsg = "Select Answer";
-  //   }
-
-  //   if (!err) {
-  //     const postQuestions: any[] =
-  //       questions?.filter(
-  //         (_item: any) =>
-  //           _item.Id && (_item.isEdit || _item.isChanged) && !_item.isDelete
-  //       ) || [];
-
-  //     postQuestions?.length && (await updateQuestionsToSP(postQuestions));
-
-  //     const saveQuestions: any[] =
-  //       questions?.filter((_item: any) => !_item.Id && !_item.isDelete) || [];
-
-  //     saveQuestions?.length && (await saveQuestionsToSP(saveQuestions));
-
-  //     const deleteQuestions: any[] =
-  //       questions?.filter((_Item: any) => _Item.Id && _Item.isDelete) || [];
-
-  //     console.log(deleteQuestions);
-  //     deleteQuestions?.length && (await deleteQuestionsToSP(deleteQuestions));
-
-  //     await toast.current?.show({
-  //       severity: "warn",
-  //       summary: "Rejected",
-  //       detail: errmsg,
-  //       life: 3000,
-  //     });
-  //   } else {
-  //     toast.current?.show({
-  //       severity: "warn",
-  //       summary: "Rejected",
-  //       detail: errmsg,
-  //       life: 3000,
-  //     });
-  //   }
-  // };
 
   // Post into list SP
 
@@ -583,13 +568,6 @@ const Config = (props: any) => {
                         style={{
                           cursor: "pointer",
                           color: "#233b83",
-
-                          // cursor: qIndex === 0 ? "not-allowed" : "pointer",
-                          // color:
-                          //   qIndex === questions.length - 1 ? "#ccc" : "#233b83",
-
-                          // pointerEvents:
-                          //   qIndex === questions.length - 1 ? "none" : "auto",
                         }}
                         onClick={() => moveQuestionDownn(qIndex)}
                       />
@@ -659,9 +637,58 @@ const Config = (props: any) => {
                                     {category.name}
                                   </label>
                                 </div>
+
+                                <i
+                                  className="pi  pi-pencil"
+                                  style={{ fontSize: "1rem" }}
+                                  onClick={() =>
+                                    setselectedOptionDetails({
+                                      qIndex: qIndex,
+                                      aIndex: aIndex,
+                                    })
+                                  }
+
+                                  // onClick={() =>
+                                  //   handleChangeOption(qIndex, aIndex)
+                                  // }
+                                />
+
+                                {selectedOptionDetails.aIndex === aIndex &&
+                                  selectedOptionDetails.qIndex === qIndex && (
+                                    <div className="ChangeOptionContainer">
+                                      <InputText
+                                        className={styles.questionInput}
+                                        value={changeOption}
+                                        placeholder="Enter here"
+                                        onChange={(e) =>
+                                          handleChangeOption(
+                                            qIndex,
+                                            aIndex,
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                      <i
+                                        className="pi pi-check"
+                                        style={{ color: "Green" }}
+                                        onClick={() =>
+                                          optionChange(qIndex, aIndex)
+                                        }
+                                      />
+
+                                      <i
+                                        className="pi pi-times"
+                                        style={{ color: "red" }}
+                                        onClick={() =>
+                                          setSelectedQuestionId(null)
+                                        }
+                                      />
+                                    </div>
+                                  )}
                                 {question.Answer.key === category.name && (
                                   <span className={styles.flowTriggerIndicator}>
-                                    Option that trigger to workflow
+                                    Choose any one option that needs attention
+                                    from an HR person
                                   </span>
                                 )}
                               </div>
