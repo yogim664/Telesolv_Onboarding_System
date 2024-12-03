@@ -97,7 +97,7 @@ const Config = (props: any) => {
   const addNewQuestion = () => {
     // Get the last question to determine new Id and QuestionNo
     const TempQues = questions.filter((_item: any) => !_item.isDelete);
-    const isEmpty = questions.length === 0;
+    const isEmpty = TempQues.length === 0;
     // const newId = isEmpty
     //   ? 1
     //   : Math.max(...questions.map((q: any) => q.Id)) + 1;
@@ -603,58 +603,56 @@ const Config = (props: any) => {
                             >
                               <div className={styles.optionSection}>
                                 <div className={styles.optionChoice}>
-                                  <RadioButton
-                                    className={styles.radioBtn}
-                                    inputId={`${question.QuestionNo}-${category.key}`}
-                                    name={`category-${question.QuestionNo}`}
-                                    value={category.name}
-                                    onChange={(e) => {
-                                      console.log(e, "radio");
+                                  <div className={styles.radioOption}>
+                                    <RadioButton
+                                      className={styles.radioBtn}
+                                      inputId={`${question.QuestionNo}-${category.key}`}
+                                      name={`category-${question.QuestionNo}`}
+                                      value={category.name}
+                                      onChange={(e) => {
+                                        console.log(e, "radio");
 
-                                      handleQuestionChange(
-                                        qIndex,
-                                        e.target.value,
-                                        "Radio",
-                                        aIndex
-                                      );
-
-                                      //handleOptionChange(question.Answer, e.value)
-                                    }}
-                                    checked={
-                                      question.Answer.key === category.name
-                                    }
-                                    disabled={!question.isEdit}
-                                  />
-
-                                  <label
-                                    htmlFor={`${question.Answer.name}-${category.key}`}
-                                    style={{
-                                      paddingLeft: "10px",
-                                      width: "15%",
-                                    }}
-                                    className="ml-2"
-                                  >
-                                    {category.name}
-                                  </label>
-                                </div>
-
-                                {selectedOptionDetails.aIndex !== aIndex &&
-                                  selectedOptionDetails.qIndex !== qIndex && (
-                                    <i
-                                      className="pi  pi-pencil"
-                                      style={{ fontSize: "1rem" }}
-                                      onClick={() =>
-                                        setselectedOptionDetails({
-                                          qIndex: qIndex,
-                                          aIndex: aIndex,
-                                        })
+                                        handleQuestionChange(
+                                          qIndex,
+                                          e.target.value,
+                                          "Radio",
+                                          aIndex
+                                        );
+                                        //handleOptionChange(question.Answer, e.value)
+                                      }}
+                                      checked={
+                                        question.Answer.key === category.name
                                       }
+                                      disabled={!question.isEdit}
                                     />
-                                  )}
+
+                                    <label
+                                      className={`${styles.optionLabel} ml-2`}
+                                      htmlFor={`${question.Answer.name}-${category.key}`}
+                                    >
+                                      {category.name}
+                                    </label>
+                                  </div>
+                                  {selectedOptionDetails.aIndex !== aIndex &&
+                                    selectedOptionDetails.qIndex !== qIndex && (
+                                      <i
+                                        className={`${styles.optionEditIcon} pi  pi-pencil`}
+                                        style={{ fontSize: "1rem" }}
+                                        onClick={() =>
+                                          setselectedOptionDetails({
+                                            qIndex: qIndex,
+                                            aIndex: aIndex,
+                                          })
+                                        }
+                                      />
+                                    )}
+                                </div>
 
                                 {selectedOptionDetails.aIndex === aIndex &&
                                   selectedOptionDetails.qIndex === qIndex && (
-                                    <div className="ChangeOptionContainer">
+                                    <div
+                                      className={styles.ChangeOptionContainer}
+                                    >
                                       <InputText
                                         className={styles.questionInput}
                                         value={changeOption}
@@ -667,24 +665,35 @@ const Config = (props: any) => {
                                           )
                                         }
                                       />
-                                      <i
-                                        className="pi pi-check"
-                                        style={{ color: "Green" }}
-                                        onClick={() =>
-                                          optionChange(qIndex, aIndex)
-                                        }
-                                      />
-
-                                      <i
-                                        className="pi pi-times"
-                                        style={{ color: "red" }}
-                                        onClick={() =>
-                                          setselectedOptionDetails({
-                                            qIndex: null,
-                                            aIndex: null,
-                                          })
-                                        }
-                                      />
+                                      <div
+                                        className={styles.optionActionContainer}
+                                      >
+                                        <div
+                                          className={styles.actionBtn}
+                                          onClick={() =>
+                                            optionChange(qIndex, aIndex)
+                                          }
+                                        >
+                                          <i
+                                            className="pi pi-check"
+                                            style={{ color: "Green" }}
+                                          />
+                                        </div>
+                                        <div
+                                          className={styles.actionBtn}
+                                          onClick={() =>
+                                            setselectedOptionDetails({
+                                              qIndex: null,
+                                              aIndex: null,
+                                            })
+                                          }
+                                        >
+                                          <i
+                                            className="pi pi-times"
+                                            style={{ color: "red" }}
+                                          />
+                                        </div>
+                                      </div>
                                     </div>
                                   )}
                                 {question.Answer.key === category.name && (

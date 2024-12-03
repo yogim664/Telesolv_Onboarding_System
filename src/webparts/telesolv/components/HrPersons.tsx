@@ -153,13 +153,14 @@ const HrPersons = (props: any) => {
     );
 
     setHRperon(updatedQuestions);
+    setfilterData(updatedQuestions);
     console.log(updatedQuestions, "updatedQuestions");
   };
 
   const AddAssigene = async () => {
     try {
-      for (let i = 0; i < hrperson.length; i++) {
-        const assignedValues = hrperson[i].Assigened;
+      for (let i = 0; i < filterData.length; i++) {
+        const assignedValues = filterData[i].Assigned;
 
         // Check if the Assigened field is empty
         if (!assignedValues || assignedValues.length === 0) {
@@ -175,7 +176,7 @@ const HrPersons = (props: any) => {
               AssigenedId: {
                 results: assignedValues.map((val: any) => val.id),
               },
-              TaskName: hrperson[i].TaskName,
+              TaskName: filterData[i].TaskName,
             })
             .then((res) => {
               console.log(res);
@@ -216,7 +217,7 @@ const HrPersons = (props: any) => {
   const peopleTask = (rowData: any) => {
     return (
       <InputText
-        value={rowData.TaskName || ""}
+        value={rowData?.TaskName || ""}
         disabled={isEdit}
         onChange={(e) => handleChange(e.target.value, rowData, "TaskName")}
         style={{
@@ -259,7 +260,6 @@ const HrPersons = (props: any) => {
             outlined
             icon="pi pi-pencil"
             style={{
-              height: "30px",
               color: "#ffff",
               backgroundColor: "#233b83",
               border: "none",
@@ -302,7 +302,6 @@ const HrPersons = (props: any) => {
           <Button
             label="Cancel"
             style={{
-              height: "30px",
               backgroundColor: "#cfcfcf",
               color: "#000",
               border: "none",
@@ -314,7 +313,6 @@ const HrPersons = (props: any) => {
             label="Save"
             disabled={isEdit}
             style={{
-              height: "30px",
               color: "#ffff",
               backgroundColor: "#233b83",
               border: "none",
