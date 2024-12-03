@@ -7,6 +7,15 @@
     .OnboardingRightContainer {
         display: flex;
         gap: 12px;
+        .filterDepartment {
+            width: 200px;
+        }
+        .filterEmployee {
+            width: 200px;
+        }
+        .filterRole {
+            width: 200px;
+        }
     }
 }
 
@@ -56,6 +65,7 @@
     background-color: #233b83 !important;
     padding: 8px 16px !important;
     border: none !important;
+    width: 100px;
 }
 
 .OnboardingContainer {
