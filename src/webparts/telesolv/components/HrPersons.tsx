@@ -17,9 +17,20 @@ import {
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
 
+interface IFilterKeys {
+  people: string[];
+}
+
 const HrPersons = (props: any) => {
+  // variables
+  let _fkeys: IFilterKeys = {
+    people: [],
+  };
+
   const [hrperson, setHRperon] = React.useState<any>([]);
   const [isEdit, setisEdit] = React.useState(true);
+  const [filterkeys, setfilterkeys] = React.useState<IFilterKeys>(_fkeys);
+  const [filterData, setfilterData] = React.useState<any>([]);
 
   // style variables
   const peoplePickerStyles = {
@@ -78,10 +89,28 @@ const HrPersons = (props: any) => {
     }
   };
 
+  const filterFunc = (key: string, val: any): void => {
+    let _masterData = [...hrperson];
+    let _tempFilterkeys: any = { ...filterkeys };
+    _tempFilterkeys[key] = val;
+    if (_tempFilterkeys.people.length) {
+      _masterData = _masterData.filter(
+        (_item) =>
+          _item.Assigened.length &&
+          _item.Assigened.some((_a: any) =>
+            val.some((_v: any) => _a.Email == _v.secondaryText)
+          )
+      );
+    }
+    setfilterkeys({ ..._tempFilterkeys });
+    setfilterData([..._masterData]);
+  };
+
   useEffect(() => {
     const fetchQuestions = async () => {
       const fetchedItems = await questionConfig();
       setHRperon(fetchedItems); // Store in state
+      setfilterData([...fetchedItems]);
     };
     fetchQuestions();
   }, []);
@@ -202,6 +231,28 @@ const HrPersons = (props: any) => {
       <Toast ref={toast} />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
+          <PeoplePicker
+            context={props.context}
+            webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+            //   titleText="Select People"
+            personSelectionLimit={100}
+            showtooltip={false}
+            ensureUser={true}
+            placeholder={""}
+            // peoplePickerCntrlclassName={styles.}
+            onChange={(selectedPeople: any[]) => {
+              filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
+            }}
+            //  styles={peoplePickerStyles}
+            //   showHiddenInUI={true}
+            principalTypes={[PrincipalType.User]}
+            // defaultSelectedUsers={rowData?.Assigened?.map(
+            //   (val: any) => val.Email
+            // )}
+            defaultSelectedUsers={filterkeys.people}
+            resolveDelay={1000}
+          />
+
           <Button
             // label="Edit"
             label={isEdit ? "Edit" : "Cancel"}
@@ -223,7 +274,8 @@ const HrPersons = (props: any) => {
           />
         </div>
         <DataTable
-          value={hrperson || []}
+          // value={hrperson || []}
+          value={filterData || []}
           //tableStyle={{ minWidth: "50rem" }}
         >
           <Column
