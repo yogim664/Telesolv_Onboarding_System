@@ -68,19 +68,59 @@ const Config = (props: any) => {
 
   const handleChangeOption = (qIndex: any, aIndex: any, e: any) => {
     console.log("qIndex", qIndex, aIndex, e);
-    setchangeOption(e);
+
+    if (!e || e.trim() === "") {
+      setchangeOption(null);
+    } else {
+      setchangeOption(e);
+    }
     console.log(changeOption);
   };
 
+  // const optionChange = (qIndex: number, aIndex: number) => {
+  //   const updatedQuestions = questions.map((question: any, index: number) =>
+  //     index === qIndex
+  //       ? {
+  //           ...question,
+  //           Options: question.Options.map((option: any, oIndex: number) =>
+  //             oIndex === aIndex
+  //               ? { ...option, name: changeOption } // Update with the state variable `changeOption`
+  //               : option
+  //           ),
+  //         }
+  //       : question
+  //   );
+
+  //   setQuestions(updatedQuestions);
+  //   setselectedOptionDetails({
+  //     qIndex: null,
+  //     aIndex: null,
+  //   });
+  //   //setChangeOption(null); // Reset the changeOption state after updating
+  //   setSelectedQuestionId(null); // Hide the input container
+  // };
+
   const optionChange = (qIndex: number, aIndex: number) => {
+    console.log(changeOption, "Infunction");
+
+    // Check if `changeOption` is blank
+    if (!changeOption.length) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Please enter value",
+        life: 3000,
+      });
+      return;
+    }
+
+    // Proceed with updating the questions
     const updatedQuestions = questions.map((question: any, index: number) =>
       index === qIndex
         ? {
             ...question,
             Options: question.Options.map((option: any, oIndex: number) =>
-              oIndex === aIndex
-                ? { ...option, name: changeOption } // Update with the state variable `changeOption`
-                : option
+              oIndex === aIndex ? { ...option, name: changeOption } : option
             ),
           }
         : question
@@ -91,7 +131,7 @@ const Config = (props: any) => {
       qIndex: null,
       aIndex: null,
     });
-    //setChangeOption(null); // Reset the changeOption state after updating
+    setchangeOption([]);
     setSelectedQuestionId(null); // Hide the input container
   };
 
@@ -603,7 +643,9 @@ const Config = (props: any) => {
                       disabled={!question.isEdit}
                     />
                     <div className={styles.QuestionTag}>
-                      Note: Choose any one option that triggers the workflow
+                      {/* Note: Choose any one option that triggers the workflow */}
+                      Note: Choose one option that requires attention from the
+                      HR personnel
                     </div>
                     {question.Options.length > 0 && (
                       <div className="flex flex-column gap-3">
@@ -667,7 +709,7 @@ const Config = (props: any) => {
                                     >
                                       <InputText
                                         className={styles.questionInput}
-                                        value={changeOption}
+                                        // value={changeOption}
                                         placeholder="Enter here"
                                         onChange={(e) =>
                                           handleChangeOption(
@@ -710,8 +752,7 @@ const Config = (props: any) => {
                                   )}
                                 {question.Answer.key === category.name && (
                                   <span className={styles.flowTriggerIndicator}>
-                                    Choose any one option that needs attention
-                                    from an HR personnel
+                                    Notifies HR personnel to take action.
                                   </span>
                                 )}
                               </div>

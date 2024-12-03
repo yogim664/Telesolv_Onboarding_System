@@ -187,7 +187,7 @@ const EmployeeForm = (props: any): JSX.Element => {
           .update({
             Response: item.Response ? item.Response.key : "",
             Status:
-              item.Response.key === item.Answer
+              item.Response.key !== item.Answer
                 ? "Satisfactory"
                 : "To be resolved",
 

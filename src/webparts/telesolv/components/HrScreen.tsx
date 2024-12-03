@@ -62,6 +62,7 @@ const HrScreen = (props: any): JSX.Element => {
     Role: "",
     Department: "",
     Task: "",
+    SecondaryEmail: "",
     Status: { key: "", name: "" },
     Comments: "",
   });
@@ -173,7 +174,7 @@ const HrScreen = (props: any): JSX.Element => {
     await sp.web.lists
       .getByTitle("EmployeeResponse")
       .items.select(
-        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role"
+        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/TaskName, Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role,EmployeeID/SecondaryEmail"
       )
       .expand("QuestionID,Employee,EmployeeID")
       .get()
@@ -186,14 +187,18 @@ const HrScreen = (props: any): JSX.Element => {
             QuestionID: item?.QuestionIDId || null,
             QuestionNo: item.QuestionID?.Sno || "N/A",
             QuestionTitle: item.QuestionID?.Title || "No Title",
+            Task: item.QuestionID?.TaskName || "No Title",
             Role: item.EmployeeID?.Role || "No Role",
             Department: item.EmployeeID?.Department || "No Department",
             Answer: item.QuestionID?.Answer || "No Answer",
+            SecondaryEmail:
+              item.EmployeeID?.SecondaryEmail || "No SecondaryEmail",
+
             //Status: item.Status || "No Status",
             Status: item.Status
               ? { key: item?.Status, name: item?.Status }
               : "",
-            ResponseComments: item.ResponseComments || "",
+            ResponseComments: item.ResponseComments || "No Comments",
             Comments: item.Comments || "",
             Response: item.Response
               ? {
@@ -279,7 +284,7 @@ const HrScreen = (props: any): JSX.Element => {
     if (rowData?.Status?.key === "Pending") {
       color = "#1E71B9";
       bgColor = "#D8E5F0";
-    } else if (rowData?.Status?.key === "Completed") {
+    } else if (rowData?.Status?.key === "Satisfactory") {
       color = "#1EB949";
       bgColor = "#D8F0E3";
     } else {
@@ -376,6 +381,25 @@ const HrScreen = (props: any): JSX.Element => {
           setVisible(false);
         }}
       >
+        <div className={styles.employeeStatusSection}>
+          <Dropdown
+            className={styles.employeeStatus}
+            value={
+              TempEmployeeDetails?.Status?.key
+                ? statusChoices?.filter(
+                    (val: any) => val.key === TempEmployeeDetails?.Status?.key
+                  )?.[0]
+                : ""
+            }
+            onChange={(e) => {
+              handleChange("Status", e.value);
+              console.log(e.value.key);
+            }}
+            options={statusChoices || []}
+            optionLabel="name"
+            placeholder="Select a City"
+          />
+        </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Employee name</div>
           <div className={styles.addDialogInput}>
@@ -400,21 +424,29 @@ const HrScreen = (props: any): JSX.Element => {
             {TempEmployeeDetails?.Employee.Email}
           </div>
         </div>
+
+        <div className={styles.addDialog}>
+          <div className={styles.addDialogHeader}>SecondaryEmail</div>
+          <div className={styles.addDialogInput}>
+            {TempEmployeeDetails?.SecondaryEmail}
+          </div>
+        </div>
+
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Task</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.QuestionTitle}
+            {TempEmployeeDetails?.Task}
           </div>
         </div>
         <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Comments</div>
+          <div className={styles.addDialogHeader}>Employee Comments</div>
           <div className={styles.addDialogInput}>
             {/* {TempEmployeeDetails?.Comments} */}
             {TempEmployeeDetails?.ResponseComments}
           </div>
         </div>
 
-        <div className={styles.addDialog}>
+        {/* <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Status</div>
           <div className={styles.addDialogInput}>
             <Dropdown
@@ -436,10 +468,10 @@ const HrScreen = (props: any): JSX.Element => {
               className="w-full md:w-14rem"
             />
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Comment</div>
+          <div className={styles.addDialogHeader}>Comments</div>
           <div className={styles.addDialogInput}>
             <InputTextarea
               placeholder="Enter comments"
@@ -568,7 +600,7 @@ const HrScreen = (props: any): JSX.Element => {
         className={styles.employeeConfig}
       >
         <Column
-          field="QuestionTitle"
+          field="Task"
           header="Task"
           style={{ width: "25%", marginLeft: "10px" }}
         />

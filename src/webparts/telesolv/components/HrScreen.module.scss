@@ -1,101 +1,109 @@
 .HrPersonContainer {
+  display: flex;
+  width: 80%;
+  align-items: center;
+  margin: 10px auto;
+  justify-content: space-between;
+  .HrPersonRightContainer {
     display: flex;
-    width: 80%;
+    gap: 8px;
+    justify-content: center;
     align-items: center;
-    margin: 10px auto;
-    justify-content: space-between;
-    .HrPersonRightContainer {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        align-items: center;
-        .filterDepartment {
-            width: 200px !important;
-        }
-        .filterStatus {
-            width: 200px !important;
-        }
-        .filterOverAll {
-            width: 200px !important;
-        }
+    .filterDepartment {
+      width: 200px !important;
     }
+    .filterStatus {
+      width: 200px !important;
+    }
+    .filterOverAll {
+      width: 200px !important;
+    }
+  }
 }
 
 .employeeConfig {
-    width: 80%;
-    margin: auto;
-    th {
-        padding: 16px !important;
-    }
+  width: 80%;
+  margin: auto;
+  th {
+    padding: 16px !important;
+  }
 }
 
 .pendingSts {
-    background: #d8e5f0;
-    padding: 6px 4px;
-    border-radius: 6px;
-    text-align: center;
-    color: #1e71b9;
-    font-weight: 600;
-    font-size: 14px;
+  background: #d8e5f0;
+  padding: 6px 4px;
+  border-radius: 6px;
+  text-align: center;
+  color: #1e71b9;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .addDialog {
-    background-color: white;
-    display: flex !important;
+  background-color: white;
+  display: flex !important;
+  align-items: center;
+  justify-content: center !important;
+  margin: 24px 16px;
+  .addDialogHeader {
     align-items: center;
-    justify-content: center !important;
-    margin: 24px 16px;
-    .addDialogHeader {
-        align-items: center;
-        display: flex;
-        justify-content: flex-start;
-        width: 36%;
-        color: #233b83;
-        font-weight: 600;
-    }
-    .addDialogInput {
-        align-items: center;
-        display: flex;
-        justify-content: flex-start;
-        width: 70% !important;
-    }
+    display: flex;
+    justify-content: flex-start;
+    width: 36%;
+    color: #233b83;
+    font-weight: 600;
+  }
+  .addDialogInput {
+    align-items: center;
+    display: flex;
+    justify-content: flex-start;
+    width: 70% !important;
+  }
 }
 
 .addDialogBtnContainer {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 .navBar {
-    width: 99%;
-    background-color: #ffffff;
-    display: flex;
-    box-shadow: 0px 5px 0px #f9f9f9;
-    justify-content: space-between;
-    border-bottom: 1px solid #cbcbcb;
+  width: 99%;
+  background-color: #ffffff;
+  display: flex;
+  box-shadow: 0px 5px 0px #f9f9f9;
+  justify-content: space-between;
+  border-bottom: 1px solid #cbcbcb;
 }
 
 .navRightContainers {
-    img {
-        width: 190px;
-    }
+  img {
+    width: 190px;
+  }
 }
 
 .navLeftContainers {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .navLeftContainers P {
+  padding: 10px;
+  cursor: pointer;
+  .selected {
     padding: 10px;
-    cursor: pointer;
-    .selected {
-        padding: 10px;
-        border-bottom: 2px solid #233b83;
-        color: #233b83;
-    }
+    border-bottom: 2px solid #233b83;
+    color: #233b83;
+  }
+}
+
+.employeeStatusSection {
+  display: flex;
+  justify-content: flex-end;
+  .employeeStatus {
+    width: 50%;
+  }
 }
