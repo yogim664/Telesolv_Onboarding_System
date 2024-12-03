@@ -31,6 +31,7 @@ const Config = (props: any) => {
   // const [selectedOptions, setSelectedOptions] = useState<any>({});
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [newOptionText, setNewOptionText] = useState("");
+  const [Submitted, setSubmitted] = useState(false);
 
   const [selectedOptionDetails, setselectedOptionDetails] = useState({
     qIndex: null,
@@ -180,7 +181,7 @@ const Config = (props: any) => {
     aIndex?: number
   ) => {
     let _questions: any = questions
-      .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
+      // .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
     if (type === "Question") {
       _questions[qIndex].QuestionTitle = value;
@@ -323,13 +324,15 @@ const Config = (props: any) => {
     let errmsg: string = "";
     let err: boolean = false;
 
-    if (questions.some((_item: any) => _item.QuestionTitle.trim() === "")) {
+    const tempquestion = questions.filter((item: any) => !item.isDelete);
+
+    if (tempquestion.some((_item: any) => _item.QuestionTitle.trim() === "")) {
       err = true;
       errmsg = "Enter Question Title";
-    } else if (questions.some((_item: any) => !_item.Options.length)) {
+    } else if (tempquestion.some((_item: any) => !_item.Options.length)) {
       err = true;
       errmsg = "Enter Options";
-    } else if (questions.some((_item: any) => _item.Answer === "")) {
+    } else if (tempquestion.some((_item: any) => _item.Answer === "")) {
       err = true;
       errmsg = "Select Answer";
     }
@@ -338,26 +341,30 @@ const Config = (props: any) => {
       try {
         const postQuestions: any[] =
           questions?.filter(
-            (_item: any) =>
-              _item.Id && (_item.isEdit || _item.isChanged) && !_item.isDelete
+            (_item: any) => _item.Id && !_item.isDelete && _item.isEdit
           ) || [];
+        console.log(postQuestions, "POst");
 
         const saveQuestions: any[] =
-          questions?.filter((_item: any) => !_item.Id && !_item.isDelete) || [];
+          questions?.filter(
+            (_item: any) => !_item.Id && !_item.isDelete && _item.isEdit
+          ) || [];
+        console.log(saveQuestions, "Save");
 
         const deleteQuestions: any[] =
           questions?.filter((_Item: any) => _Item.Id && _Item.isDelete) || [];
-
+        console.log(deleteQuestions, "Delete");
+        console.log(questions, "Question");
         // Execute all operations in parallel
         await Promise.all([
+          deleteQuestions?.length
+            ? deleteQuestionsToSP(deleteQuestions)
+            : Promise.resolve(),
           postQuestions?.length
             ? updateQuestionsToSP(postQuestions)
             : Promise.resolve(),
           saveQuestions?.length
             ? saveQuestionsToSP(saveQuestions)
-            : Promise.resolve(),
-          deleteQuestions?.length
-            ? deleteQuestionsToSP(deleteQuestions)
             : Promise.resolve(),
         ]);
 
@@ -368,6 +375,7 @@ const Config = (props: any) => {
           detail: "Questions saved successfully!",
           life: 3000,
         });
+        setSubmitted(!Submitted);
       } catch (error) {
         console.error("Error processing questions:", error);
 
@@ -433,24 +441,28 @@ const Config = (props: any) => {
     }
   };
 
-  // Delete Sp
-
   const deleteQuestionsToSP = async (questions: any) => {
     try {
       // Create an array of promises to delete questions
-      const promises = await questions?.map(
-        async (question: any) =>
-          await sp.web.lists
-            .getByTitle("CheckpointConfig")
-            .items.getById(question.Id)
-            .delete()
+      const promises = questions?.map((question: any) =>
+        sp.web.lists
+          .getByTitle("CheckpointConfig")
+          .items.getById(question.Id)
+          .delete()
+          .catch((error: any) => {
+            console.error(
+              `Error deleting question with ID ${question.Id}:`,
+              error
+            );
+          })
       );
 
       // Wait for all delete operations to complete
       await Promise.all(promises);
+
       console.log("Questions deleted successfully from SharePoint!");
     } catch (error) {
-      console.error("Error deleting questions:", error);
+      console.error("Error in deleteQuestionsToSP function:", error);
     }
   };
 
@@ -505,7 +517,7 @@ const Config = (props: any) => {
     };
 
     fetchQuestions();
-  }, []);
+  }, [Submitted]);
 
   return (
     <div style={{ padding: 10 }}>
@@ -699,7 +711,7 @@ const Config = (props: any) => {
                                 {question.Answer.key === category.name && (
                                   <span className={styles.flowTriggerIndicator}>
                                     Choose any one option that needs attention
-                                    from an HR person
+                                    from an HR personnel
                                   </span>
                                 )}
                               </div>
