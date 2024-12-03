@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-lone-blocks */
 /* eslint-disable no-unused-expressions */
@@ -41,14 +42,29 @@ const defaultPagination: IPageSync = {
 };
 
 const Onboarding = (props: any) => {
+  interface IFilData {
+    Employee: any;
+    search: string;
+    dept: string;
+  }
+
+  let _fkeys: IFilData = {
+    Employee: {},
+    search: "",
+    dept: "",
+  };
+
   const [visible, setVisible] = useState(false);
   const [Update, setUpdate] = useState(false);
   const [EmployeeOnboarding, setEmployeeOnboarding] = useState<any>([]);
   const [SelectedEmp, setSelectedEmp] = useState<any>([]);
   const [showResponseView, setShowResponseView] = useState(false);
   const [questions, setQuestions] = useState<any>([]);
+  const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
   const [Departments, setDepartments] = useState<any>([]);
-  const [SearchTerms, setSearchTerms] = useState<string>("");
+  //const [SearchTerms, setSearchTerms] = useState<string>("");
+  const [filterData, setfilterData] = React.useState<any>([]);
+
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
@@ -101,27 +117,35 @@ const Onboarding = (props: any) => {
     });
   };
 
-  const filterItems =
-    SearchTerms.trim() === ""
-      ? EmployeeOnboarding
-      : EmployeeOnboarding.filter(
-          (item: any) =>
-            item.Department.key
-              .toLowerCase()
-              .includes(SearchTerms.toLowerCase()) ||
-            item.Role.toLowerCase().includes(SearchTerms.toLowerCase()) ||
-            item.Employee.EmployeeTitle.toLowerCase().includes(
-              SearchTerms.toLowerCase()
-            ) ||
-            item.Employee.EmployeeEMail.toLowerCase().includes(
-              SearchTerms.toLowerCase()
-            )
-        );
+  const filterFunc = (key: string, val: any): void => {
+    let filteredData: any[] = [...EmployeeOnboarding];
+    let _tempFilterkeys: any = { ...filterkeys };
+    _tempFilterkeys[key] = val;
+    console.log("_tempFilterkeys: ", _tempFilterkeys);
 
-  useEffect(() => {
-    console.log("Search Terms:", SearchTerms);
-    console.log("Filtered Items:", filterItems);
-  }, [SearchTerms, filterItems]);
+    if (_tempFilterkeys?.dept) {
+      filteredData = filteredData?.filter(
+        (value: any) => value?.Department?.key === _tempFilterkeys?.dept
+      );
+    }
+
+    if (_tempFilterkeys.Employee.length > 0) {
+      filteredData = filteredData?.filter((_item: any) =>
+        val.some((_v: any) => _item.Employee.EmployeeEMail === _v.secondaryText)
+      );
+    }
+
+    if (_tempFilterkeys.search) {
+      filteredData = filteredData?.filter((value: any) =>
+        value?.Role?.toLowerCase().includes(
+          _tempFilterkeys.search.toLowerCase()
+        )
+      );
+    }
+
+    setfilterkeys(_tempFilterkeys);
+    setfilterData(filteredData);
+  };
 
   const handleChange = (key: string, value: any) => {
     const curObj: any = { ...TempEmployeeOnboarding };
@@ -278,7 +302,7 @@ const Onboarding = (props: any) => {
       // Fetch employee onboarding details
       const fetchedItems = await EmployeeOnboardingDetails();
       setEmployeeOnboarding(fetchedItems); // Store the data in state
-
+      setfilterData(fetchedItems);
       // Fetch question configuration and store it in state
       const formattedQuestions = await questionConfig();
       setQuestions(formattedQuestions);
@@ -432,13 +456,48 @@ const Onboarding = (props: any) => {
           <div className={styles.OnboardingContainer}>
             <h2 className={styles.pageTitle}>Employee Onboarding</h2>
             <div className={styles.OnboardingRightContainer}>
-              <InputText
-                placeholder="Search"
+              <Dropdown
+                value={
+                  Departments
+                    ? Departments?.find(
+                        (choice: any) => choice.key === filterkeys.dept
+                      ) || null
+                    : null
+                }
                 onChange={(e) => {
-                  setSearchTerms(e.target.value);
-                  console.log(e.target.value);
-                  console.log(SearchTerms);
-                  console.log(filterItems);
+                  filterFunc("dept", e.value.key);
+                }}
+                style={{ width: "100%" }}
+                options={Departments || []}
+                optionLabel="name"
+                placeholder="Select a Department"
+                className="w-full md:w-14rem"
+              />
+              <PeoplePicker
+                context={props.context}
+                webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                //   titleText="Select People"
+                personSelectionLimit={100}
+                showtooltip={false}
+                ensureUser={true}
+                placeholder={""}
+                // peoplePickerCntrlclassName={styles.}
+                onChange={(selectedPeople: any[]) => {
+                  filterFunc("Employee", selectedPeople); // Pass selectedPeople and rowData
+                }}
+                //  styles={peoplePickerStyles}
+                //   showHiddenInUI={true}
+                principalTypes={[PrincipalType.User]}
+                // defaultSelectedUsers={rowData?.Assigened?.map(
+                //   (val: any) => val.Email
+                // )}
+                defaultSelectedUsers={filterkeys.Employee}
+                resolveDelay={1000}
+              />
+
+              <InputText
+                onChange={(e) => {
+                  filterFunc("search", e.target.value);
                 }}
               />
               <Button
@@ -451,14 +510,33 @@ const Onboarding = (props: any) => {
                   setVisible(true);
                 }}
               />
+
+              <i
+                className="pi pi-refresh"
+                style={{
+                  backgroundColor: "#223b83",
+                  padding: 10,
+                  borderRadius: 4,
+                  color: "#fff",
+                }}
+                onClick={() => {
+                  filterkeys.Employee = {};
+                  filterkeys.dept = "";
+                  filterkeys.search = "";
+                  // setSearchTerms({ ...filData });
+                  setfilterData(EmployeeOnboarding);
+                }}
+              />
             </div>
           </div>
 
-          {filterItems.length > 0 ? (
+          {filterData.length > 0 ? (
             <DataTable
               className={styles.onboardingDataTable}
               //  value={EmployeeOnboarding}
-              value={filterItems?.slice(
+              //filterItems
+
+              value={filterData?.slice(
                 PageNationRows.first,
                 PageNationRows.first + PageNationRows.rows
               )}
