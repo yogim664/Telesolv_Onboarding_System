@@ -638,20 +638,19 @@ const Config = (props: any) => {
                                   </label>
                                 </div>
 
-                                <i
-                                  className="pi  pi-pencil"
-                                  style={{ fontSize: "1rem" }}
-                                  onClick={() =>
-                                    setselectedOptionDetails({
-                                      qIndex: qIndex,
-                                      aIndex: aIndex,
-                                    })
-                                  }
-
-                                  // onClick={() =>
-                                  //   handleChangeOption(qIndex, aIndex)
-                                  // }
-                                />
+                                {selectedOptionDetails.aIndex !== aIndex &&
+                                  selectedOptionDetails.qIndex !== qIndex && (
+                                    <i
+                                      className="pi  pi-pencil"
+                                      style={{ fontSize: "1rem" }}
+                                      onClick={() =>
+                                        setselectedOptionDetails({
+                                          qIndex: qIndex,
+                                          aIndex: aIndex,
+                                        })
+                                      }
+                                    />
+                                  )}
 
                                 {selectedOptionDetails.aIndex === aIndex &&
                                   selectedOptionDetails.qIndex === qIndex && (
@@ -680,7 +679,10 @@ const Config = (props: any) => {
                                         className="pi pi-times"
                                         style={{ color: "red" }}
                                         onClick={() =>
-                                          setSelectedQuestionId(null)
+                                          setselectedOptionDetails({
+                                            qIndex: null,
+                                            aIndex: null,
+                                          })
                                         }
                                       />
                                     </div>
