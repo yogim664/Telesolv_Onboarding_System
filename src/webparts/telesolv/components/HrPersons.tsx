@@ -16,6 +16,7 @@ import {
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
+import { forEach } from "lodash";
 
 interface IFilterKeys {
   people: string[];
@@ -159,6 +160,9 @@ const HrPersons = (props: any) => {
 
   const AddAssigene = async () => {
     try {
+      forEach((row: any) => {
+        console.log(row.Assigned);
+      });
       for (let i = 0; i < filterData.length; i++) {
         const assignedValues = filterData[i].Assigned;
 
@@ -232,27 +236,29 @@ const HrPersons = (props: any) => {
       <Toast ref={toast} />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
-          <PeoplePicker
-            context={props.context}
-            webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-            //   titleText="Select People"
-            personSelectionLimit={100}
-            showtooltip={false}
-            ensureUser={true}
-            placeholder={""}
-            // peoplePickerCntrlclassName={styles.}
-            onChange={(selectedPeople: any[]) => {
-              filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
-            }}
-            //  styles={peoplePickerStyles}
-            //   showHiddenInUI={true}
-            principalTypes={[PrincipalType.User]}
-            // defaultSelectedUsers={rowData?.Assigened?.map(
-            //   (val: any) => val.Email
-            // )}
-            defaultSelectedUsers={filterkeys.people}
-            resolveDelay={1000}
-          />
+          <div className="HRPersonPeopleSearch">
+            <PeoplePicker
+              context={props.context}
+              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+              //   titleText="Select People"
+              personSelectionLimit={100}
+              showtooltip={false}
+              ensureUser={true}
+              placeholder={""}
+              // peoplePickerCntrlclassName={styles.}
+              onChange={(selectedPeople: any[]) => {
+                filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
+              }}
+              //  styles={peoplePickerStyles}
+              //   showHiddenInUI={true}
+              principalTypes={[PrincipalType.User]}
+              // defaultSelectedUsers={rowData?.Assigened?.map(
+              //   (val: any) => val.Email
+              // )}
+              defaultSelectedUsers={filterkeys.people}
+              resolveDelay={1000}
+            />
+          </div>
 
           <Button
             // label="Edit"
@@ -274,26 +280,25 @@ const HrPersons = (props: any) => {
           />
         </div>
         <DataTable
-          // value={hrperson || []}
+          className={styles.HRConfigDataTable}
           value={filterData || []}
-          //tableStyle={{ minWidth: "50rem" }}
         >
           <Column
             field="QuestionTitle"
             header="CheckPoints"
-            style={{
-              width: "40%",
-            }}
+            className={styles.questionsTD}
           ></Column>
-          <Column field="TaskName" header="TaskName" body={peopleTask}></Column>
-          .
           <Column
+            className={styles.taskName}
+            field="TaskName"
+            header="TaskName"
+            body={peopleTask}
+          ></Column>
+          <Column
+            className={styles.HRPersonsList}
             field="Assigenee"
             header="HR Person"
             body={peopletemplate}
-            style={{
-              width: "65%",
-            }}
           ></Column>
         </DataTable>
       </div>

@@ -151,3 +151,19 @@
 .employeeFormFooter button {
     border: none;
 }
+
+.reponseCompletedInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px;
+    color: #233b83;
+}
+
+.showComments {
+    width: 100%;
+    min-height: 100px;
+    padding: 6px;
+    box-shadow: -1px -2px 18px -1px #c6d4ff;
+    border-radius: 6px;
+}

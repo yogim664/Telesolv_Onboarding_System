@@ -398,3 +398,24 @@
     color: #233b83;
     cursor: pointer;
 }
+
+.HRConfigDataTable {
+    overflow: unset !important;
+    th {
+        padding: 16px !important;
+    }
+    .questionsTD {
+        width: 40%;
+        font-weight: 600;
+    }
+    .p-datatable-wrapper {
+        overflow: unset !important;
+    }
+    .taskName {
+        color: #000;
+    }
+}
+
+.HRPersonsList {
+    width: 60%;
+}

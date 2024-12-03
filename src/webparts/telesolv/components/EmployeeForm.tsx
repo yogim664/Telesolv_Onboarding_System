@@ -360,11 +360,17 @@ const EmployeeForm = (props: any): JSX.Element => {
                     Comments
                   </span>
                 </div>
-                <InputTextarea
-                  placeholder="Enter comments"
-                  onChange={handleCommentChange} // Handle the onChange event
-                  value={comment}
-                />
+
+                {ListItems.length !==
+                ListItems.filter((item) => item.isAnswered === true).length ? (
+                  <InputTextarea
+                    placeholder="Enter comments"
+                    onChange={handleCommentChange} // Handle the onChange event
+                    value={comment}
+                  />
+                ) : (
+                  <div className={styles.showComments}>{comment}</div>
+                )}
               </div>
             </div>
 
@@ -382,14 +388,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                 </Button>
               </div>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "16px",
-                }}
-              >
+              <div className={styles.reponseCompletedInfo}>
                 Your form has been submitted. Please contact the IT admin in
                 case of any issues.
               </div>
