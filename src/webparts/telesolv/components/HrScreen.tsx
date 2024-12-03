@@ -29,13 +29,6 @@ interface IFilData {
   status: string;
 }
 
-// Define the IFilDrp interface
-// interface IFilDrp {
-//   dept: string;
-//   search: string;
-//   status: string;
-// }
-
 const defaultPagination: IPageSync = {
   first: 0,
   rows: 5,
@@ -46,12 +39,6 @@ let filData: IFilData = {
   search: "",
   status: "",
 };
-
-// let filDrp: IFilDrp = {
-//   dept: "",
-//   search: "",
-//   status: "",
-// };
 
 const HrScreen = (props: any): JSX.Element => {
   const CurUser = {
