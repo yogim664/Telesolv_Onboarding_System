@@ -43,7 +43,8 @@ const EmployeeForm = (props: any): JSX.Element => {
     console.log(totalItems, "totalItems");
 
     const completedItems = _tempArr.filter(
-      (item: any) => item.Status === "Completed" || item.Status === "Resolved"
+      (item: any) =>
+        item.Status === "Satisfactory" || item.Status === "Resolved"
     ).length;
     console.log(completedItems, "completedItems");
 
@@ -141,7 +142,6 @@ const EmployeeForm = (props: any): JSX.Element => {
     }
 
     setListItems([..._Listitems]);
-    console.log(ListItems);
   };
 
   /// validation
@@ -188,7 +188,7 @@ const EmployeeForm = (props: any): JSX.Element => {
             Response: item.Response ? item.Response.key : "",
             Status:
               item.Response.key === item.Answer
-                ? "Completed"
+                ? "Satisfactory"
                 : "To be resolved",
 
             // Response: "Text",
@@ -204,6 +204,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                 life: 3000,
               });
             }
+            setListItems([]);
             questionConfig();
           })
           .catch((err) => console.log(err, "updateQuestionsToSP"))
@@ -329,7 +330,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                                 className={styles.responseStatus}
                                 style={{
                                   backgroundColor:
-                                    _item.Status === "Completed"
+                                    _item.Status === "Satisfactory"
                                       ? " #caf0cc"
                                       : "#ffebc0",
                                 }}
@@ -338,7 +339,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                                   style={{
                                     // backgroundColor: "green",
                                     color:
-                                      _item.Status === "Completed"
+                                      _item.Status === "Satisfactory"
                                         ? "#437426"
                                         : "#8f621f",
                                   }}
@@ -366,17 +367,33 @@ const EmployeeForm = (props: any): JSX.Element => {
                 />
               </div>
             </div>
-            <div className={styles.employeeFormFooter}>
-              <Button className={styles.cancelBtn}>Cancel</Button>
-              <Button
-                className={styles.primaryBtn}
-                onClick={() => {
-                  validation();
+
+            {ListItems.length !==
+            ListItems.filter((item) => item.isAnswered === true).length ? (
+              <div className={styles.employeeFormFooter}>
+                <Button className={styles.cancelBtn}>Cancel</Button>
+                <Button
+                  className={styles.primaryBtn}
+                  onClick={() => {
+                    validation();
+                  }}
+                >
+                  Save
+                </Button>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "16px",
                 }}
               >
-                Save
-              </Button>
-            </div>
+                Your form has been submitted. Please contact the IT admin in
+                case of any issues.
+              </div>
+            )}
           </div>
         </div>
       </div>
