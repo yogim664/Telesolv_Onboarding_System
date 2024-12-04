@@ -15,8 +15,9 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { Paginator } from "primereact/paginator";
-import { Toast } from "primereact/toast";
-import { useRef } from "react";
+import { toast, Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+//import { useRef } from "react";
 import EmployeeResponseView from "./EmployeeResponseView";
 import "../assets/style/employeeConfig.css";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -30,6 +31,7 @@ import {
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Dropdown } from "primereact/dropdown";
+import { GCongfig } from "../../../Config/Config";
 
 interface IPageSync {
   first: number;
@@ -88,7 +90,7 @@ const Onboarding = (props: any) => {
   const getAllTitles = async () => {
     try {
       const items = await sp.web.lists
-        .getByTitle("Department") // Replace 'Departments' with your list name
+        .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
         .items.select("Title") // Fetch only the Title column
         .get();
 
@@ -162,7 +164,7 @@ const Onboarding = (props: any) => {
     console.log(TempEmployeeOnboarding);
   };
 
-  const toast = useRef<any>(null);
+  //const toast = useRef<any>(null);
 
   ///Delete component
   const confirm2 = (id: any) => {
@@ -178,11 +180,16 @@ const Onboarding = (props: any) => {
 
   //Success Tost
   const showSuccess = (string: any) => {
-    toast.current.show({
-      severity: "success",
-      summary: "Success",
-      detail: string,
-      life: 3000,
+    toast.success("Deleted Successfully", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
     });
   };
 
@@ -191,9 +198,12 @@ const Onboarding = (props: any) => {
     try {
       console.log(id);
 
-      sp.web.lists.getByTitle("EmployeeOnboarding").items.getById(id).update({
-        isDelete: true,
-      });
+      sp.web.lists
+        .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+        .items.getById(id)
+        .update({
+          isDelete: true,
+        });
       showSuccess("Delete Sucessfuly");
 
       fetchQuestions();
@@ -216,7 +226,7 @@ const Onboarding = (props: any) => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
-        .getByTitle("EmployeeOnboarding")
+        .getByTitle(GCongfig.ListName.EmployeeOnboarding)
         .items.select("*,Employee/ID,Employee/EMail,Employee/Title")
         .expand("Employee")
         .filter("isDelete ne 1")
@@ -277,7 +287,7 @@ const Onboarding = (props: any) => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
-        .getByTitle("CheckpointConfig")
+        .getByTitle(GCongfig.ListName.CheckpointConfig)
         .items.select("*,Assigened/ID, Assigened/EMail")
         .expand("Assigened")
         .filter("isDelete ne 1")
@@ -321,7 +331,7 @@ const Onboarding = (props: any) => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
-        .getByTitle("EmployeeResponse")
+        .getByTitle(GCongfig.ListName.EmployeeResponse)
 
         .items.select(
           "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
@@ -434,7 +444,7 @@ const Onboarding = (props: any) => {
     try {
       if (Update) {
         await sp.web.lists
-          .getByTitle("EmployeeOnboarding")
+          .getByTitle(GCongfig.ListName.EmployeeOnboarding)
           .items.getById(TempEmployeeOnboarding.Id)
           .update({
             Role: TempEmployeeOnboarding.Role,
@@ -447,10 +457,22 @@ const Onboarding = (props: any) => {
           });
 
         console.log("Employee details updated successfully in SharePoint!");
+
+        toast.success("Employee Updated Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
       } else {
         // Create new item
         await sp.web.lists
-          .getByTitle("EmployeeOnboarding")
+          .getByTitle(GCongfig.ListName.EmployeeOnboarding)
           .items.add({
             Role: TempEmployeeOnboarding.Role,
             Department: TempEmployeeOnboarding.Department.key,
@@ -469,19 +491,33 @@ const Onboarding = (props: any) => {
                   console.log(question.Id);
                   console.log(question.Answer, "Answer");
 
-                  await sp.web.lists.getByTitle("EmployeeResponse").items.add({
-                    EmployeeIDId: res.data.ID, // Employee ID
-                    Title: question.QuestionTitle,
-                    Sno: question.QuestionNo,
-                    Status: "Pending",
+                  await sp.web.lists
+                    .getByTitle(GCongfig.ListName.EmployeeResponse)
+                    .items.add({
+                      EmployeeIDId: res.data.ID, // Employee ID
+                      Title: question.QuestionTitle,
+                      Sno: question.QuestionNo,
+                      Status: "Pending",
 
-                    Answer: question.Answer.key,
-                    QuestionIDId: question.Id, // Question ID from questions array
-                    EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
-                  });
+                      Answer: question.Answer.key,
+                      QuestionIDId: question.Id, // Question ID from questions array
+                      EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
+                    });
                 })
               );
               console.log("Employee responses saved successfully.");
+
+              toast.success("Employee add Successfully", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+              });
             } catch (err) {
               console.error("Error saving employee responses:", err);
             }
@@ -545,7 +581,23 @@ const Onboarding = (props: any) => {
       ) : (
         <div>
           <ConfirmDialog />
-          <Toast ref={toast} />
+          {/* <Toast ref={toast} /> */}
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
+
+          {/* Same as */}
+          <ToastContainer />
           <div className={styles.OnboardingContainer}>
             <h2 className={styles.pageTitle}>Employee Onboarding</h2>
             <div className={styles.OnboardingRightContainer}>

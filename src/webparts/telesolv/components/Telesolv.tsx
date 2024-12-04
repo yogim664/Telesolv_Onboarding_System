@@ -13,16 +13,17 @@ const logoImg: string = require("../assets/Images/Logo.svg");
 import { TabView, TabPanel } from "primereact/tabview";
 import Onboarding from "./EmployeeOnboarding";
 import "../assets/style/Tabs.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmployeeForm from "./EmployeeForm";
+import Loader from "./Loader";
 import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
 
 const Telesolve = (props: any): JSX.Element => {
+  const [isLoader, setIsLoader] = useState(true);
   console.log(props);
-
   const CurUser = {
     Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
@@ -37,57 +38,62 @@ const Telesolve = (props: any): JSX.Element => {
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
     useState<boolean>(false);
 
-  //HR Director
-
-  async function getGroupUsers(groupId: string) {
-    try {
-      // Fetch group members
-      const members = await graph.groups.getById(groupId).members();
-      console.log("Group Members:", members);
-      return members; // This will return an array of user objects
-    } catch (error) {
-      console.error("Error fetching group users:", error);
-      throw error;
-    }
-  }
-  // Example usage
-  const groupId = "0127711a-e331-4698-8e2e-47617926b1d0";
-  getGroupUsers(groupId).then((users) => {
-    const HrDirector = users.some((user) => user.mail === CurUser.Email);
-    setShowHrDirectorScreen(HrDirector);
-    console.log(HrDirector, "HR Director");
-  });
-
   // HR Person
 
-  async function getHRGroupUsers(groupId: string) {
-    try {
-      // Fetch group members
-      const members = await graph.groups.getById(groupId).members();
-      console.log("Group Members:", members);
-      return members; // This will return an array of user objects
-    } catch (error) {
-      console.error("Error fetching group users:", error);
-      throw error;
+  const hrpersonfun = () => {
+    async function getHRGroupUsers(groupId: string) {
+      try {
+        const members = await graph.groups.getById(groupId).members();
+        console.log("Group Members:", members);
+        return members;
+      } catch (error) {
+        console.error("Error fetching group users:", error);
+        throw error;
+      }
     }
-  }
 
-  const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
-  getHRGroupUsers(HRgroupId).then((users) => {
-    const HrPerson = users.some((user) => user.mail === CurUser.Email);
-    console.log(HrPerson, "HR Director");
-    setShowHrPerson(HrPerson);
-  });
+    const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
+    getHRGroupUsers(HRgroupId).then((users) => {
+      const HrPerson = users.some((user) => user.mail === CurUser.Email);
+      console.log(HrPerson, "HR Director");
+      setShowHrPerson(HrPerson);
+      setIsLoader(false);
+    });
+  };
+  //HR Director
+
+  const getGroups = (): void => {
+    async function getGroupUsers(groupId: string) {
+      try {
+        // Fetch group members
+        const members = await graph.groups.getById(groupId).members();
+        console.log("Group Members:", members);
+        return members;
+      } catch (error) {
+        console.error("Error fetching group users:", error);
+        throw error;
+      }
+    }
+    const groupId = "0127711a-e331-4698-8e2e-47617926b1d0";
+    getGroupUsers(groupId).then((users) => {
+      const HrDirector = users.some((user) => user.mail === CurUser.Email);
+      setShowHrDirectorScreen(HrDirector);
+      hrpersonfun();
+      console.log(HrDirector, "HR Director");
+    });
+  };
+
+  useEffect(() => {
+    getGroups();
+  }, []);
 
   return (
     <>
-      {ShowHrPerson ? (
+      {isLoader ? (
+        <Loader />
+      ) : ShowHrPerson ? (
         <HrScreen context={props.context} />
-      ) : // setShowResponseView={setShowResponseView}
-      // ShowEmpScreen={ShowEmpScreen}
-      //  />
-      // <EmployeeForm />
-      ShowHrDirectorScreen ? (
+      ) : ShowHrDirectorScreen ? (
         <div style={{ padding: 10 }}>
           <button
             style={{ display: "none" }}
@@ -132,9 +138,7 @@ const Telesolve = (props: any): JSX.Element => {
           )}
         </div>
       ) : (
-        <>
-          <EmployeeForm context={props.context} />
-        </>
+        <EmployeeForm context={props.context} />
       )}
     </>
   );

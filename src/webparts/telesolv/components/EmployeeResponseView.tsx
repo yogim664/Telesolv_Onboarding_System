@@ -9,6 +9,7 @@ import styles from "./EmployeeResponse.module.scss";
 import { useEffect, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { GCongfig } from "../../../Config/Config";
 // import {
 //   PeoplePicker,
 //   PrincipalType,
@@ -58,7 +59,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       // Fetch items from the SharePoint list
       const employeeIdString = SeelectedEmp.Employee.EmployeeId.toString();
       const items = await sp.web.lists
-        .getByTitle("EmployeeResponse")
+        .getByTitle(GCongfig.ListName.EmployeeResponse)
 
         .items.select(
           "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
@@ -75,7 +76,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
       // Fetch items from the SharePoint list
       const Qitems = await sp.web.lists
-        .getByTitle("CheckpointConfig")
+        .getByTitle(GCongfig.ListName.CheckpointConfig)
         .items.select("*,Assigened/ID,Assigened/EMail,Assigened/Title")
         .expand("Assigened")
         .filter("isDelete ne 1")

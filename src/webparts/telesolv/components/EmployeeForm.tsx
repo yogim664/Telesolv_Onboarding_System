@@ -11,10 +11,14 @@ import styles from "./EmployeeForm.module.scss";
 import "../assets/style/employeeform.css";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
-import { useEffect, useState, useRef } from "react";
-import { Toast } from "primereact/toast";
+import { useEffect, useState } from "react";
+//import { Toast } from "primereact/toast";
+import { toast, Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { sp } from "@pnp/sp/presets/all";
 import { ProgressBar } from "primereact/progressbar";
+import { GCongfig } from "../../../Config/Config";
 
 //import styles from "./EmployeeOnboarding.module.scss";
 
@@ -28,7 +32,7 @@ const EmployeeForm = (props: any): JSX.Element => {
   const [ProgressPercent, setProgressPercent] = useState<number>(0);
 
   const [comment, setComment] = useState("");
-  const toast = useRef<Toast>(null);
+  //const toast = useRef<Toast>(null);
 
   //Set Value into Comments
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -64,7 +68,7 @@ const EmployeeForm = (props: any): JSX.Element => {
   //Get EmployeeResponse
   const questionConfig = () => {
     sp.web.lists
-      .getByTitle("EmployeeResponse")
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
         "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options, Employee/ID, Employee/EMail"
       )
@@ -166,11 +170,16 @@ const EmployeeForm = (props: any): JSX.Element => {
       }
     } else {
       // Show a warning toast if there's an error
-      toast.current?.show({
-        severity: "warn",
-        summary: "Rejected",
-        detail: errmsg,
-        life: 3000,
+      toast.warn(errmsg, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
     }
   };
@@ -182,7 +191,7 @@ const EmployeeForm = (props: any): JSX.Element => {
       // Map and update each item in SharePoint
       ListItems.forEach((item: any, i: number) =>
         sp.web.lists
-          .getByTitle("EmployeeResponse")
+          .getByTitle(GCongfig.ListName.EmployeeResponse)
           .items.getById(item.Id)
           .update({
             Response: item.Response ? item.Response.key : "",
@@ -196,14 +205,19 @@ const EmployeeForm = (props: any): JSX.Element => {
           })
           .then(() => {
             // Optionally, show success toast
-            if (ListItems.length - 1 === i) {
-              toast.current?.show({
-                severity: "success",
-                summary: "Ssuccess",
-                detail: "Response updated successfully!",
-                life: 3000,
+            if (ListItems.length - 1 === i)
+              toast.success("Updated Successfully", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
               });
-            }
+
             setListItems([]);
             questionConfig();
           })
@@ -215,11 +229,17 @@ const EmployeeForm = (props: any): JSX.Element => {
       console.error("Error saving questions:", error);
 
       // Show error toast
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save questions.",
-        life: 3000,
+
+      toast.error("error", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
     }
   };
@@ -230,7 +250,22 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   return (
     <div style={{ padding: 10 }}>
-      <Toast ref={toast} />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+
+      {/* Same as */}
+      <ToastContainer />
       <div>
         <div className={styles.navBar}>
           <div className={styles.navRightContainers}>
