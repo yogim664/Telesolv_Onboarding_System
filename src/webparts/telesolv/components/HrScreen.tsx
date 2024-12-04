@@ -16,7 +16,6 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import { InputTextarea } from "primereact/inputtextarea";
 import { Paginator } from "primereact/paginator";
 import { GCongfig } from "../../../Config/Config";
@@ -225,7 +224,7 @@ const HrScreen = (props: any): JSX.Element => {
 
         setListItems(tempAssigenQuestion);
         setFilArray(tempAssigenQuestion);
-        // filterFun([...tempAssigenQuestion]);
+
         getStsChoices();
       })
       .catch((err) => {
@@ -323,9 +322,6 @@ const HrScreen = (props: any): JSX.Element => {
   // update sp
   const updateQuestionsToSP: any = async (TempEmployeeDetails: any) => {
     try {
-      // Map and update each item in SharePoint
-      //    TempEmployeeDetails.forEach((item: any, i: number) =>
-      // TempEmployeeDetails.map((item: any, i: number) =>
       sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeResponse)
         .items.getById(TempEmployeeDetails.Id)
@@ -335,13 +331,6 @@ const HrScreen = (props: any): JSX.Element => {
         })
         .then(() => {
           setVisible(false);
-          // toast.current?.show({
-          //   severity: "success",
-          //   summary: "Success",
-          //   detail: "Questions updated successfully!",
-          //   life: 3000,
-          // });
-
           toast.success("Update Successfully", {
             position: "top-right",
             autoClose: 5000,
@@ -353,25 +342,13 @@ const HrScreen = (props: any): JSX.Element => {
             theme: "light",
             transition: Bounce,
           });
-
-          // questionConfig();
           AssigendPerson();
         })
         .catch((err) => console.log(err, "updateQuestionsToSP"));
-      // );
 
       // Wait for all updates to complete
     } catch (error) {
       console.error("Error saving questions:", error);
-
-      // Show error toast
-      // toast.current?.show({
-      //   severity: "error",
-      //   summary: "Error",
-      //   detail: "Failed to save questions.",
-      //   life: 3000,
-      // });
-
       toast.error("error", {
         position: "top-right",
         autoClose: 5000,
@@ -468,41 +445,15 @@ const HrScreen = (props: any): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Employee Comments</div>
           <div className={styles.addDialogInput}>
-            {/* {TempEmployeeDetails?.Comments} */}
             {TempEmployeeDetails?.ResponseComments}
           </div>
         </div>
-
-        {/* <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Status</div>
-          <div className={styles.addDialogInput}>
-            <Dropdown
-              value={
-                TempEmployeeDetails?.Status?.key
-                  ? statusChoices?.filter(
-                      (val: any) => val.key === TempEmployeeDetails?.Status?.key
-                    )?.[0]
-                  : ""
-              }
-              style={{ width: "100%" }}
-              onChange={(e) => {
-                handleChange("Status", e.value);
-                console.log(e.value.key);
-              }}
-              options={statusChoices || []}
-              optionLabel="name"
-              placeholder="Select a City"
-              className="w-full md:w-14rem"
-            />
-          </div>
-        </div> */}
 
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Comments</div>
           <div className={styles.addDialogInput}>
             <InputTextarea
               placeholder="Enter comments"
-              // value={TempEmployeeDetails?.comments || ""}
               value={
                 TempEmployeeDetails.Comments ? TempEmployeeDetails.Comments : ""
               }
@@ -516,7 +467,6 @@ const HrScreen = (props: any): JSX.Element => {
         <div className={styles.addDialog}>
           <div className={styles.addDialogBtnContainer}>
             <Button
-              //  style={{ marginRight: 14, width: "100px" }}
               label="Cancel"
               style={{
                 height: "36px",
@@ -525,7 +475,6 @@ const HrScreen = (props: any): JSX.Element => {
                 border: "none",
                 width: "100px",
               }}
-              //  icon="pi pi-plus"
               onClick={() => setVisible(false)}
             />
             <Button
@@ -537,7 +486,6 @@ const HrScreen = (props: any): JSX.Element => {
                 border: "none",
                 width: "100px",
               }}
-              //   icon="pi pi-plus"
               onClick={() => updateQuestionsToSP(TempEmployeeDetails)}
             />
           </div>

@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as React from "react";
-// import styles from "./Telesolv.module.scss";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
@@ -17,7 +16,6 @@ import { Dialog } from "primereact/dialog";
 import { Paginator } from "primereact/paginator";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-//import { useRef } from "react";
 import EmployeeResponseView from "./EmployeeResponseView";
 import "../assets/style/employeeConfig.css";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -64,7 +62,6 @@ const Onboarding = (props: any) => {
   const [questions, setQuestions] = useState<any>([]);
   const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
   const [Departments, setDepartments] = useState<any>([]);
-  //const [SearchTerms, setSearchTerms] = useState<string>("");
   const [filterData, setfilterData] = React.useState<any>([]);
 
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
@@ -164,8 +161,6 @@ const Onboarding = (props: any) => {
     console.log(TempEmployeeOnboarding);
   };
 
-  //const toast = useRef<any>(null);
-
   ///Delete component
   const confirm2 = (id: any) => {
     confirmDialog({
@@ -244,7 +239,7 @@ const Onboarding = (props: any) => {
             }
           : "",
         Role: item.Role ? item.Role : "",
-        // Department: item.Department ? item.Department : "",
+
         Department: item.Department
           ? {
               key: item.Department,
@@ -269,7 +264,6 @@ const Onboarding = (props: any) => {
             ? "Pending"
             : "Satisfactory",
 
-        //    Status: item.Status ? item.Status : "",
         SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
       }));
       console.log("Fetched Items:", formattedItems);
@@ -340,9 +334,6 @@ const Onboarding = (props: any) => {
         .get();
       console.log(items, "items");
 
-      // Map the items to create an array of values
-
-      // Map the items to create an array of values
       // Format EmployeeResponse items and link to assigned values
       const formattedResponseItems = items.map((item: any) => {
         return {
@@ -453,7 +444,6 @@ const Onboarding = (props: any) => {
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
             SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
-            //    Status: "Pending",
           });
 
         console.log("Employee details updated successfully in SharePoint!");
@@ -553,7 +543,6 @@ const Onboarding = (props: any) => {
     return (
       <div
         style={{
-          //    background: "#d8e5f0",
           background:
             rowData.Status === "Satisfactory" ? " #caf0cc" : "#d8e5f0",
           padding: "6px 4px",
@@ -581,7 +570,6 @@ const Onboarding = (props: any) => {
       ) : (
         <div>
           <ConfirmDialog />
-          {/* <Toast ref={toast} /> */}
           <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -664,7 +652,7 @@ const Onboarding = (props: any) => {
                   filterkeys.Employee = {};
                   filterkeys.dept = "";
                   filterkeys.search = "";
-                  // setSearchTerms({ ...filData });
+
                   setfilterData(EmployeeOnboarding);
                 }}
               />
@@ -674,9 +662,6 @@ const Onboarding = (props: any) => {
           {filterData.length > 0 ? (
             <DataTable
               className={styles.onboardingDataTable}
-              //  value={EmployeeOnboarding}
-              //filterItems
-
               value={filterData?.slice(
                 PageNationRows.first,
                 PageNationRows.first + PageNationRows.rows
@@ -706,7 +691,6 @@ const Onboarding = (props: any) => {
             first={PageNationRows.first}
             rows={PageNationRows.rows}
             totalRecords={EmployeeOnboarding.length}
-            // rowsPerPageOptions={[10, 20, 30]}
             onPageChange={onPageChange}
           />
 
@@ -744,7 +728,6 @@ const Onboarding = (props: any) => {
                           width: "100%",
                         },
                       }}
-                      // styles={{ root: "100%" }}
                       onChange={(selectedPeople: any[]) => {
                         console.log(selectedPeople);
                         if (selectedPeople.length !== 0) {
@@ -774,7 +757,6 @@ const Onboarding = (props: any) => {
                   <InputText
                     placeholder="Enter Email"
                     style={{ width: "100%", color: "black" }}
-                    //value={TempEmployeeOnboarding?.Email || ""}
                     value={
                       TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""
                     }
@@ -791,7 +773,6 @@ const Onboarding = (props: any) => {
                   <InputText
                     placeholder="Enter Secondary Email"
                     style={{ width: "100%", color: "black" }}
-                    //value={TempEmployeeOnboarding?.Email || ""}
                     value={TempEmployeeOnboarding?.SecondaryEmail || ""}
                     onChange={(e) => {
                       handleChange("SecondaryEmail", e.target.value);
@@ -857,7 +838,6 @@ const Onboarding = (props: any) => {
               <div className={styles.addDialog}>
                 <div className={styles.addDialogBtnContainer}>
                   <Button
-                    //  style={{ marginRight: 14, width: "100px" }}
                     label="Cancel"
                     style={{
                       height: "34px",
@@ -866,7 +846,6 @@ const Onboarding = (props: any) => {
                       border: "none",
                       width: "100px",
                     }}
-                    //  icon="pi pi-plus"
                     onClick={() => setVisible(false)}
                   />
                   <Button
@@ -879,7 +858,6 @@ const Onboarding = (props: any) => {
                       width: "100px",
                     }}
                     disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
-                    //   icon="pi pi-plus"
                     onClick={() => saveEmployeeDetailsToSP()}
                   />
                 </div>
