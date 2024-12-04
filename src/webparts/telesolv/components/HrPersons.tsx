@@ -8,8 +8,9 @@ import { DataTable } from "primereact/datatable";
 import "../assets/style/HrPersonStyle.css";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { useEffect, useRef } from "react";
-import { Toast } from "primereact/toast";
+import { useEffect } from "react";
+import { toast, Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   PeoplePicker,
   PrincipalType,
@@ -17,6 +18,8 @@ import {
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
 import { forEach } from "lodash";
+import { GCongfig } from "../../../Config/Config";
+import { IQuestionDatas } from "../../../Interface/Interface";
 
 interface IFilterKeys {
   people: string[];
@@ -50,7 +53,7 @@ const HrPersons = (props: any) => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
-        .getByTitle("CheckpointConfig")
+        .getByTitle(GCongfig.ListName.CheckpointConfig)
         .items.select("*,Assigened/ID,Assigened/EMail")
         .expand("Assigened")
         .filter("isDelete ne 1")
@@ -58,7 +61,7 @@ const HrPersons = (props: any) => {
       console.log(items, "items");
 
       // Map the items to create an array of values
-      const formattedItems = items.map((item: any) => ({
+      const formattedItems: IQuestionDatas[] = items.map((item: any) => ({
         Id: item.Id,
         isEdit: false,
         QuestionNo: item.Sno,
@@ -79,7 +82,9 @@ const HrPersons = (props: any) => {
           };
         }),
       }));
-      formattedItems.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+      formattedItems.sort(
+        (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
+      );
       console.log("Fetched Items:", formattedItems);
 
       // Return the formatted array
@@ -114,26 +119,37 @@ const HrPersons = (props: any) => {
       setfilterData([...fetchedItems]);
     };
     fetchQuestions();
-  }, []);
+  }, [isEdit]);
 
-  const toast = useRef<any>(null); // Create a reference for the Toast component
+  //const toast = useRef<any>(null); // Create a reference for the Toast component
 
   const showError = (string: any) => {
-    toast.current?.show({
-      severity: "error",
-      summary: "Error",
-      detail: string,
-      life: 3000,
+    toast.error("Please enter value", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
     });
   };
 
   const showSuccess = (string: any) => {
-    toast.current.show({
-      severity: "success",
-      summary: "Success",
-      detail: string,
-      life: 3000,
+    toast.success("Successfully updated", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
     });
+
     setisEdit(true);
   };
 
@@ -174,7 +190,7 @@ const HrPersons = (props: any) => {
 
         if (hrperson[i].Id) {
           await sp.web.lists
-            .getByTitle("CheckpointConfig")
+            .getByTitle(GCongfig.ListName.CheckpointConfig)
             .items.getById(hrperson[i].Id)
             .update({
               AssigenedId: {
@@ -233,7 +249,22 @@ const HrPersons = (props: any) => {
 
   return (
     <div>
-      <Toast ref={toast} />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+
+      {/* Same as */}
+      <ToastContainer />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
           <div className="HRPersonPeopleSearch">

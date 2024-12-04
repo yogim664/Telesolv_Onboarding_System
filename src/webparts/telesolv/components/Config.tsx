@@ -11,11 +11,12 @@ import styles from "./Telesolv.module.scss";
 import { InputText } from "primereact/inputtext";
 import { RadioButton } from "primereact/radiobutton";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import "../assets/style/CheckPoints.css";
 import { useState } from "react";
+import { toast, Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import "./HrPersons";
 import HrPersons from "./HrPersons";
@@ -23,6 +24,8 @@ import HrPersons from "./HrPersons";
 const cmtImg: string = require("../assets/Images/Comment.png");
 import { sp } from "@pnp/sp";
 import { _Item } from "@pnp/sp/items/types";
+import { GCongfig } from "../../../Config/Config";
+import { IQuestionDatas } from "../../../Interface/Interface";
 
 // import "primeicons/primeicons.css";
 // import "../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css";
@@ -41,15 +44,21 @@ const Config = (props: any) => {
   const [questions, setQuestions] = useState<any>([]);
   const [changeOption, setchangeOption] = useState<any>([]);
 
-  const toast = useRef<Toast>(null);
-
+  //const toast = useRef<Toast>(null);
+  //const toastRef = useRef();
   const accept = (id: any, qIndex: number) => {
-    toast.current?.show({
-      severity: "error",
-      summary: "Deleted",
-      detail: "Question deleted successfully!",
-      life: 3000,
+    toast.success("Deleted Successfully", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
     });
+
     deleteQuestion(id, qIndex);
   };
 
@@ -77,40 +86,23 @@ const Config = (props: any) => {
     console.log(changeOption);
   };
 
-  // const optionChange = (qIndex: number, aIndex: number) => {
-  //   const updatedQuestions = questions.map((question: any, index: number) =>
-  //     index === qIndex
-  //       ? {
-  //           ...question,
-  //           Options: question.Options.map((option: any, oIndex: number) =>
-  //             oIndex === aIndex
-  //               ? { ...option, name: changeOption } // Update with the state variable `changeOption`
-  //               : option
-  //           ),
-  //         }
-  //       : question
-  //   );
-
-  //   setQuestions(updatedQuestions);
-  //   setselectedOptionDetails({
-  //     qIndex: null,
-  //     aIndex: null,
-  //   });
-  //   //setChangeOption(null); // Reset the changeOption state after updating
-  //   setSelectedQuestionId(null); // Hide the input container
-  // };
-
   const optionChange = (qIndex: number, aIndex: number) => {
     console.log(changeOption, "Infunction");
 
     // Check if `changeOption` is blank
     if (!changeOption.length) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Please enter value",
-        life: 3000,
+      toast.warn("Please enter value", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
+
       return;
     }
 
@@ -120,7 +112,9 @@ const Config = (props: any) => {
         ? {
             ...question,
             Options: question.Options.map((option: any, oIndex: number) =>
-              oIndex === aIndex ? { ...option, name: changeOption } : option
+              oIndex === aIndex
+                ? { ...option, key: changeOption, name: changeOption }
+                : option
             ),
           }
         : question
@@ -326,12 +320,10 @@ const Config = (props: any) => {
     const nextQuestion = updatedQuestions[index + 1];
 
     // Swap the properties between the current and next question
-    //   const tempId = currentQuestion.Id;
     const tempQuestionNo = currentQuestion.QuestionNo;
 
     updatedQuestions[index] = {
       ...currentQuestion,
-      //   Id: tempId,
       QuestionNo: tempQuestionNo,
       QuestionTitle: nextQuestion.QuestionTitle,
       Options: nextQuestion.Options,
@@ -341,8 +333,6 @@ const Config = (props: any) => {
 
     updatedQuestions[index + 1] = {
       ...nextQuestion,
-
-      //   Id: nextQuestion.Id,
       QuestionNo: nextQuestion.QuestionNo,
 
       QuestionTitle: currentQuestion.QuestionTitle,
@@ -376,6 +366,7 @@ const Config = (props: any) => {
       err = true;
       errmsg = "Select Answer";
     }
+    console.log(errmsg);
 
     if (!err) {
       try {
@@ -409,31 +400,46 @@ const Config = (props: any) => {
         ]);
 
         // Show success toast after all operations are complete
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Questions saved successfully!",
-          life: 3000,
+
+        toast.success("Questions saved successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
         });
+
         setSubmitted(!Submitted);
       } catch (error) {
         console.error("Error processing questions:", error);
 
-        // Show error toast if any operation fails
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to process questions.",
-          life: 3000,
+        toast.error("Failed to process questions.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
         });
       }
     } else {
-      // Show warning toast if validation fails
-      toast.current?.show({
-        severity: "warn",
-        summary: "Rejected",
-        detail: errmsg,
-        life: 3000,
+      toast.warn(errmsg, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
     }
   };
@@ -441,13 +447,15 @@ const Config = (props: any) => {
   const saveQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
-        return sp.web.lists.getByTitle("CheckpointConfig").items.add({
-          Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
-          Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
-          Options: JSON.stringify(question.Options), // Convert Options to JSON string
-          Answer: question.Answer.key ? question.Answer.key : "",
-          isDelete: false,
-        });
+        return sp.web.lists
+          .getByTitle(GCongfig.ListName.CheckpointConfig)
+          .items.add({
+            Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
+            Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
+            Options: JSON.stringify(question.Options), // Convert Options to JSON string
+            Answer: question.Answer.key ? question.Answer.key : "",
+            isDelete: false,
+          });
       });
 
       await Promise.all(promises); // Wait for all items to be saved
@@ -463,7 +471,7 @@ const Config = (props: any) => {
     try {
       const promises = questions.map((question: any) => {
         return sp.web.lists
-          .getByTitle("CheckpointConfig")
+          .getByTitle(GCongfig.ListName.CheckpointConfig)
           .items.getById(question.Id)
           .update({
             Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
@@ -486,7 +494,7 @@ const Config = (props: any) => {
       // Create an array of promises to delete questions
       const promises = questions?.map((question: any) =>
         sp.web.lists
-          .getByTitle("CheckpointConfig")
+          .getByTitle(GCongfig.ListName.CheckpointConfig)
           .items.getById(question.Id)
           .delete()
           .catch((error: any) => {
@@ -510,36 +518,42 @@ const Config = (props: any) => {
   const questionConfig = async () => {
     try {
       // Fetch items from the SharePoint list
-      const items = await sp.web.lists
-        .getByTitle("CheckpointConfig")
+      const items: any = await sp.web.lists
+        .getByTitle(GCongfig.ListName.CheckpointConfig)
         .items.select("*,Assigened/ID,Assigened/EMail")
         .expand("Assigened")
         .filter("isDelete ne 1")
         .get();
-      console.log(items, "items");
 
       // Map the items to create an array of values
-      const formattedItems = items.map((item: any) => ({
-        Id: item.Id,
-        isEdit: false,
-        QuestionNo: item.Sno,
-        QuestionTitle: item.Title,
-        isDelete: item.isDelete,
-        Answer: item.Answer
-          ? {
-              key: item.Answer,
-              name: item.Answer,
-            }
-          : null,
-        Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigened: item.Assigened?.map((Assigened: any) => {
+      const formattedItems: IQuestionDatas[] =
+        items?.map((val: any) => {
           return {
-            id: Assigened.ID,
-            Email: Assigened.EMail,
+            Id: val.Id,
+            isEdit: false,
+            QuestionNo: val.Sno,
+            QuestionTitle: val.Title,
+            isDelete: val.isDelete,
+            Answer: val.Answer
+              ? {
+                  key: val.Answer,
+                  name: val.Answer,
+                }
+              : null,
+            Options: val.Options ? JSON.parse(val.Options) : [],
+            Assigened:
+              val?.Assigened?.map((Assigened: any) => {
+                return {
+                  id: Assigened.ID,
+                  Email: Assigened.EMail,
+                };
+              }) || [],
           };
-        }),
-      }));
-      formattedItems.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+        }) || [];
+
+      formattedItems?.sort(
+        (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
+      );
       console.log("Fetched Items:", formattedItems);
 
       // Return the formatted array
@@ -561,7 +575,23 @@ const Config = (props: any) => {
 
   return (
     <div style={{ padding: 10 }}>
-      <Toast ref={toast} />
+      {/* <Toast ref={toast} /> */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+
+      {/* Same as */}
+      <ToastContainer />
       <ConfirmDialog group="templating" />
 
       <TabView className="CongifTab">

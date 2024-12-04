@@ -6,7 +6,7 @@ import * as React from "react";
 const logoImg: string = require("../assets/Images/Logo.svg");
 // import styles from "./Telesolv.module.scss";
 import styles from "./HrScreen.module.scss";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
@@ -14,9 +14,12 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { Toast } from "primereact/toast";
+import { toast, Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { InputTextarea } from "primereact/inputtextarea";
 import { Paginator } from "primereact/paginator";
+import { GCongfig } from "../../../Config/Config";
 
 interface IPageSync {
   first: number;
@@ -51,7 +54,6 @@ const HrScreen = (props: any): JSX.Element => {
   const [AssigenedQuestion, setAssigenedQuestion] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
   const [Departments, setDepartments] = useState<any>([]);
-  const toast = useRef<Toast>(null);
   const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
   const [TempEmployeeDetails, setTempEmployeeDetails] = useState<any>({
     Employee: {
@@ -125,7 +127,7 @@ const HrScreen = (props: any): JSX.Element => {
   const getAllTitles = async () => {
     try {
       const items = await sp.web.lists
-        .getByTitle("Department") // Replace 'Departments' with your list name
+        .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
         .items.select("Title") // Fetch only the Title column
         .get();
 
@@ -144,7 +146,7 @@ const HrScreen = (props: any): JSX.Element => {
 
   const getStsChoices = (): void => {
     sp.web.lists
-      .getByTitle("EmployeeResponse")
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
       .fields.getByInternalNameOrTitle("Status")
       .select("Choices,ID")
       .get()
@@ -172,7 +174,7 @@ const HrScreen = (props: any): JSX.Element => {
 
   const questionConfig = async (assArray: any[] = []): Promise<void> => {
     await sp.web.lists
-      .getByTitle("EmployeeResponse")
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
         "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/TaskName, Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role,EmployeeID/SecondaryEmail"
       )
@@ -233,7 +235,7 @@ const HrScreen = (props: any): JSX.Element => {
 
   const AssigendPerson = async (): Promise<void> => {
     await sp.web.lists
-      .getByTitle("CheckpointConfig")
+      .getByTitle(GCongfig.ListName.CheckpointConfig)
       .items.select("*, Assigened/ID, Assigened/EMail")
       .expand("Assigened")
       .get()
@@ -325,7 +327,7 @@ const HrScreen = (props: any): JSX.Element => {
       //    TempEmployeeDetails.forEach((item: any, i: number) =>
       // TempEmployeeDetails.map((item: any, i: number) =>
       sp.web.lists
-        .getByTitle("EmployeeResponse")
+        .getByTitle(GCongfig.ListName.EmployeeResponse)
         .items.getById(TempEmployeeDetails.Id)
         .update({
           Status: TempEmployeeDetails.Status.key,
@@ -333,12 +335,25 @@ const HrScreen = (props: any): JSX.Element => {
         })
         .then(() => {
           setVisible(false);
-          toast.current?.show({
-            severity: "success",
-            summary: "Success",
-            detail: "Questions updated successfully!",
-            life: 3000,
+          // toast.current?.show({
+          //   severity: "success",
+          //   summary: "Success",
+          //   detail: "Questions updated successfully!",
+          //   life: 3000,
+          // });
+
+          toast.success("Update Successfully", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
           });
+
           // questionConfig();
           AssigendPerson();
         })
@@ -350,11 +365,23 @@ const HrScreen = (props: any): JSX.Element => {
       console.error("Error saving questions:", error);
 
       // Show error toast
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save questions.",
-        life: 3000,
+      // toast.current?.show({
+      //   severity: "error",
+      //   summary: "Error",
+      //   detail: "Failed to save questions.",
+      //   life: 3000,
+      // });
+
+      toast.error("error", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
     }
   };
@@ -637,7 +664,23 @@ const HrScreen = (props: any): JSX.Element => {
         // rowsPerPageOptions={[10, 20, 30]}
         onPageChange={onPageChange}
       />
-      <Toast ref={toast} />
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+
+      {/* Same as */}
+      <ToastContainer />
     </>
   );
 };
