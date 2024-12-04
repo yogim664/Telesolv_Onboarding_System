@@ -7,7 +7,6 @@
 import * as React from "react";
 import "../assets/style/style.css";
 import styles from "./Telesolv.module.scss";
-//import { Button } from "primereact/button";
 import Config from "./Config";
 const logoImg: string = require("../assets/Images/Logo.svg");
 import { TabView, TabPanel } from "primereact/tabview";
@@ -95,13 +94,7 @@ const Telesolve = (props: any): JSX.Element => {
         <HrScreen context={props.context} />
       ) : ShowHrDirectorScreen ? (
         <div style={{ padding: 10 }}>
-          <button
-            style={{ display: "none" }}
-            onClick={() => {
-              // setShowHrScreen(true);
-              // setShowEmpScreen(true);
-            }}
-          >
+          <button style={{ display: "none" }} onClick={() => {}}>
             Click here
           </button>
 

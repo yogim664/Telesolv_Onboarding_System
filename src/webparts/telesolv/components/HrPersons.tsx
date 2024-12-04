@@ -121,8 +121,6 @@ const HrPersons = (props: any) => {
     fetchQuestions();
   }, [isEdit]);
 
-  //const toast = useRef<any>(null); // Create a reference for the Toast component
-
   const showError = (string: any) => {
     toast.error("Please enter value", {
       position: "top-right",
@@ -215,17 +213,14 @@ const HrPersons = (props: any) => {
       <PeoplePicker
         context={props.context}
         webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-        //   titleText="Select People"
         personSelectionLimit={100}
         showtooltip={false}
         ensureUser={true}
         placeholder={""}
-        // peoplePickerCntrlclassName={styles.}
         onChange={(selectedPeople: any[]) => {
           handleChange(selectedPeople, rowData, "Assigned"); // Pass selectedPeople and rowData
         }}
         styles={peoplePickerStyles}
-        //   showHiddenInUI={true}
         principalTypes={[PrincipalType.User]}
         defaultSelectedUsers={rowData?.Assigened?.map((val: any) => val.Email)}
         resolveDelay={1000}
@@ -271,28 +266,20 @@ const HrPersons = (props: any) => {
             <PeoplePicker
               context={props.context}
               webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-              //   titleText="Select People"
               personSelectionLimit={100}
               showtooltip={false}
               ensureUser={true}
               placeholder={""}
-              // peoplePickerCntrlclassName={styles.}
               onChange={(selectedPeople: any[]) => {
                 filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
               }}
-              //  styles={peoplePickerStyles}
-              //   showHiddenInUI={true}
               principalTypes={[PrincipalType.User]}
-              // defaultSelectedUsers={rowData?.Assigened?.map(
-              //   (val: any) => val.Email
-              // )}
               defaultSelectedUsers={filterkeys.people}
               resolveDelay={1000}
             />
           </div>
 
           <Button
-            // label="Edit"
             label={isEdit ? "Edit" : "Cancel"}
             outlined
             icon="pi pi-pencil"
@@ -301,12 +288,8 @@ const HrPersons = (props: any) => {
               backgroundColor: "#233b83",
               border: "none",
             }}
-            //  onClick={() => setisEdit(!isEdit)}
             onClick={() => {
               setisEdit(!isEdit);
-              // if (isEdit) {
-
-              // }
             }}
           />
         </div>
@@ -343,7 +326,6 @@ const HrPersons = (props: any) => {
               border: "none",
             }}
             disabled={isEdit}
-            // onClick={() => setSelectedQuestionId(null)}
           />
           <Button
             label="Save"

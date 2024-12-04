@@ -4,16 +4,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { sp } from "@pnp/sp";
-// import styles from "./Telesolv.module.scss";
 import styles from "./EmployeeResponse.module.scss";
 import { useEffect, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { GCongfig } from "../../../Config/Config";
-// import {
-//   PeoplePicker,
-//   PrincipalType,
-// } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 
 const EmployeeResponseView = (props: any): JSX.Element => {
   const [questions, setQuestions] = useState<any>([]);
@@ -65,7 +60,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
         )
         .expand("QuestionID,Employee,EmployeeID")
-        // .filter(`EmployeeID eq ${SeelectedEmp.Employee.EmployeeId}.toString()`)
         .filter(
           `Employee/ID eq ${employeeIdString} and Status ne 'Satisfactory'`
         )
@@ -83,9 +77,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         .get();
       console.log(Qitems, "Quwsrtion");
 
-      // Map the items to create an array of values
-
-      // Map the items to create an array of values
       // Format EmployeeResponse items and link to assigned values
       const formattedItems = items.map((item: any) => {
         const relatedQitems: any = Qitems.filter(
@@ -129,7 +120,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     return (
       <div
         style={{
-          //    background: "#d8e5f0",
           background:
             rowData.Status === "Satisfactory"
               ? " #caf0cc"
@@ -139,7 +129,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           padding: "6px 4px",
           borderRadius: "6px",
           textAlign: "center",
-          //   color: "#1e71b9",
+
           color:
             rowData.Status === "Satisfactory"
               ? "#437426"
@@ -154,8 +144,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         {rowData.Status}
       </div>
     );
-
-    // <div className={styles.pendingSts}>{rowData.Status}</div>;
   };
 
   useEffect(() => {

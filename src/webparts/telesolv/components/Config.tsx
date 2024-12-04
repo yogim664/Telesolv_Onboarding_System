@@ -26,9 +26,6 @@ import { sp } from "@pnp/sp";
 import { _Item } from "@pnp/sp/items/types";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
-
-// import "primeicons/primeicons.css";
-// import "../../../node_modules/primereact/resources/themes/bootstrap4-light-blue/theme.css";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const Config = (props: any) => {
   // const [selectedOptions, setSelectedOptions] = useState<any>({});
@@ -44,8 +41,6 @@ const Config = (props: any) => {
   const [questions, setQuestions] = useState<any>([]);
   const [changeOption, setchangeOption] = useState<any>([]);
 
-  //const toast = useRef<Toast>(null);
-  //const toastRef = useRef();
   const accept = (id: any, qIndex: number) => {
     toast.success("Deleted Successfully", {
       position: "top-right",
@@ -186,7 +181,6 @@ const Config = (props: any) => {
       (a: any, b: any) => a.QuestionNo - b.QuestionNo
     );
     // const updatedQuestion =
-    //   questions?.filter((qus: any, index: any) => index !== qIndex) || [];
     updatedQuestion.forEach((qus: any, ind: any) => {
       if (qIndex === ind) {
         qus.isDelete = true;
@@ -214,9 +208,9 @@ const Config = (props: any) => {
     type: any,
     aIndex?: number
   ) => {
-    let _questions: any = questions
-      // .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
-      .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+    let _questions: any = questions.sort(
+      (a: any, b: any) => a.QuestionNo - b.QuestionNo
+    );
     if (type === "Question") {
       _questions[qIndex].QuestionTitle = value;
     } else {
@@ -254,8 +248,6 @@ const Config = (props: any) => {
   // move index UP
 
   const moveQuestionUp = (index: any, del: boolean, _tempArr?: any) => {
-    // if (index <= 0) return;
-
     // const updatedQuestions = [...questions];
     const updatedQuestions = [..._tempArr];
     // if (!del) {
@@ -268,7 +260,6 @@ const Config = (props: any) => {
 
       updatedQuestions[index] = {
         ...currentQuestion,
-        // Id: previousQuestion.Id,
         QuestionNo: tempQuestionNo,
         QuestionTitle: previousQuestion.QuestionTitle,
         Options: previousQuestion.Options,
@@ -278,7 +269,6 @@ const Config = (props: any) => {
 
       updatedQuestions[index - 1] = {
         ...previousQuestion,
-        //   Id: tempId,
         QuestionNo: previousQuestion.QuestionNo,
         QuestionTitle: currentQuestion.QuestionTitle,
         Options: currentQuestion.Options,
@@ -575,7 +565,6 @@ const Config = (props: any) => {
 
   return (
     <div style={{ padding: 10 }}>
-      {/* <Toast ref={toast} /> */}
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -637,12 +626,8 @@ const Config = (props: any) => {
                         className="pi pi-arrow-up"
                         onClick={() => moveQuestionUp(qIndex, false, questions)}
                         style={{
-                          // cursor: qIndex === 0 ? "not-allowed" : "pointer",
                           cursor: "pointer",
                           color: "#233b83",
-
-                          //  color: qIndex === 0 ? "#ccc" : "#233b83",
-                          //   pointerEvents: qIndex === 0 ? "none" : "auto",
                         }}
                       />
                       <i

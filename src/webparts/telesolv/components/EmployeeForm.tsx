@@ -32,7 +32,6 @@ const EmployeeForm = (props: any): JSX.Element => {
   const [ProgressPercent, setProgressPercent] = useState<number>(0);
 
   const [comment, setComment] = useState("");
-  //const toast = useRef<Toast>(null);
 
   //Set Value into Comments
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -142,7 +141,6 @@ const EmployeeForm = (props: any): JSX.Element => {
       _Listitems[qIndex].QuestionTitle = value;
     } else {
       _Listitems[qIndex].Response = { key: value, name: value };
-      // value;
     }
 
     setListItems([..._Listitems]);
@@ -337,13 +335,10 @@ const EmployeeForm = (props: any): JSX.Element => {
                                                 aIndex
                                               );
                                             }}
-                                            //  checked={_item.Answer === category.name}
                                             checked={
-                                              // _item.Answer &&
                                               _item.Response.name ===
                                               category.name
                                             }
-                                            //  disabled={!_item.isEdit}
                                           />
 
                                           <label
@@ -372,7 +367,6 @@ const EmployeeForm = (props: any): JSX.Element => {
                               >
                                 <span
                                   style={{
-                                    // backgroundColor: "green",
                                     color:
                                       _item.Status === "Satisfactory"
                                         ? "#437426"
