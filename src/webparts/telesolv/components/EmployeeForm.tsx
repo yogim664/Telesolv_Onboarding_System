@@ -32,6 +32,7 @@ const EmployeeForm = (props: any): JSX.Element => {
   const [ProgressPercent, setProgressPercent] = useState<number>(0);
 
   const [comment, setComment] = useState("");
+  const [EmpConfig, setEmpConfig] = useState<any[]>([]);
 
   //Set Value into Comments
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -215,6 +216,36 @@ const EmployeeForm = (props: any): JSX.Element => {
                 theme: "light",
                 transition: Bounce,
               });
+
+            ///Update notify
+
+            const items = sp.web.lists
+              .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+              .items.select("*,Employee/ID,Employee/EMail")
+              .expand("Employee")
+              .get()
+              .then((_items: any) => {
+                console.log(_items, "REsponse");
+                const temp: any = _items?.filter(
+                  (val: any) =>
+                    val?.Employee?.EMail.toLowerCase() ===
+                    CurUser?.Email.toLowerCase()
+                );
+
+                setEmpConfig(temp);
+                console.log(temp, "temp578");
+                console.log(EmpConfig);
+
+                const updatePromises = temp.map((_Empitem: any) =>
+                  sp.web.lists
+                    .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+                    .items.getById(_Empitem.Id)
+                    .update({ isEmployeeCompleted: true })
+                );
+                console.log(updatePromises);
+              });
+
+            console.log(items);
 
             setListItems([]);
             questionConfig();
