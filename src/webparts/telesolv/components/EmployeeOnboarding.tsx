@@ -63,7 +63,7 @@ const Onboarding = (props: any) => {
   const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
   const [Departments, setDepartments] = useState<any>([]);
   const [filterData, setfilterData] = React.useState<any>([]);
-
+  const [statusChoices, setStatusChoices] = useState<any[]>([]);
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
@@ -79,6 +79,7 @@ const Onboarding = (props: any) => {
     Department: { key: "", name: "" },
     Email: "",
     PhoneNumber: "",
+    Status: { key: "", name: "" },
     SecondaryEmail: "",
   });
 
@@ -215,6 +216,30 @@ const Onboarding = (props: any) => {
     }
   };
 
+  //Get choice
+
+  const getStsChoices = (): void => {
+    sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+      .fields.getByInternalNameOrTitle("Status")
+      .select("Choices,ID")
+      .get()
+      .then((data: any) => {
+        // Transform the choices into an array of objects
+        const ChoicesCollection = data.Choices.map((choice: string) => ({
+          key: choice,
+          name: choice,
+        }));
+
+        console.log(ChoicesCollection);
+
+        // Update the state
+        setStatusChoices(ChoicesCollection);
+        console.log("Choices fetched and set:", ChoicesCollection);
+      })
+      .catch((err) => console.error("Error fetching choices:", err));
+  };
+
   //Get data from sp list
 
   const EmployeeOnboardingDetails = async (formattedQuestions: any) => {
@@ -262,7 +287,7 @@ const Onboarding = (props: any) => {
               Qitem.Employee.EmployeeId === item.Employee.ID
           ).length
             ? "Pending"
-            : "Satisfactory",
+            : "Completed",
 
         SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
       }));
@@ -390,6 +415,7 @@ const Onboarding = (props: any) => {
 
   useEffect(() => {
     fetchQuestions();
+    getStsChoices();
   }, []);
 
   const ActionIcons = (Rowdata: any) => {
@@ -444,9 +470,43 @@ const Onboarding = (props: any) => {
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
             SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
+            Status: TempEmployeeOnboarding.Status.key,
           });
 
-        console.log("Employee details updated successfully in SharePoint!");
+        sp.web.lists
+          .getByTitle(GCongfig.ListName.EmployeeResponse)
+          .items.select("Employee/EMail,Id,ID") // Fetch only necessary fields
+          .expand("Employee")
+          .get()
+          .then(async (_items: any) => {
+            console.log(_items, "Response84848");
+            console.log(TempEmployeeOnboarding.Status.key, "Status");
+
+            // Filter items based on employee email
+            const tempItems: any = _items.filter(
+              (val: any) =>
+                val?.Employee?.EMail?.toLowerCase() ===
+                TempEmployeeOnboarding.Email?.toLowerCase()
+            );
+
+            if (TempEmployeeOnboarding.Status.key === "Completed") {
+              console.log(tempItems, "tempItemstempItemstempItemstempItems");
+
+              tempItems.map((_Empitem: any) =>
+                sp.web.lists
+                  .getByTitle(GCongfig.ListName.EmployeeResponse)
+                  .items.getById(_Empitem.Id)
+                  .update({ Status: "Satisfactory" })
+              );
+            } else {
+              console.log(
+                "Employee status is not 'Completed'. No updates performed."
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching EmployeeResponse items:", error);
+          });
 
         toast.success("Employee Updated Successfully", {
           position: "top-right",
@@ -543,13 +603,12 @@ const Onboarding = (props: any) => {
     return (
       <div
         style={{
-          background:
-            rowData.Status === "Satisfactory" ? " #caf0cc" : "#d8e5f0",
+          background: rowData.Status === "Completed" ? " #caf0cc" : "#d8e5f0",
           padding: "6px 4px",
           borderRadius: "6px",
           textAlign: "center",
           //   color: "#1e71b9",
-          color: rowData.Status === "Satisfactory" ? "#437426" : "#1e71b9",
+          color: rowData.Status === "Completed" ? "#437426" : "#1e71b9",
           fontWeight: "600",
           fontSize: "14px",
           width: "160px",
@@ -834,6 +893,37 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
+
+              {Update && (
+                <div className={styles.addDialog}>
+                  <div className={styles.addDialogHeader}>Status</div>
+                  <div className={styles.addDialogInput}>
+                    <div className={styles.employeeStatusSection}>
+                      <Dropdown
+                        className={styles.employeeStatus}
+                        value={
+                          TempEmployeeOnboarding.Status ||
+                          TempEmployeeOnboarding.Status.key
+                            ? statusChoices?.filter(
+                                (val: any) =>
+                                  val.key ===
+                                  (TempEmployeeOnboarding.Status ||
+                                    TempEmployeeOnboarding.Status.key)
+                              )?.[0]
+                            : ""
+                        }
+                        onChange={(e) => {
+                          handleChange("Status", e.value);
+                          console.log(e.value.key);
+                        }}
+                        options={statusChoices || []}
+                        optionLabel="name"
+                        placeholder="Select a status"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className={styles.addDialog}>
                 <div className={styles.addDialogBtnContainer}>

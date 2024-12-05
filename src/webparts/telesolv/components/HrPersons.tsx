@@ -112,14 +112,16 @@ const HrPersons = (props: any) => {
     setfilterData([..._masterData]);
   };
 
+  const fetchQuestions = async () => {
+    const fetchedItems = await questionConfig();
+    setHRperon(fetchedItems); // Store in state
+    setfilterData([...fetchedItems]);
+  };
+
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const fetchedItems = await questionConfig();
-      setHRperon(fetchedItems); // Store in state
-      setfilterData([...fetchedItems]);
-    };
     fetchQuestions();
-  }, [isEdit]);
+    // }, [isEdit]);
+  }, []);
 
   const showError = (string: any) => {
     toast.error("Please enter value", {
@@ -168,7 +170,7 @@ const HrPersons = (props: any) => {
     );
 
     setHRperon(updatedQuestions);
-    setfilterData(updatedQuestions);
+    setfilterData([...updatedQuestions]);
     console.log(updatedQuestions, "updatedQuestions");
   };
 
@@ -290,13 +292,11 @@ const HrPersons = (props: any) => {
             }}
             onClick={() => {
               setisEdit(!isEdit);
+              fetchQuestions();
             }}
           />
         </div>
-        <DataTable
-          className={styles.HRConfigDataTable}
-          value={filterData || []}
-        >
+        <DataTable className={styles.HRConfigDataTable} value={[...filterData]}>
           <Column
             field="QuestionTitle"
             header="CheckPoints"
