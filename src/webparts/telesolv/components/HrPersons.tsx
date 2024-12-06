@@ -305,13 +305,13 @@ const HrPersons = (props: any) => {
           <Column
             className={styles.taskName}
             field="TaskName"
-            header="TaskName"
+            header="Task Name"
             body={peopleTask}
           ></Column>
           <Column
             className={styles.HRPersonsList}
             field="Assigenee"
-            header="HR Person"
+            header="HR Persons"
             body={peopletemplate}
           ></Column>
         </DataTable>

@@ -1,65 +1,69 @@
 .employeeResponseSection {
-    padding: 16px;
-    width: 75%;
-    margin: auto;
-    .ResponseHeader {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        .backIcon {
-            color: #233b83;
-            font-size: 2rem;
-        }
-        .userName {
-            // font-size: 18px;
-            color: #233b83;
-            font-weight: 600;
-        }
+  padding: 16px;
+  width: 75%;
+  margin: auto;
+  .ResponseHeader {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    .backIcon {
+      color: #233b83;
+      font-size: 2rem;
     }
-    .employeeResponseDataTable {
-        th {
-            padding: 16px !important;
-        }
-        td {
-            min-width: 200px;
-        }
-        td:nth-child(1) {
-            min-width: 300px;
-            font-weight: 600;
-        }
-        td:nth-child(3) {
-            min-width: 100px;
-            font-weight: 600;
-        }
+    .userName {
+      // font-size: 18px;
+      color: #233b83;
+      font-weight: 600;
     }
-    .noDataFound {
-        display: flex;
-        justify-content: center;
-        color: #233b83;
-        font-weight: 500;
-        height: 100px;
-        font-weight: 600;
+  }
+  .employeeResponseDataTable {
+    th {
+      padding: 16px !important;
     }
+    td {
+      min-width: 200px;
+    }
+    td:nth-child(1) {
+      min-width: 300px;
+      font-weight: 600;
+    }
+    td:nth-child(3) {
+      min-width: 100px;
+      font-weight: 600;
+    }
+  }
+  .noDataFound {
+    display: flex;
+    justify-content: center;
+    color: #233b83;
+    font-weight: 500;
+    height: 100px;
+    font-weight: 600;
+  }
 }
 
 .pageTitle {
-    color: #233b83;
-    font-weight: 500;
+  color: #233b83;
+  font-weight: 500;
 }
 
 .pendingSts {
-    padding: 6px 12px;
-    border-radius: 20px;
-    text-align: center;
-    font-size: 14px;
-    width: max-content;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
-    .statusDot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-    }
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-align: center;
+  font-size: 14px;
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  .statusDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+}
+.FilterOption {
+  display: flex;
+  justify-content: space-between;
 }

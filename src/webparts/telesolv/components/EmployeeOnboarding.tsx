@@ -197,9 +197,7 @@ const Onboarding = (props: any) => {
       sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeOnboarding)
         .items.getById(id)
-        .update({
-          isDelete: true,
-        });
+        .delete();
       showSuccess("Delete Sucessfuly");
 
       fetchQuestions();
@@ -374,6 +372,7 @@ const Onboarding = (props: any) => {
           },
           Role: item.EmployeeID?.Role || "No Role",
           Department: item.EmployeeID?.Department || "No Department",
+          SecondaryEmail: item.SecondaryEmail || "No Email",
         };
       });
 
@@ -456,6 +455,13 @@ const Onboarding = (props: any) => {
 
   // Post into list SP
   const saveEmployeeDetailsToSP = async (): Promise<void> => {
+    const EmployeeCount = EmployeeOnboarding.map(
+      (val: any) => val.Employee?.EmployeeEmail === TempEmployeeOnboarding.Email
+    );
+    console.log(EmployeeCount);
+
+    //EmployeeOnboarding
+
     console.log(TempEmployeeOnboarding);
 
     try {
@@ -736,6 +742,7 @@ const Onboarding = (props: any) => {
               <Column field="Role" header="Role" />
               <Column field="Department.key" header="Department" />
               <Column field="Employee.EmployeeEMail" header="Email" />
+              <Column field="SecondaryEmail" header="SecondryEmail" />
               <Column field="Status" header="Status" body={stsTemplate} />
               <Column
                 field="Action"
@@ -762,7 +769,7 @@ const Onboarding = (props: any) => {
               }
               visible={visible}
               style={{
-                width: "30%",
+                minWidth: "44vw",
                 padding: "10px",
                 backgroundColor: "white",
                 borderRadius: "10px",
@@ -771,31 +778,6 @@ const Onboarding = (props: any) => {
               }}
               onHide={() => setVisible(false)}
             >
-              {Update && (
-                <div className={styles.employeeStatusSection}>
-                  <Dropdown
-                    className={styles.employeeStatus}
-                    value={
-                      TempEmployeeOnboarding.Status ||
-                      TempEmployeeOnboarding.Status.key
-                        ? statusChoices?.filter(
-                            (val: any) =>
-                              val.key ===
-                              (TempEmployeeOnboarding.Status ||
-                                TempEmployeeOnboarding.Status.key)
-                          )?.[0]
-                        : ""
-                    }
-                    onChange={(e) => {
-                      handleChange("Status", e.value);
-                      console.log(e.value.key);
-                    }}
-                    options={statusChoices || []}
-                    optionLabel="name"
-                    placeholder="Select a status"
-                  />
-                </div>
-              )}
               <div className={styles.addDialog}>
                 <div
                   className={`${styles.addDialogHeader} ${styles.addDialogHeaderName}`}
@@ -868,7 +850,6 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
-
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>Role</div>
                 <div className={styles.addDialogInput}>
@@ -922,6 +903,39 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
+
+              {Update && (
+                <div className={styles.addDialog}>
+                  <div className={styles.addDialogHeader}>Status</div>
+                  <div className={styles.addDialogInput}>
+                    <div className={styles.employeeStatusSection}>
+                      <Dropdown
+                        className="w-full md:w-14rem"
+                        value={
+                          TempEmployeeOnboarding.Status ||
+                          TempEmployeeOnboarding.Status.key
+                            ? statusChoices?.filter(
+                                (val: any) =>
+                                  val.key ===
+                                  (TempEmployeeOnboarding.Status ||
+                                    TempEmployeeOnboarding.Status.key)
+                              )?.[0]
+                            : ""
+                        }
+                        onChange={(e) => {
+                          handleChange("Status", e.value);
+                          console.log(e.value.key);
+                        }}
+                        options={statusChoices || []}
+                        optionLabel="name"
+                        placeholder="Select a status"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className={styles.addDialog}>
                 <div className={styles.addDialogBtnContainer}>
                   <Button
