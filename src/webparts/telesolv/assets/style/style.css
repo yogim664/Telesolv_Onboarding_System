@@ -254,3 +254,7 @@ i {
 .commandBarWrapper {
     display: none !important;
 }
+
+[class^="navBar"] h2 {
+    color: #233b83;
+}

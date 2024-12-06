@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as React from "react";
-const logoImg: string = require("../assets/Images/Logo.svg");
+// const logoImg: string = require("../assets/Images/Logo.svg");
 // import styles from "./Telesolv.module.scss";
 import styles from "./HrScreen.module.scss";
 import { useState, useEffect } from "react";
@@ -500,9 +500,10 @@ const HrScreen = (props: any): JSX.Element => {
 
       <div>
         <div className={styles.navBar}>
-          <div className={styles.navRightContainers}>
+          {/* <div className={styles.navRightContainers}>
             <img src={logoImg} alt="logo" />
-          </div>
+          </div> */}
+          <h2>Onboarding App</h2>
         </div>
       </div>
       <div className={styles.HrPersonContainer}>

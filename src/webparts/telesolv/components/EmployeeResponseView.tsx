@@ -400,7 +400,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           <div className={styles.noDataFound}>No data found!</div>
         )}
       </div>
-      {ResComment && (
+      {ResComment && questions.length > 0 && (
         <div className={styles.commentSection}>
           <h4>Comments</h4>
           <div className={styles.CommentBox}>{ResComment}</div>
