@@ -298,7 +298,13 @@ const HrScreen = (props: any): JSX.Element => {
         className={styles.pendingSts}
         style={{ color: color, backgroundColor: bgColor }}
       >
-        {rowData?.Status?.key}
+        <div
+          className={styles.statusDot}
+          style={{
+            background: color,
+          }}
+        ></div>
+        <div>{rowData?.Status?.key}</div>
       </div>
     );
   };
@@ -571,36 +577,16 @@ const HrScreen = (props: any): JSX.Element => {
           PageNationRows.first,
           PageNationRows.first + PageNationRows.rows
         )}
-        // tableStyle={{ minWidth: "50rem" }}
         className={styles.employeeConfig}
       >
-        <Column
-          field="Task"
-          header="Task"
-          style={{ width: "25%", marginLeft: "10px" }}
-        />
-        <Column
-          field="QuestionTitle"
-          header="To"
-          body={personColumnToPerson}
-          style={{ width: "25%" }}
-        />
+        <Column field="Task" header="Task" />
+        <Column field="QuestionTitle" header="To" body={personColumnToPerson} />
         <Column field="Role" header="Role" style={{ width: "15%" }} />
-        <Column
-          field="Department"
-          header="Department"
-          style={{ width: "15%" }}
-        />
-        <Column
-          field="Status"
-          header="Status"
-          body={stsTemplate}
-          style={{ width: "10%" }}
-        />
+        <Column field="Department" header="Department" />
+        <Column field="Status" header="Status" body={stsTemplate} />
         <Column
           field="Action"
           header="Action"
-          style={{ width: "10%", textAlign: "center" }}
           body={(Rowdata: any) => ActionIcons(Rowdata)}
         />{" "}
         *

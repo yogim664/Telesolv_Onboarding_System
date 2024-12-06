@@ -48,12 +48,18 @@
 }
 
 .pendingSts {
-    background: #d8e5f0;
-    padding: 6px 4px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
     text-align: center;
-    color: #1e71b9;
-    font-weight: 600;
     font-size: 14px;
-    width: 160px;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    .statusDot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
 }

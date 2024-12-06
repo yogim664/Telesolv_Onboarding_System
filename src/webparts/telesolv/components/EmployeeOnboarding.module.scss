@@ -1,140 +1,155 @@
 .OnboardingContainer {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  margin: 10px 0px;
-  justify-content: space-between;
-  .OnboardingRightContainer {
     display: flex;
-    gap: 12px;
-    .filterDepartment {
-      width: 200px;
+    width: 100%;
+    align-items: center;
+    margin: 10px 0px;
+    justify-content: space-between;
+    .OnboardingRightContainer {
+        display: flex;
+        gap: 12px;
+        .filterDepartment {
+            width: 200px;
+        }
+        .filterEmployee {
+            width: 200px;
+        }
+        .filterRole {
+            width: 200px;
+        }
     }
-    .filterEmployee {
-      width: 200px;
-    }
-    .filterRole {
-      width: 200px;
-    }
-  }
 }
 
 .addDialog {
-  background-color: white;
-  display: flex !important;
-  align-items: flex-start;
-  justify-content: center !important;
-  margin: 24px 16px;
-  .addEmpInfo {
-    display: flex;
-    justify-content: end;
-    font-size: 12px;
-    color: #837023 !important;
-    font-weight: 600;
-  }
-  .addDialogHeader {
+    background-color: white;
+    display: flex !important;
     align-items: center;
-    display: flex;
-    justify-content: flex-start;
-    width: 30%;
-  }
-  .addDialogInput {
-    align-items: center;
-    display: flex;
-    justify-content: flex-start;
-    width: 70% !important;
-  }
-  .peoplePicker {
-    width: 100% !important;
-  }
+    justify-content: center !important;
+    margin: 24px 16px;
+    .addEmpInfo {
+        display: flex;
+        justify-content: end;
+        font-size: 12px;
+        color: #837023 !important;
+        font-weight: 600;
+    }
+    .addDialogHeader {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 30%;
+    }
+    .addDialogInput {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 70% !important;
+    }
+    .peoplePicker {
+        width: 100% !important;
+    }
 }
 
 .addDialogBtnContainer {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 .pageTitle {
-  color: #233b83;
-  font-weight: 600;
+    color: #233b83;
+    font-weight: 600;
 }
 
 .addNewBtn {
-  background-color: #233b83 !important;
-  padding: 8px 16px !important;
-  border: none !important;
-  width: 100px;
+    background-color: #233b83 !important;
+    padding: 8px 16px !important;
+    border: none !important;
+    width: 100px;
 }
 
 .OnboardingContainer {
-  width: 75%;
-  margin: auto;
-  margin-top: 10px;
+    width: 75%;
+    margin: auto;
+    margin-top: 10px;
 }
 
 .onboardingDataTable {
-  width: 75%;
-  margin: auto;
-  th {
-    background-color: #f0f8ff;
-    color: #233b83 !important;
-    padding: 16px !important;
-  }
-  .userImageInTable {
-    border-radius: 6px;
-    width: 26px;
-    height: 26px;
-    margin: 10px;
-  }
-  td:nth-child(1) {
-    min-width: 300px;
-  }
-  td:nth-child(2) {
-    min-width: 100px;
-  }
-  td:nth-child(3) {
-    min-width: 100px;
-  }
-  .pendingSts {
-    font-weight: 600;
-    background: #d8e5f0;
-    padding: 6px 4px;
-    border-radius: 6px;
-    text-align: center;
-    color: #1e71b9;
-    font-weight: 600;
-    font-size: 14px;
-    width: 160px;
-  }
+    width: 75%;
+    margin: auto;
+    th {
+        background-color: #f0f8ff;
+        color: #233b83 !important;
+        padding: 16px !important;
+    }
+    .userImageInTable {
+        border-radius: 20px;
+        width: 26px;
+        height: 26px;
+        margin-right: 6px;
+    }
+    td:nth-child(1) {
+        min-width: 300px;
+    }
+    td:nth-child(2) {
+        min-width: 100px;
+    }
+    td:nth-child(3) {
+        min-width: 100px;
+    }
+    .pendingSts {
+        padding: 6px 12px;
+        border-radius: 20px;
+        text-align: center;
+        font-size: 14px;
+        width: max-content;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+    }
 }
 
 .actionDialog {
-  .p-dialog-header::after {
-    content: none !important;
-  }
+    .p-dialog-header::after {
+        content: none !important;
+    }
+}
+
+.addDialogHeaderName {
+    margin-top: -20px;
 }
 
 .dashboardActionIcons {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .noDataFound {
-  display: flex;
-  justify-content: center;
-  color: #233b83;
-  font-weight: 500;
-  height: 100px;
-  font-weight: 600;
+    display: flex;
+    justify-content: center;
+    color: #233b83;
+    font-weight: 500;
+    height: 100px;
+    font-weight: 600;
 }
 
 .employeeStatusSection {
-  display: flex;
-  justify-content: flex-end;
-  .employeeStatus {
-    width: 100%;
-  }
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 20px;
+    .employeeStatus {
+        width: 50%;
+    }
+}
+
+.onboardingUser {
+    font-weight: 600;
+}
+
+.statusDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
 }
