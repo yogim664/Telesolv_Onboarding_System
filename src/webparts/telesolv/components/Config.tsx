@@ -444,6 +444,7 @@ const Config = (props: any) => {
             Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
             Options: JSON.stringify(question.Options), // Convert Options to JSON string
             Answer: question.Answer.key ? question.Answer.key : "",
+            TaskName: question.QuestionTitle,
             isDelete: false,
           });
       });

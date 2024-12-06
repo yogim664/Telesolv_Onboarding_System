@@ -5,7 +5,13 @@
   .ResponseHeader {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 16px;
+    .backIconWithUserName {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
     .backIcon {
       color: #233b83;
       font-size: 2rem;
@@ -14,6 +20,10 @@
       // font-size: 18px;
       color: #233b83;
       font-weight: 600;
+    }
+    .FilterOption {
+      display: flex;
+      gap: 8px;
     }
   }
   .employeeResponseDataTable {
@@ -63,7 +73,13 @@
     border-radius: 50%;
   }
 }
-.FilterOption {
-  display: flex;
-  justify-content: space-between;
+.commentSection {
+  margin-top: 10px;
+  .CommentBox {
+    // border: 1px solid;
+    padding: 10px;
+    //   border: 1px solid;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  }
 }

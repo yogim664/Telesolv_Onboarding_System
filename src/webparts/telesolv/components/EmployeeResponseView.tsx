@@ -1,3 +1,5 @@
+/* eslint-disable no-debugger */
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -10,31 +12,38 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { GCongfig } from "../../../Config/Config";
 import { InputText } from "primereact/inputtext";
-import { Dropdown } from "@fluentui/react";
+// import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 // import {
 //   PeoplePicker,
 //   PrincipalType,
 // } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 
+interface IFilData {
+  Employee: any;
+  search: string;
+  Status: string;
+}
+interface IDrop {
+  name: string;
+  code: string;
+}
+
+const _fkeys: IFilData = {
+  Employee: {},
+  search: "",
+  Status: "",
+};
+
 const EmployeeResponseView = (props: any): JSX.Element => {
-  interface IFilData {
-    Employee: any;
-    search: string;
-    Status: string;
-  }
-
-  let _fkeys: IFilData = {
-    Employee: {},
-    search: "",
-    Status: "",
-  };
-
+  let curFilterItem: IFilData = _fkeys;
   const [questions, setQuestions] = useState<any>([]);
-  const [statusChoices, setStatusChoices] = useState<any[]>([]);
-  const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
-  const [filterData, setfilterData] = React.useState<any>([]);
+  const [statusChoices, setStatusChoices] = useState<IDrop[]>([]);
+  const [filterkeys, setfilterkeys] = useState<IFilData>({ ..._fkeys });
+  const [filterData, setfilterData] = useState<any>([]);
+  const [ResComment, setResComment] = useState<any>([]);
 
   const SeelectedEmp = props.setSelectedEmp;
+  console.log(statusChoices);
   console.log(SeelectedEmp.Employee.EmployeeTitle);
 
   const peopleTemplate = (rowData: any) => {
@@ -69,6 +78,39 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       </div>
     );
   };
+
+  // const CompletedByTemplate = (rowData: any) => {
+  //   const assignees = rowData.CompletedBy || []; // Access Assignees from the rowData
+
+  //   return (
+  //     <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+  //       {assignees.map((assignee: any, index: number) => (
+  //         <div
+  //           key={index}
+  //           style={{
+  //             display: "flex",
+  //             alignItems: "center",
+  //             backgroundColor: "#f4f4f4",
+  //             padding: "5px 10px",
+  //             borderRadius: "5px",
+  //           }}
+  //         >
+  //           <img
+  //             src={`/_layouts/15/userphoto.aspx?size=S&username=${assignee.Email}`}
+  //             alt={assignee.Email}
+  //             style={{
+  //               width: 26,
+  //               height: 26,
+  //               borderRadius: "50%",
+  //               marginRight: "10px",
+  //             }}
+  //           />
+  //           <span>{assignee.Title}</span>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   );
+  // };
 
   const EmployeeDetails = async () => {
     try {
@@ -111,9 +153,15 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           Answer: item.QuestionID?.Answer,
           Status: item.Status,
           Comments: item.Comments,
+          ResponseComments: item.ResponseComments,
           Employee: {
             Name: item.Employee ? item.Employee.Title : "",
             Email: item.Employee ? item.Employee.EMail : "",
+          },
+
+          CompletedBy: {
+            Name: item.CompletedBy ? item.CompletedBy.Title : "",
+            Email: item.CompletedBy ? item.CompletedBy.EMail : "",
           },
           Role: item.EmployeeID?.Role || "No Role",
           Department: item.EmployeeID?.Department || "No Department",
@@ -126,6 +174,14 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             : [],
         };
       });
+      // const ResComment = formattedItems?.map((e: any, index: any) =>
+      //   index === 0 ? e.ResponseComments : null
+      // );
+      // setResComment(ResComment);
+      // console.log(
+      //   ResComment,
+      //   "ResponseCommentsResponseCommentsResponseComments"
+      // );
 
       console.log("Fetched Items:", formattedItems);
 
@@ -166,7 +222,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 ? "#8f621f"
                 : "#1e71b9",
           }}
-        ></div>
+        />
         <div>{rowData.Status}</div>
       </div>
     );
@@ -179,75 +235,90 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       .select("Choices,ID")
       .get()
       .then((data: any) => {
-        // Transform the choices into an array of objects
-        const ChoicesCollection = data.Choices.map((choice: string) => ({
-          key: choice,
-          name: choice,
-        }));
+        const ChoicesCollection: IDrop[] = data.Choices.map(
+          (choice: string) => {
+            return {
+              code: choice,
+              name: choice,
+            };
+          }
+        );
 
-        console.log(ChoicesCollection);
-
-        // Update the state
-        setStatusChoices(ChoicesCollection);
-        console.log("Choices fetched and set:", ChoicesCollection);
+        setStatusChoices([...ChoicesCollection]);
       })
       .catch((err) => console.error("Error fetching choices:", err));
   };
 
-  const filterFunc = (key: string, val: any): void => {
-    let filteredData: any[] = [...questions];
-    let _tempFilterkeys: any = { ...filterkeys };
-    _tempFilterkeys[key] = val;
-    console.log("_tempFilterkeys: ", _tempFilterkeys);
+  const filterFunc = (): void => {
+    let tempArray: any[] = [...questions];
 
-    if (_tempFilterkeys?.Status) {
-      filteredData = filteredData?.filter(
-        (value: any) => value?.Status?.key === _tempFilterkeys?.Status
+    if (curFilterItem.search) {
+      tempArray = tempArray?.filter((val: any) =>
+        val?.QuestionTitle?.toLowerCase().includes(
+          curFilterItem.search.toLowerCase()
+        )
+      );
+    }
+    if (curFilterItem.Status) {
+      tempArray = tempArray?.filter(
+        (val: any) => val?.Status === curFilterItem.Status
       );
     }
 
-    setfilterkeys(_tempFilterkeys);
-    setfilterData(filteredData);
+    setfilterData(tempArray);
   };
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const fetchedItems = await EmployeeDetails();
-      setQuestions(fetchedItems); // Store in state
+      setResComment(
+        fetchedItems?.[0].ResponseComments
+          ? fetchedItems?.[0].ResponseComments
+          : ""
+      );
+      setQuestions(fetchedItems);
+      setfilterData(fetchedItems);
     };
 
     fetchQuestions();
     getStsChoices();
   }, []);
 
+  console.log(questions, "questions object");
   return (
     <div className={styles.employeeResponseSection}>
       <div className={styles.ResponseHeader}>
-        <i
-          className={`pi pi-arrow-circle-left ${styles.backIcon}`}
-          onClick={() => {
-            props.setShowResponseView(false);
-          }}
-        />
-        <h2 className={styles.userName}>
-          {SeelectedEmp.Employee.EmployeeTitle}
-        </h2>
+        <div className={styles.backIconWithUserName}>
+          <i
+            className={`pi pi-arrow-circle-left ${styles.backIcon}`}
+            onClick={() => {
+              props.setShowResponseView(false);
+            }}
+          />
+          <h2 className={styles.userName}>
+            {SeelectedEmp.Employee.EmployeeTitle}
+          </h2>
+        </div>
 
         <div className={styles.FilterOption}>
-          <Dropdown
-            // value={
-            //   statusChoices?.find(
-            //     (choice: any) => choice.key === filterkeys?.Status
-            //   ) || null
-            // }
-            onChange={(e: any) => {
-              const selectedValue = e.value || e.target.value || e.key; // Adjust based on actual behavior
-              filterFunc("Status", selectedValue);
+          {/* <Dropdown
+            placeholder="Select a status"
+            options={[...statusChoices]}
+            value={
+              filterkeys?.Status
+                ? statusChoices?.filter(
+                    (val: any) => val.code === filterkeys?.Status
+                  )?.[0]
+                : null
+            }
+            onChange={(val: DropdownChangeEvent) => {
+              // const value: string = val?.value?.code || "";
+              // curFilterItem.Status = value;
+              // setfilterkeys({ ...curFilterItem });
+              // filterFunc();
+
             }}
-            options={statusChoices || []}
-            // optionLabel="name"
-            placeholder="Select a City"
-          />
+          /> */}
 
           <div>
             {/* <PeoplePicker
@@ -267,10 +338,13 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           </div>
 
           <InputText
+            value={filterkeys?.search || ""}
             placeholder={"Search Questions"}
-            // className={styles.filterRole}
             onChange={(e) => {
-              filterFunc("search", e.target.value);
+              const value: any = e.target.value.trimStart();
+              curFilterItem.search = value;
+              setfilterkeys({ ...curFilterItem });
+              filterFunc();
             }}
           />
 
@@ -283,11 +357,11 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               color: "#fff",
             }}
             onClick={() => {
-              // filterkeys.Employee = {};
-              // filterkeys.dept = "";
-              // filterkeys.search = "";
-              setfilterData(questions);
-              // setfilterData(EmployeeOnboarding);
+              curFilterItem.search = "";
+              curFilterItem.Status = "";
+              curFilterItem.Employee = null;
+              setfilterkeys({ ..._fkeys });
+              filterFunc();
             }}
           />
         </div>
@@ -311,12 +385,27 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 width: "65%",
               }}
             />
-            <Column field="Comments" header="Comments" />
+            {/* <Column
+              field="Assigenee"
+              header="Assigned to"
+              body={CompletedByTemplate}
+              style={{
+                width: "65%",
+              }}
+            /> */}
+
+            <Column field="Comments" header="HR Comments" />
           </DataTable>
         ) : (
           <div className={styles.noDataFound}>No data found!</div>
         )}
       </div>
+      {ResComment && (
+        <div className={styles.commentSection}>
+          <h4>Comments</h4>
+          <div className={styles.CommentBox}>{ResComment}</div>
+        </div>
+      )}
     </div>
   );
 };

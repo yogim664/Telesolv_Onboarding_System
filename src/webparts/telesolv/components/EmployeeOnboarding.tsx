@@ -22,7 +22,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import styles from "./EmployeeOnboarding.module.scss";
 import "../assets/style/EmployeeOnboarding.css";
 import { useState } from "react";
-import { sp } from "@pnp/sp";
+import { sp } from "@pnp/sp/presets/all";
 import { useEffect } from "react";
 import {
   PeoplePicker,
@@ -64,6 +64,7 @@ const Onboarding = (props: any) => {
   const [Departments, setDepartments] = useState<any>([]);
   const [filterData, setfilterData] = React.useState<any>([]);
   const [statusChoices, setStatusChoices] = useState<any[]>([]);
+  const [CurUserID, setCurUserID] = useState<any>();
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
@@ -82,6 +83,17 @@ const Onboarding = (props: any) => {
     Status: { key: "", name: "" },
     SecondaryEmail: "",
   });
+
+  const getCurrentUserId = async () => {
+    try {
+      const user = await sp.web.currentUser();
+      console.log("Current User ID:", user.Id);
+      setCurUserID(user.Id);
+      return user.Id;
+    } catch (error) {
+      console.error("Error getting current user ID:", error);
+    }
+  };
 
   //Get Departments
   // Function to fetch Title values
@@ -108,6 +120,7 @@ const Onboarding = (props: any) => {
   // Fetch titles when the component mounts
   useEffect(() => {
     getAllTitles();
+    getCurrentUserId();
   }, []);
 
   const onPageChange = (event: any) => {
@@ -176,6 +189,7 @@ const Onboarding = (props: any) => {
 
   //Success Tost
   const showSuccess = (string: any) => {
+    fetchQuestions();
     toast.success("Deleted Successfully", {
       position: "top-right",
       autoClose: 5000,
@@ -432,8 +446,9 @@ const Onboarding = (props: any) => {
           className="pi pi-pencil"
           style={{ fontSize: "1.25rem", color: "#233b83" }}
           onClick={() => {
-            setVisible(true);
             setUpdate(true);
+            setVisible(true);
+
             console.log(Update);
             console.log(Rowdata);
             setTempEmployeeOnboarding({ ...Rowdata });
@@ -453,16 +468,56 @@ const Onboarding = (props: any) => {
     );
   };
 
+  const Vaildation = async (): Promise<void> => {
+    let errmsg: string = "";
+    let err: boolean = false;
+
+    const EmployeeCount = EmployeeOnboarding.filter(
+      (item: any) =>
+        item?.Employee.EmployeeEMail?.toLowerCase() ===
+        TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
+    );
+
+    console.log(EmployeeCount.length, "EmployeeCount");
+
+    if (EmployeeCount.length !== 0 && !Update) {
+      err = true;
+      errmsg = "Employee already exists";
+    }
+
+    const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      TempEmployeeOnboarding.SecondaryEmail &&
+      !emailFormat.test(TempEmployeeOnboarding.SecondaryEmail)
+    ) {
+      err = true;
+      errmsg = "Please enter a valid SecondaryEmail";
+    }
+
+    if (!err) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      await saveEmployeeDetailsToSP();
+    } else {
+      toast.error(errmsg, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
+  };
+
   // Post into list SP
   const saveEmployeeDetailsToSP = async (): Promise<void> => {
-    const EmployeeCount = EmployeeOnboarding.map(
-      (val: any) => val.Employee?.EmployeeEmail === TempEmployeeOnboarding.Email
-    );
-    console.log(EmployeeCount);
-
     //EmployeeOnboarding
 
-    console.log(TempEmployeeOnboarding);
+    console.log(TempEmployeeOnboarding, "TEmp details");
 
     try {
       if (Update) {
@@ -472,11 +527,11 @@ const Onboarding = (props: any) => {
           .update({
             Role: TempEmployeeOnboarding.Role,
             Department: TempEmployeeOnboarding.Department.key,
-            Email: TempEmployeeOnboarding.Email,
+            Email: TempEmployeeOnboarding.Employee.EmployeeEMail,
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
             SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
-            Status: TempEmployeeOnboarding.Status.key,
+            Status: TempEmployeeOnboarding.Status,
           });
 
         sp.web.lists
@@ -486,30 +541,41 @@ const Onboarding = (props: any) => {
           .get()
           .then(async (_items: any) => {
             console.log(_items, "Response84848");
-            console.log(TempEmployeeOnboarding.Status.key, "Status");
+            console.log(TempEmployeeOnboarding);
+
+            console.log(TempEmployeeOnboarding.Status, "Statusfinanl");
 
             // Filter items based on employee email
-            const tempItems: any = _items.filter(
-              (val: any) =>
-                val?.Employee?.EMail?.toLowerCase() ===
-                TempEmployeeOnboarding.Email?.toLowerCase()
+            const filteredItems = _items.filter(
+              (item: any) =>
+                item?.Employee?.EMail?.toLowerCase() ===
+                TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
             );
 
-            if (TempEmployeeOnboarding.Status.key === "Completed") {
-              console.log(tempItems, "tempItemstempItemstempItemstempItems");
+            if (TempEmployeeOnboarding.Status === "Completed") {
+              console.log(
+                filteredItems,
+                "tempItemstempItemstempItemstempItems"
+              );
 
-              tempItems.map((_Empitem: any) =>
+              filteredItems.map((_Empitem: any) =>
                 sp.web.lists
                   .getByTitle(GCongfig.ListName.EmployeeResponse)
                   .items.getById(_Empitem.Id)
-                  .update({ Status: "Satisfactory" })
+                  .update({
+                    Status: "Satisfactory",
+                    CompletedById: CurUserID,
+                  })
               );
             } else {
+              console.log(CurUserID);
+
               console.log(
                 "Employee status is not 'Completed'. No updates performed."
               );
             }
           })
+
           .catch((error) => {
             console.error("Error fetching EmployeeResponse items:", error);
           });
@@ -525,6 +591,9 @@ const Onboarding = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
+        setUpdate(false);
+
+        fetchQuestions();
       } else {
         // Create new item
         await sp.web.lists
@@ -532,7 +601,7 @@ const Onboarding = (props: any) => {
           .items.add({
             Role: TempEmployeeOnboarding.Role,
             Department: TempEmployeeOnboarding.Department.key,
-            Email: TempEmployeeOnboarding.Email,
+            Email: TempEmployeeOnboarding.Employee.EmployeeEMail,
             Status: "Pending",
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
@@ -562,7 +631,7 @@ const Onboarding = (props: any) => {
                 })
               );
               console.log("Employee responses saved successfully.");
-
+              fetchQuestions();
               toast.success("Employee add Successfully", {
                 position: "top-right",
                 autoClose: 5000,
@@ -813,10 +882,11 @@ const Onboarding = (props: any) => {
                           : []
                       }
                       resolveDelay={1000}
+                      disabled={Update}
                     />
 
                     <div className={styles.addEmpInfo}>
-                      Please contact admin if you do not find the mail address.
+                      Please contact admin if you do not find the user
                     </div>
                   </div>
                 </div>
@@ -836,7 +906,6 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
-
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>Secondary Email</div>
                 <div className={styles.addDialogInput}>
@@ -889,7 +958,6 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
-
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>PhoneNumber</div>
                 <div className={styles.addDialogInput}>
@@ -923,8 +991,8 @@ const Onboarding = (props: any) => {
                             : ""
                         }
                         onChange={(e) => {
-                          handleChange("Status", e.value);
-                          console.log(e.value.key);
+                          handleChange("Status", e.value.key);
+                          console.log(e.value.key, "Selectedkey");
                         }}
                         options={statusChoices || []}
                         optionLabel="name"
@@ -959,7 +1027,8 @@ const Onboarding = (props: any) => {
                       width: "100px",
                     }}
                     disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
-                    onClick={() => saveEmployeeDetailsToSP()}
+                    // onClick={() => saveEmployeeDetailsToSP()}
+                    onClick={() => Vaildation()}
                   />
                 </div>
               </div>
