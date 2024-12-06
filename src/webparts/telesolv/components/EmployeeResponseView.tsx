@@ -119,6 +119,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   const stsTemplate = (rowData: any) => {
     return (
       <div
+        className={styles.pendingSts}
         style={{
           background:
             rowData.Status === "Satisfactory"
@@ -126,22 +127,26 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               : rowData.Status === "Resolved"
               ? "#ffebc0"
               : "#d8e5f0",
-          padding: "6px 4px",
-          borderRadius: "6px",
-          textAlign: "center",
-
           color:
             rowData.Status === "Satisfactory"
               ? "#437426"
               : rowData.Status === "Resolved"
               ? "#8f621f"
               : "#1e71b9",
-          fontWeight: "600",
-          fontSize: "14px",
-          width: "160px",
         }}
       >
-        {rowData.Status}
+        <div
+          className={styles.statusDot}
+          style={{
+            background:
+              rowData.Status === "Satisfactory"
+                ? "#437426"
+                : rowData.Status === "Resolved"
+                ? "#8f621f"
+                : "#1e71b9",
+          }}
+        ></div>
+        <div>{rowData.Status}</div>
       </div>
     );
   };

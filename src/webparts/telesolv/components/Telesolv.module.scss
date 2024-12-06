@@ -159,7 +159,7 @@
 
 .card {
     //display: flex !important;
-    width: 50%;
+    width: 75%;
     margin: auto;
     justify-content: center;
     align-items: center !important;
@@ -405,8 +405,11 @@
         padding: 16px !important;
     }
     .questionsTD {
-        width: 40%;
+        min-width: 40%;
         font-weight: 600;
+    }
+    .HRPersonsList {
+        min-width: 40%;
     }
     .p-datatable-wrapper {
         overflow: unset !important;
@@ -416,6 +419,6 @@
     }
 }
 
-.HRPersonsList {
-    width: 60%;
+.onboardingUser {
+    font-weight: 600;
 }

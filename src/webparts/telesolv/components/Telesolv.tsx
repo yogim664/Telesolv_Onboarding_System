@@ -8,7 +8,6 @@ import * as React from "react";
 import "../assets/style/style.css";
 import styles from "./Telesolv.module.scss";
 import Config from "./Config";
-const logoImg: string = require("../assets/Images/Logo.svg");
 import { TabView, TabPanel } from "primereact/tabview";
 import Onboarding from "./EmployeeOnboarding";
 import "../assets/style/Tabs.css";
@@ -19,6 +18,7 @@ import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
+const logoImg: string = require("../assets/Images/Logo.svg");
 
 const Telesolve = (props: any): JSX.Element => {
   const [isLoader, setIsLoader] = useState(true);
