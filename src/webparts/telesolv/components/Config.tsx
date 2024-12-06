@@ -672,49 +672,61 @@ const Config = (props: any) => {
                             >
                               <div className={styles.optionSection}>
                                 <div className={styles.optionChoice}>
-                                  <div className={styles.radioOption}>
-                                    <RadioButton
-                                      className={styles.radioBtn}
-                                      inputId={`${question.QuestionNo}-${category.key}`}
-                                      name={`category-${question.QuestionNo}`}
-                                      value={category.name}
-                                      onChange={(e) => {
-                                        console.log(e, "radio");
+                                  {/* {selectedOptionDetails.aIndex !== aIndex &&
+                                    selectedOptionDetails.qIndex !== qIndex && ( */}
+                                  {!(
+                                    selectedOptionDetails.qIndex === qIndex &&
+                                    selectedOptionDetails.aIndex === aIndex
+                                  ) && (
+                                    <div className={styles.radioOption}>
+                                      <>
+                                        <RadioButton
+                                          className={styles.radioBtn}
+                                          inputId={`${question.QuestionNo}-${category.key}`}
+                                          name={`category-${question.QuestionNo}`}
+                                          value={category.name}
+                                          onChange={(e) => {
+                                            console.log(e, "radio");
 
-                                        handleQuestionChange(
-                                          qIndex,
-                                          e.target.value,
-                                          "Radio",
-                                          aIndex
-                                        );
-                                        //handleOptionChange(question.Answer, e.value)
-                                      }}
-                                      checked={
-                                        question.Answer.key === category.name
+                                            handleQuestionChange(
+                                              qIndex,
+                                              e.target.value,
+                                              "Radio",
+                                              aIndex
+                                            );
+                                            //handleOptionChange(question.Answer, e.value)
+                                          }}
+                                          checked={
+                                            question.Answer.key ===
+                                            category.name
+                                          }
+                                          disabled={!question.isEdit}
+                                        />
+
+                                        <label
+                                          className={`${styles.optionLabel} ml-2`}
+                                          htmlFor={`${question.Answer.name}-${category.key}`}
+                                        >
+                                          {category.name}
+                                        </label>
+                                      </>
+                                    </div>
+                                  )}
+                                  {!(
+                                    selectedOptionDetails.qIndex === qIndex &&
+                                    selectedOptionDetails.aIndex === aIndex
+                                  ) && (
+                                    <i
+                                      className={`${styles.optionEditIcon} pi  pi-pencil`}
+                                      style={{ fontSize: "1rem" }}
+                                      onClick={() =>
+                                        setselectedOptionDetails({
+                                          qIndex: qIndex,
+                                          aIndex: aIndex,
+                                        })
                                       }
-                                      disabled={!question.isEdit}
                                     />
-
-                                    <label
-                                      className={`${styles.optionLabel} ml-2`}
-                                      htmlFor={`${question.Answer.name}-${category.key}`}
-                                    >
-                                      {category.name}
-                                    </label>
-                                  </div>
-                                  {selectedOptionDetails.aIndex !== aIndex &&
-                                    selectedOptionDetails.qIndex !== qIndex && (
-                                      <i
-                                        className={`${styles.optionEditIcon} pi  pi-pencil`}
-                                        style={{ fontSize: "1rem" }}
-                                        onClick={() =>
-                                          setselectedOptionDetails({
-                                            qIndex: qIndex,
-                                            aIndex: aIndex,
-                                          })
-                                        }
-                                      />
-                                    )}
+                                  )}
                                 </div>
 
                                 {selectedOptionDetails.aIndex === aIndex &&
@@ -724,7 +736,6 @@ const Config = (props: any) => {
                                     >
                                       <InputText
                                         className={styles.questionInput}
-                                        // value={changeOption}
                                         placeholder="Enter here"
                                         onChange={(e) =>
                                           handleChangeOption(

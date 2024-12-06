@@ -9,9 +9,30 @@ import { useEffect, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { GCongfig } from "../../../Config/Config";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "@fluentui/react";
+// import {
+//   PeoplePicker,
+//   PrincipalType,
+// } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 
 const EmployeeResponseView = (props: any): JSX.Element => {
+  interface IFilData {
+    Employee: any;
+    search: string;
+    Status: string;
+  }
+
+  let _fkeys: IFilData = {
+    Employee: {},
+    search: "",
+    Status: "",
+  };
+
   const [questions, setQuestions] = useState<any>([]);
+  const [statusChoices, setStatusChoices] = useState<any[]>([]);
+  const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
+  const [filterData, setfilterData] = React.useState<any>([]);
 
   const SeelectedEmp = props.setSelectedEmp;
   console.log(SeelectedEmp.Employee.EmployeeTitle);
@@ -151,6 +172,44 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     );
   };
 
+  const getStsChoices = (): void => {
+    sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
+      .fields.getByInternalNameOrTitle("Status")
+      .select("Choices,ID")
+      .get()
+      .then((data: any) => {
+        // Transform the choices into an array of objects
+        const ChoicesCollection = data.Choices.map((choice: string) => ({
+          key: choice,
+          name: choice,
+        }));
+
+        console.log(ChoicesCollection);
+
+        // Update the state
+        setStatusChoices(ChoicesCollection);
+        console.log("Choices fetched and set:", ChoicesCollection);
+      })
+      .catch((err) => console.error("Error fetching choices:", err));
+  };
+
+  const filterFunc = (key: string, val: any): void => {
+    let filteredData: any[] = [...questions];
+    let _tempFilterkeys: any = { ...filterkeys };
+    _tempFilterkeys[key] = val;
+    console.log("_tempFilterkeys: ", _tempFilterkeys);
+
+    if (_tempFilterkeys?.Status) {
+      filteredData = filteredData?.filter(
+        (value: any) => value?.Status?.key === _tempFilterkeys?.Status
+      );
+    }
+
+    setfilterkeys(_tempFilterkeys);
+    setfilterData(filteredData);
+  };
+
   useEffect(() => {
     const fetchQuestions = async () => {
       const fetchedItems = await EmployeeDetails();
@@ -158,6 +217,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     };
 
     fetchQuestions();
+    getStsChoices();
   }, []);
 
   return (
@@ -172,12 +232,72 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         <h2 className={styles.userName}>
           {SeelectedEmp.Employee.EmployeeTitle}
         </h2>
+
+        <div className={styles.FilterOption}>
+          <Dropdown
+            // value={
+            //   statusChoices?.find(
+            //     (choice: any) => choice.key === filterkeys?.Status
+            //   ) || null
+            // }
+            onChange={(e: any) => {
+              const selectedValue = e.value || e.target.value || e.key; // Adjust based on actual behavior
+              filterFunc("Status", selectedValue);
+            }}
+            options={statusChoices || []}
+            // optionLabel="name"
+            placeholder="Select a City"
+          />
+
+          <div>
+            {/* <PeoplePicker
+              context={props.context}
+              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+              personSelectionLimit={100}
+              showtooltip={false}
+              ensureUser={true}
+              placeholder={"Search Employee"}
+              onChange={(selectedPeople: any[]) => {
+                filterFunc("Employee", selectedPeople); // Pass selectedPeople and rowData
+              }}
+              principalTypes={[PrincipalType.User]}
+              // defaultSelectedUsers={filterkeys.Employee}
+              resolveDelay={1000}
+            /> */}
+          </div>
+
+          <InputText
+            placeholder={"Search Questions"}
+            // className={styles.filterRole}
+            onChange={(e) => {
+              filterFunc("search", e.target.value);
+            }}
+          />
+
+          <i
+            className="pi pi-refresh"
+            style={{
+              backgroundColor: "#223b83",
+              padding: 10,
+              borderRadius: 4,
+              color: "#fff",
+            }}
+            onClick={() => {
+              // filterkeys.Employee = {};
+              // filterkeys.dept = "";
+              // filterkeys.search = "";
+              setfilterData(questions);
+              // setfilterData(EmployeeOnboarding);
+            }}
+          />
+        </div>
       </div>
       <div>
         {questions.length > 0 ? (
           <DataTable
             className={styles.employeeResponseDataTable}
-            value={questions}
+            //  value={questions}
+            value={filterData}
             tableStyle={{ minWidth: "50rem" }}
           >
             <Column field="QuestionTitle" header="Questions" />
