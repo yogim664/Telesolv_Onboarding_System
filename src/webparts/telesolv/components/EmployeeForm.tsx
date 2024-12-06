@@ -15,14 +15,12 @@ import { useEffect, useState } from "react";
 //import { Toast } from "primereact/toast";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { Avatar } from "primereact/avatar";
 import { sp } from "@pnp/sp/presets/all";
 import { ProgressBar } from "primereact/progressbar";
 import { GCongfig } from "../../../Config/Config";
-
 //import styles from "./EmployeeOnboarding.module.scss";
 
-const logoImg: string = require("../assets/Images/Logo.svg");
 const cmtImg: string = require("../assets/Images/Comment.png");
 
 const EmployeeForm = (props: any): JSX.Element => {
@@ -33,7 +31,7 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   const [comment, setComment] = useState("");
   const [EmpConfig, setEmpConfig] = useState<any[]>([]);
-
+  const [curUserName, setCurUserName] = useState({ Name: "", Email: "" });
   //Set Value into Comments
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setComment(e.target.value); // Update the comment state with the input value
@@ -275,10 +273,14 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   useEffect(() => {
     questionConfig();
+    sp.web.currentUser.get().then((user) => {
+      console.log(user);
+      setCurUserName({ Name: user.Title, Email: user.Email });
+    });
   }, []);
 
   return (
-    <div style={{ padding: 10 }}>
+    <div>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -296,15 +298,22 @@ const EmployeeForm = (props: any): JSX.Element => {
       {/* Same as */}
       <ToastContainer />
       <div>
-        <div className={styles.navBar}>
-          <div className={styles.navRightContainers}>
-            <img src={logoImg} alt="logo" />
-          </div>
-        </div>
         <div className={styles.Bgstyle}>
           <div className={styles.EmployeeAnsContainer}>
             <div className={styles.EmployeeAnsContainerheader}>
-              <h2>Let's get started</h2>
+              <div className={styles.userGreetingSection}>
+                <div className={styles.userGreeting}>
+                  {`Welcome on board ${curUserName.Name} !`}
+                  <Avatar
+                    className={styles.userAvatar}
+                    image={`/_layouts/15/userphoto.aspx?size=S&username=${curUserName.Email}`}
+                    shape="circle"
+                    size="normal"
+                    label={curUserName.Name}
+                  />
+                </div>
+              </div>
+              <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
               <h4>
                 Fill in the check points below to get started with your
                 onboarding process
@@ -417,7 +426,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                 <div className={styles.commentsContainerHeader}>
                   <img src={cmtImg} alt="logo" />
                   <span style={{ fontWeight: "bolder", fontSize: "large" }}>
-                    Comments
+                    Additional Comments
                   </span>
                 </div>
 
