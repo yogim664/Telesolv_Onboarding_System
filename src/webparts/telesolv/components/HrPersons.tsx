@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -173,39 +174,6 @@ const HrPersons = (props: any) => {
     setfilterData([...updatedQuestions]);
     console.log(updatedQuestions, "updatedQuestions");
   };
-
-  // const AddAssigene = async () => {
-  //   try {
-  //     for (let i = 0; i < filterData.length; i++) {
-  //       const assignedValues = filterData[i].Assigned;
-
-  //       // Check if the Assigned field is empty
-  //       if (!assignedValues || assignedValues.length === 0) {
-  //         showError("Assigned field is empty");
-  //         return;
-  //       }
-
-  //       if (hrperson[i].Id) {
-  //         await sp.web.lists
-  //           .getByTitle(GCongfig.ListName.CheckpointConfig)
-  //           .items.getById(hrperson[i].Id)
-  //           .update({
-  //             AssignedId: {
-  //               results: assignedValues.map((val: any) => val.id),
-  //             },
-  //             TaskName: filterData[i].TaskName,
-  //           })
-  //           .then((res) => {
-  //             console.log(res);
-  //           });
-  //       }
-  //     }
-  //     showSuccess("Submitted successfully");
-  //     console.log("Questions saved or updated successfully to SharePoint!");
-  //   } catch (error) {
-  //     console.error("Error saving or updating questions:", error);
-  //   }
-  // };
 
   const AddAssigene = async () => {
     let err = false;
