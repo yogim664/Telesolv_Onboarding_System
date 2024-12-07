@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable react/self-closing-comp */
@@ -32,7 +33,6 @@ const Config = (props: any) => {
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [newOptionText, setNewOptionText] = useState("");
   const [Submitted, setSubmitted] = useState(false);
-
   const [selectedOptionDetails, setselectedOptionDetails] = useState({
     qIndex: null,
     aIndex: null,
@@ -361,11 +361,9 @@ const Config = (props: any) => {
     if (!err) {
       try {
         const postQuestions: any[] =
-          questions?.filter(
-            (_item: any) => _item.Id && !_item.isDelete && _item.isEdit
-          ) || [];
-        console.log(postQuestions, "POst");
-
+          questions?.filter((_item: any) => _item.Id && !_item.isDelete) || [];
+        console.log(postQuestions, "POstQuestiondetaild");
+        debugger;
         const saveQuestions: any[] =
           questions?.filter(
             (_item: any) => !_item.Id && !_item.isDelete && _item.isEdit
@@ -511,8 +509,8 @@ const Config = (props: any) => {
       // Fetch items from the SharePoint list
       const items: any = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigened/ID,Assigened/EMail")
-        .expand("Assigened")
+        .items.select("*,Assigned/ID,Assigned/EMail")
+        .expand("Assigned")
         .filter("isDelete ne 1")
         .get();
 
@@ -532,11 +530,11 @@ const Config = (props: any) => {
                 }
               : null,
             Options: val.Options ? JSON.parse(val.Options) : [],
-            Assigened:
-              val?.Assigened?.map((Assigened: any) => {
+            Assigned:
+              val?.Assigned?.map((Assigned: any) => {
                 return {
-                  id: Assigened.ID,
-                  Email: Assigened.EMail,
+                  id: Assigned.ID,
+                  Email: Assigned.EMail,
                 };
               }) || [],
           };

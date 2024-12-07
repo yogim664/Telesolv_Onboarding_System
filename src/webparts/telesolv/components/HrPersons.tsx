@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/self-closing-comp */
@@ -17,7 +18,6 @@ import {
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
-import { forEach } from "lodash";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
 
@@ -54,8 +54,8 @@ const HrPersons = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigened/ID,Assigened/EMail")
-        .expand("Assigened")
+        .items.select("*,Assigned/ID,Assigned/EMail")
+        .expand("Assigned")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "items");
@@ -75,10 +75,10 @@ const HrPersons = (props: any) => {
             }
           : null,
         Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigened: item.Assigened?.map((Assigened: any) => {
+        Assigned: item.Assigned?.map((Assigned: any) => {
           return {
-            id: Assigened.ID,
-            Email: Assigened.EMail,
+            id: Assigned.ID,
+            Email: Assigned.EMail,
           };
         }),
       }));
@@ -102,8 +102,8 @@ const HrPersons = (props: any) => {
     if (_tempFilterkeys.people.length) {
       _masterData = _masterData.filter(
         (_item) =>
-          _item.Assigened.length &&
-          _item.Assigened.some((_a: any) =>
+          _item.Assigned.length &&
+          _item.Assigned.some((_a: any) =>
             val.some((_v: any) => _a.Email == _v.secondaryText)
           )
       );
@@ -174,26 +174,74 @@ const HrPersons = (props: any) => {
     console.log(updatedQuestions, "updatedQuestions");
   };
 
-  const AddAssigene = async () => {
-    try {
-      forEach((row: any) => {
-        console.log(row.Assigned);
-      });
-      for (let i = 0; i < filterData.length; i++) {
-        const assignedValues = filterData[i].Assigned;
+  // const AddAssigene = async () => {
+  //   try {
+  //     for (let i = 0; i < filterData.length; i++) {
+  //       const assignedValues = filterData[i].Assigned;
 
-        // Check if the Assigened field is empty
+  //       // Check if the Assigned field is empty
+  //       if (!assignedValues || assignedValues.length === 0) {
+  //         showError("Assigned field is empty");
+  //         return;
+  //       }
+
+  //       if (hrperson[i].Id) {
+  //         await sp.web.lists
+  //           .getByTitle(GCongfig.ListName.CheckpointConfig)
+  //           .items.getById(hrperson[i].Id)
+  //           .update({
+  //             AssignedId: {
+  //               results: assignedValues.map((val: any) => val.id),
+  //             },
+  //             TaskName: filterData[i].TaskName,
+  //           })
+  //           .then((res) => {
+  //             console.log(res);
+  //           });
+  //       }
+  //     }
+  //     showSuccess("Submitted successfully");
+  //     console.log("Questions saved or updated successfully to SharePoint!");
+  //   } catch (error) {
+  //     console.error("Error saving or updating questions:", error);
+  //   }
+  // };
+
+  const AddAssigene = async () => {
+    let err = false;
+    let errmsg = "";
+    try {
+      if (
+        filterData.some(
+          (_item: any) =>
+            Array.isArray(_item.Assigned) && _item.Assigned.length === 0
+        )
+      ) {
+        err = true;
+        errmsg = "Select Answer";
+      }
+      console.log(err, errmsg);
+      debugger;
+      for (let i = 0; i < filterData.length; i++) {
+        console.log("I value", i);
+
+        const assignedValues = filterData[i]?.Assigned;
+
         if (!assignedValues || assignedValues.length === 0) {
-          showError("Assigned field is empty");
-          return; // Exit the function if Assigened is empty for any person
+          showError(
+            `Assigned field is empty for task: ${
+              filterData[i]?.TaskName || "Unknown Task"
+            }`
+          );
+          return;
         }
 
-        if (hrperson[i].Id) {
+        if (hrperson[i]?.Id) {
           await sp.web.lists
             .getByTitle(GCongfig.ListName.CheckpointConfig)
             .items.getById(hrperson[i].Id)
             .update({
-              AssigenedId: {
+              AssignedId: {
                 results: assignedValues.map((val: any) => val.id),
               },
               TaskName: filterData[i].TaskName,
@@ -224,7 +272,7 @@ const HrPersons = (props: any) => {
         }}
         styles={peoplePickerStyles}
         principalTypes={[PrincipalType.User]}
-        defaultSelectedUsers={rowData?.Assigened?.map((val: any) => val.Email)}
+        defaultSelectedUsers={rowData?.Assigned?.map((val: any) => val.Email)}
         resolveDelay={1000}
         disabled={isEdit}
       />
