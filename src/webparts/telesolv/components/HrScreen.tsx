@@ -50,7 +50,7 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const [ListItems, setListItems] = useState<any[]>([]);
-  const [AssigenedQuestion, setAssigenedQuestion] = useState<any[]>([]);
+  const [AssignedQuestion, setAssignedQuestion] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
   const [Departments, setDepartments] = useState<any>([]);
   const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
@@ -235,8 +235,8 @@ const HrScreen = (props: any): JSX.Element => {
   const AssigendPerson = async (): Promise<void> => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
-      .items.select("*, Assigened/ID, Assigened/EMail")
-      .expand("Assigened")
+      .items.select("*, Assigned/ID, Assigned/EMail")
+      .expand("Assigned")
       .get()
       .then(async (_items: any) => {
         console.log(_items, "Response");
@@ -244,15 +244,15 @@ const HrScreen = (props: any): JSX.Element => {
         // Filter based on current user's email
         const temp: any =
           _items?.filter((val: any) =>
-            val?.Assigened?.some(
+            val?.Assigned?.some(
               (user: any) =>
                 user?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
             )
           ) || [];
 
         console.log(temp, "Filtered assigen person");
-        setAssigenedQuestion(temp);
-        console.log(AssigenedQuestion, "AssigenQuestion");
+        setAssignedQuestion(temp);
+        console.log(AssignedQuestion, "AssigenQuestion");
         await questionConfig(temp);
       })
       .catch((error: any) => {

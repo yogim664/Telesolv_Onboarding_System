@@ -29,6 +29,6 @@ export interface IQuestionDatas {
   isDelete: boolean;
   Answer: IAnswerDatas | null;
   Options: IOptionsDatas[];
-  Assigened: IAssignedData[];
+  Assigned: IAssignedData[];
   TaskName: string | null;
 }

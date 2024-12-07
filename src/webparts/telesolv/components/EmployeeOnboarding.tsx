@@ -319,8 +319,8 @@ const Onboarding = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigened/ID, Assigened/EMail")
-        .expand("Assigened")
+        .items.select("*,Assigned/ID, Assigned/EMail")
+        .expand("Assigned")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "COnfigitems");
@@ -340,10 +340,10 @@ const Onboarding = (props: any) => {
             }
           : null,
         Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigened: item.Assigened?.map((Assigened: any) => {
+        Assigned: item.Assigned?.map((Assigned: any) => {
           return {
-            id: Assigened.ID,
-            Email: Assigened.EMail,
+            id: Assigned.ID,
+            Email: Assigned.EMail,
           };
         }),
       }));
@@ -700,6 +700,7 @@ const Onboarding = (props: any) => {
         <EmployeeResponseView
           setShowResponseView={setShowResponseView}
           setSelectedEmp={SelectedEmp}
+          context={props.context}
         />
       ) : (
         <div>
