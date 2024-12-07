@@ -18,6 +18,7 @@ import {
   PeoplePicker,
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+import { format } from "date-fns";
 
 interface IFilData {
   Employee: any;
@@ -79,38 +80,25 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     );
   };
 
-  // const CompletedByTemplate = (rowData: any) => {
-  //   const assignees = rowData.CompletedBy || []; // Access Assignees from the rowData
-
-  //   return (
-  //     <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-  //       {assignees.map((assignee: any, index: number) => (
-  //         <div
-  //           key={index}
-  //           style={{
-  //             display: "flex",
-  //             alignItems: "center",
-  //             backgroundColor: "#f4f4f4",
-  //             padding: "5px 10px",
-  //             borderRadius: "5px",
-  //           }}
-  //         >
-  //           <img
-  //             src={`/_layouts/15/userphoto.aspx?size=S&username=${assignee.Email}`}
-  //             alt={assignee.Email}
-  //             style={{
-  //               width: 26,
-  //               height: 26,
-  //               borderRadius: "50%",
-  //               marginRight: "10px",
-  //             }}
-  //           />
-  //           <span>{assignee.Title}</span>
-  //         </div>
-  //       ))}
-  //     </div>
-  //   );
-  // };
+  //People picker
+  const CompletedByPeopleTemplate = (rowData: any) => {
+    const user = rowData.Employee; // Access Employee data from the rowData
+    return (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <img
+          src={`/_layouts/15/userphoto.aspx?size=S&username=${rowData?.CompletedBy.Email}`}
+          alt={user.Name}
+          style={{
+            width: 26,
+            height: 26,
+            borderRadius: "50%",
+            marginRight: "10px",
+          }}
+        />
+        <span>{user.Name}</span>
+      </div>
+    );
+  };
 
   const EmployeeDetails = async () => {
     try {
@@ -123,9 +111,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
         )
         .expand("QuestionID,Employee,EmployeeID")
-        .filter(
-          `Employee/ID eq ${employeeIdString} and Status ne 'Satisfactory'`
-        )
+        .filter(`Employee/ID eq ${employeeIdString}`)
         .get();
       console.log(items, "items");
 
@@ -164,6 +150,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             Email: item.CompletedBy ? item.CompletedBy.EMail : "",
           },
           Role: item.EmployeeID?.Role || "No Role",
+          CompletedDateAndTime: item.CompletedDateAndTime || "",
           Department: item.EmployeeID?.Department || "No Department",
           Assigenee: relatedQitems[0]?.Assigned
             ? relatedQitems[0].Assigned.map((assignee: any) => ({
@@ -174,14 +161,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             : [],
         };
       });
-      // const ResComment = formattedItems?.map((e: any, index: any) =>
-      //   index === 0 ? e.ResponseComments : null
-      // );
-      // setResComment(ResComment);
-      // console.log(
-      //   ResComment,
-      //   "ResponseCommentsResponseCommentsResponseComments"
-      // );
 
       console.log("Fetched Items:", formattedItems);
 
@@ -227,27 +206,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       </div>
     );
   };
-
-  // const getStsChoices = (): void => {
-  //   sp.web.lists
-  //     .getByTitle(GCongfig.ListName.EmployeeResponse)
-  //     .fields.getByInternalNameOrTitle("Status")
-  //     .select("Choices,ID")
-  //     .get()
-  //     .then((data: any) => {
-  //       const ChoicesCollection: IDrop[] = data.Choices.map(
-  //         (choice: string) => {
-  //           return {
-  //             key: choice,
-  //             name: choice,
-  //           };
-  //         }
-  //       );
-
-  //       setStatusChoices([...ChoicesCollection]);
-  //     })
-  //     .catch((err) => console.error("Error fetching choices:", err));
-  // };
 
   const getStsChoices = (): void => {
     sp.web.lists
@@ -436,14 +394,22 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 width: "65%",
               }}
             />
-            {/* <Column
-              field="Assigenee"
-              header="Assigned to"
-              body={CompletedByTemplate}
+            <Column
+              field="completedBy"
+              header="Completed by"
+              body={CompletedByPeopleTemplate}
               style={{
                 width: "65%",
               }}
-            /> */}
+            />
+            <Column
+              field="CompletedDateAndTime"
+              header="Completed Date and Time"
+              body={(rowData) => {
+                const date = new Date(rowData.CompletedDateAndTime);
+                return format(date, "MM/dd/yyyy hh:mm a");
+              }}
+            />
 
             <Column field="Comments" header="HR Comments" />
           </DataTable>

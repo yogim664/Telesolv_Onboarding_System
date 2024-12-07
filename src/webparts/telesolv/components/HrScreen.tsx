@@ -150,8 +150,9 @@ const HrScreen = (props: any): JSX.Element => {
       .select("Choices,ID")
       .get()
       .then((data: any) => {
-        // Transform the choices into an array of objects
-        const ChoicesCollection = data.Choices.map((choice: string) => ({
+        const ChoicesCollection = data.Choices.filter(
+          (choice: any) => choice !== "Satisfactory" && choice !== "Resolved"
+        ).map((choice: any) => ({
           key: choice,
           name: choice,
         }));
@@ -217,7 +218,12 @@ const HrScreen = (props: any): JSX.Element => {
 
         const tempAssigenQuestion = await Promise.all(
           _tempArr?.filter((item: any) =>
-            assArray?.some((val: any) => val?.ID === item?.QuestionID)
+            assArray?.some(
+              (val: any) =>
+                val?.ID === item?.QuestionID &&
+                item.Status.key !== "Satisfactory" &&
+                item.Status.key !== "Resolved"
+            )
           ) || []
         );
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);

@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-lone-blocks */
@@ -176,13 +177,13 @@ const Onboarding = (props: any) => {
   };
 
   ///Delete component
-  const confirm2 = (id: any) => {
+  const confirm2 = (id: any, index: any) => {
     confirmDialog({
       message: "Do you want to delete this record?",
       header: "Delete Confirmation",
       defaultFocus: "reject",
       acceptClassName: "p-button-danger",
-      accept: () => accept(id),
+      accept: () => accept(id, index),
       reject,
     });
   };
@@ -204,8 +205,9 @@ const Onboarding = (props: any) => {
   };
 
   //Delete componant
-  const accept = (id: any) => {
+  const accept = (id: any, index: any) => {
     try {
+      debugger;
       console.log(id);
 
       sp.web.lists
@@ -214,7 +216,10 @@ const Onboarding = (props: any) => {
         .delete();
       showSuccess("Delete Sucessfuly");
 
-      fetchQuestions();
+      //  fetchQuestions();
+
+      const afterDelete = filterData.filter((e: any) => e.index !== index);
+      setfilterData(afterDelete);
 
       console.log("Employee details updated successfully in SharePoint!");
     } catch (error) {
@@ -431,7 +436,7 @@ const Onboarding = (props: any) => {
     getStsChoices();
   }, []);
 
-  const ActionIcons = (Rowdata: any) => {
+  const ActionIcons = (Rowdata: any, index: any) => {
     return (
       <div className={styles.dashboardActionIcons}>
         <i
@@ -459,7 +464,7 @@ const Onboarding = (props: any) => {
           style={{ fontSize: "1.25rem", color: "red" }}
           onClick={() => {
             console.log("Worked");
-            confirm2(Rowdata.Id);
+            confirm2(Rowdata.Id, index);
             console.log("TRashData ID:", Rowdata.Id);
             setTempEmployeeOnboarding({ ...Rowdata });
           }}
@@ -517,8 +522,6 @@ const Onboarding = (props: any) => {
   const saveEmployeeDetailsToSP = async (): Promise<void> => {
     //EmployeeOnboarding
 
-    console.log(TempEmployeeOnboarding, "TEmp details");
-
     try {
       if (Update) {
         await sp.web.lists
@@ -565,6 +568,7 @@ const Onboarding = (props: any) => {
                   .update({
                     Status: "Satisfactory",
                     CompletedById: CurUserID,
+                    CompletedDateAndTime: new Date().toISOString(),
                   })
               );
             } else {
@@ -817,7 +821,7 @@ const Onboarding = (props: any) => {
               <Column
                 field="Action"
                 header="Action"
-                body={(Rowdata: any) => ActionIcons(Rowdata)}
+                body={(Rowdata: any, index: any) => ActionIcons(Rowdata, index)}
               />
             </DataTable>
           ) : (

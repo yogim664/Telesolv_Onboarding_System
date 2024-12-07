@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
