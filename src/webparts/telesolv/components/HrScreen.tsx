@@ -1,3 +1,6 @@
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable prefer-const */
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -50,7 +53,7 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const [ListItems, setListItems] = useState<any[]>([]);
-  const [AssigenedQuestion, setAssigenedQuestion] = useState<any[]>([]);
+  const [AssignedQuestion, setAssignedQuestion] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
   const [Departments, setDepartments] = useState<any>([]);
   const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
@@ -96,10 +99,8 @@ const HrScreen = (props: any): JSX.Element => {
     }
 
     if (_tempFilterkey?.status) {
-      temp = temp?.filter((value: any) =>
-        value?.Status.key
-          .toLowerCase()
-          .includes(_tempFilterkey.status.toLowerCase())
+      temp = temp?.filter(
+        (value: any) => value?.Status.key === _tempFilterkey.status
       );
     }
     if (_tempFilterkey?.search) {
@@ -126,14 +127,14 @@ const HrScreen = (props: any): JSX.Element => {
   const getAllTitles = async () => {
     try {
       const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
-        .items.select("Title") // Fetch only the Title column
+        .getByTitle(GCongfig.ListName.Department)
+        .items.select("Title")
         .get();
 
       // Format the fetched items for react-select
       const titleValues = items.map((item: any) => ({
-        key: item.Title, // Unique identifier
-        name: item.Title, // Display name
+        key: item.Title,
+        name: item.Title,
       }));
       console.log(titleValues, "dep");
       setDepartments([...titleValues]);
@@ -150,8 +151,9 @@ const HrScreen = (props: any): JSX.Element => {
       .select("Choices,ID")
       .get()
       .then((data: any) => {
-        // Transform the choices into an array of objects
-        const ChoicesCollection = data.Choices.map((choice: string) => ({
+        const ChoicesCollection = data.Choices.filter(
+          (choice: any) => choice !== "Satisfactory"
+        ).map((choice: any) => ({
           key: choice,
           name: choice,
         }));
@@ -164,12 +166,6 @@ const HrScreen = (props: any): JSX.Element => {
       })
       .catch((err) => console.error("Error fetching choices:", err));
   };
-
-  // Call the function on component mount
-  useEffect(() => {
-    getStsChoices();
-    getAllTitles();
-  }, []);
 
   const questionConfig = async (assArray: any[] = []): Promise<void> => {
     await sp.web.lists
@@ -217,7 +213,12 @@ const HrScreen = (props: any): JSX.Element => {
 
         const tempAssigenQuestion = await Promise.all(
           _tempArr?.filter((item: any) =>
-            assArray?.some((val: any) => val?.ID === item?.QuestionID)
+            assArray?.some(
+              (val: any) =>
+                val?.ID === item?.QuestionID &&
+                item.Status.key !== "Satisfactory" &&
+                item.Status.key !== "Resolved"
+            )
           ) || []
         );
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
@@ -233,10 +234,11 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const AssigendPerson = async (): Promise<void> => {
+    debugger;
     await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
-      .items.select("*, Assigened/ID, Assigened/EMail")
-      .expand("Assigened")
+      .items.select("*, Assigned/ID, Assigned/EMail")
+      .expand("Assigned")
       .get()
       .then(async (_items: any) => {
         console.log(_items, "Response");
@@ -244,15 +246,15 @@ const HrScreen = (props: any): JSX.Element => {
         // Filter based on current user's email
         const temp: any =
           _items?.filter((val: any) =>
-            val?.Assigened?.some(
+            val?.Assigned?.some(
               (user: any) =>
                 user?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
             )
           ) || [];
 
         console.log(temp, "Filtered assigen person");
-        setAssigenedQuestion(temp);
-        console.log(AssigenedQuestion, "AssigenQuestion");
+        setAssignedQuestion(temp);
+        console.log(AssignedQuestion, "AssigenQuestion");
         await questionConfig(temp);
       })
       .catch((error: any) => {
@@ -378,6 +380,8 @@ const HrScreen = (props: any): JSX.Element => {
 
   useEffect(() => {
     AssigendPerson();
+    getStsChoices();
+    getAllTitles();
   }, []);
 
   return (

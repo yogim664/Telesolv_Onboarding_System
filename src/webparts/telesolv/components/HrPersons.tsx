@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/self-closing-comp */
@@ -8,7 +10,7 @@ import { DataTable } from "primereact/datatable";
 import "../assets/style/HrPersonStyle.css";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -17,25 +19,30 @@ import {
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
-import { forEach } from "lodash";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
+import { Dropdown } from "primereact/dropdown";
 
 interface IFilterKeys {
   people: string[];
+  search: string;
+  Forms: any;
 }
 
 const HrPersons = (props: any) => {
   // variables
   let _fkeys: IFilterKeys = {
     people: [],
+    search: "",
+    Forms: "",
   };
 
-  const [hrperson, setHRperon] = React.useState<any>([]);
-  const [isEdit, setisEdit] = React.useState(true);
-  const [filterkeys, setfilterkeys] = React.useState<IFilterKeys>(_fkeys);
-  const [filterData, setfilterData] = React.useState<any>([]);
-
+  const [hrperson, setHRperon] = useState<any>([]);
+  const [isEdit, setisEdit] = useState(true);
+  const [filterkeys, setfilterkeys] = useState<IFilterKeys>(_fkeys);
+  const [filterData, setfilterData] = useState<any>([]);
+  const [CurFormID, setCurFormID] = useState(null);
+  const [FormsChoice, setFormsChoice] = useState<any>([]);
   // style variables
   const peoplePickerStyles = {
     root: {
@@ -54,8 +61,8 @@ const HrPersons = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigened/ID,Assigened/EMail")
-        .expand("Assigened")
+        .items.select("*,Assigned/ID,Assigned/EMail, Forms/ID, Forms/Title")
+        .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "items");
@@ -68,6 +75,8 @@ const HrPersons = (props: any) => {
         QuestionTitle: item.Title,
         isDelete: item.isDelete,
         TaskName: item.TaskName,
+        FormID: item.Forms?.ID,
+        FormTitle: item.Forms?.Title,
         Answer: item.Answer
           ? {
               key: item.Answer,
@@ -75,10 +84,10 @@ const HrPersons = (props: any) => {
             }
           : null,
         Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigened: item.Assigened?.map((Assigened: any) => {
+        Assigned: item.Assigned?.map((Assigned: any) => {
           return {
-            id: Assigened.ID,
-            Email: Assigened.EMail,
+            id: Assigned.ID,
+            Email: Assigned.EMail,
           };
         }),
       }));
@@ -99,15 +108,35 @@ const HrPersons = (props: any) => {
     let _masterData = [...hrperson];
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
+
+    if (_tempFilterkeys?.Forms) {
+      _masterData = _masterData?.filter(
+        (value: any) => value?.FormID === _tempFilterkeys?.Forms
+      );
+    }
+
     if (_tempFilterkeys.people.length) {
       _masterData = _masterData.filter(
         (_item) =>
-          _item.Assigened.length &&
-          _item.Assigened.some((_a: any) =>
-            val.some((_v: any) => _a.Email == _v.secondaryText)
+          _item.Assigned.length &&
+          _item.Assigned.some((_a: any) =>
+            // val.some((_v: any) => _a.Email === _v.secondaryText)
+            _tempFilterkeys.people.some(
+              (_v: any) => _a.Email === _v.secondaryText
+            )
           )
       );
     }
+
+    if (_tempFilterkeys.search) {
+      const searchKey = _tempFilterkeys.search.toLowerCase();
+      _masterData = _masterData?.filter(
+        (value: any) =>
+          value?.QuestionTitle?.toLowerCase().includes(searchKey) ||
+          value?.TaskName?.toLowerCase().includes(searchKey)
+      );
+    }
+
     setfilterkeys({ ..._tempFilterkeys });
     setfilterData([..._masterData]);
   };
@@ -118,8 +147,32 @@ const HrPersons = (props: any) => {
     setfilterData([...fetchedItems]);
   };
 
+  // Function to fetch Title values
+  const getForms = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle(GCongfig.ListName.Forms)
+        .items.select("Title, ID")
+        .get();
+
+      const FormValues = items.map((item: any) => ({
+        key: item.Title,
+        name: item.Title,
+        ID: item.ID,
+      }));
+
+      setFormsChoice(FormValues);
+      const firstFormID = FormValues?.[0]?.ID;
+      setCurFormID(firstFormID);
+      // filterFunc("Forms", firstFormID);
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
+  };
+
   useEffect(() => {
     fetchQuestions();
+    getForms();
     // }, [isEdit]);
   }, []);
 
@@ -175,25 +228,40 @@ const HrPersons = (props: any) => {
   };
 
   const AddAssigene = async () => {
+    let err = false;
+    let errmsg = "";
     try {
-      forEach((row: any) => {
-        console.log(row.Assigned);
-      });
+      if (
+        filterData.some(
+          (_item: any) =>
+            Array.isArray(_item.Assigned) && _item.Assigned.length === 0
+        )
+      ) {
+        err = true;
+        errmsg = "Select Answer";
+      }
+      console.log(err, errmsg);
+      debugger;
       for (let i = 0; i < filterData.length; i++) {
-        const assignedValues = filterData[i].Assigned;
+        console.log("I value", i);
 
-        // Check if the Assigened field is empty
+        const assignedValues = filterData[i]?.Assigned;
+
         if (!assignedValues || assignedValues.length === 0) {
-          showError("Assigned field is empty");
-          return; // Exit the function if Assigened is empty for any person
+          showError(
+            `Assigned field is empty for task: ${
+              filterData[i]?.TaskName || "Unknown Task"
+            }`
+          );
+          return;
         }
 
-        if (hrperson[i].Id) {
+        if (hrperson[i]?.Id) {
           await sp.web.lists
             .getByTitle(GCongfig.ListName.CheckpointConfig)
             .items.getById(hrperson[i].Id)
             .update({
-              AssigenedId: {
+              AssignedId: {
                 results: assignedValues.map((val: any) => val.id),
               },
               TaskName: filterData[i].TaskName,
@@ -224,7 +292,7 @@ const HrPersons = (props: any) => {
         }}
         styles={peoplePickerStyles}
         principalTypes={[PrincipalType.User]}
-        defaultSelectedUsers={rowData?.Assigened?.map((val: any) => val.Email)}
+        defaultSelectedUsers={rowData?.Assigned?.map((val: any) => val.Email)}
         resolveDelay={1000}
         disabled={isEdit}
       />
@@ -264,6 +332,33 @@ const HrPersons = (props: any) => {
       <ToastContainer />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
+          <Dropdown
+            value={
+              FormsChoice
+                ? FormsChoice?.find(
+                    (choice: any) => choice.ID === filterkeys.Forms
+                  ) || ""
+                : ""
+            }
+            onChange={(e) => {
+              filterFunc("Forms", e.value.ID);
+              setCurFormID(e.value.ID);
+              console.log(CurFormID);
+            }}
+            options={FormsChoice || []}
+            optionLabel="name"
+            placeholder="Select a Form"
+          />
+
+          <InputText
+            placeholder={"Search"}
+            value={filterkeys.search || ""}
+            onChange={(e) => {
+              console.log(e.target.value);
+
+              filterFunc("search", e.target.value);
+            }}
+          />
           <div className="HRPersonPeopleSearch">
             <PeoplePicker
               context={props.context}
@@ -271,7 +366,7 @@ const HrPersons = (props: any) => {
               personSelectionLimit={100}
               showtooltip={false}
               ensureUser={true}
-              placeholder={""}
+              placeholder={"Search HR Persons"}
               onChange={(selectedPeople: any[]) => {
                 filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
               }}
@@ -295,6 +390,22 @@ const HrPersons = (props: any) => {
               fetchQuestions();
             }}
           />
+          <i
+            className="pi pi-refresh"
+            style={{
+              backgroundColor: "#223b83",
+              padding: 10,
+              borderRadius: 4,
+              color: "#fff",
+            }}
+            onClick={() => {
+              filterkeys.people = [];
+              filterkeys.Forms = "";
+              filterkeys.search = "";
+
+              setfilterData(hrperson);
+            }}
+          />
         </div>
         <DataTable className={styles.HRConfigDataTable} value={[...filterData]}>
           <Column
@@ -308,6 +419,7 @@ const HrPersons = (props: any) => {
             header="Task Name"
             body={peopleTask}
           ></Column>
+          <Column field="FormTitle" header="Form"></Column>
           <Column
             className={styles.HRPersonsList}
             field="Assigenee"

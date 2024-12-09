@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-lone-blocks */
@@ -64,6 +65,9 @@ const Onboarding = (props: any) => {
   const [Departments, setDepartments] = useState<any>([]);
   const [filterData, setfilterData] = React.useState<any>([]);
   const [statusChoices, setStatusChoices] = useState<any[]>([]);
+  const [CurFormID, setCurFormID] = useState(null);
+  const [FormsChoice, setFormsChoice] = useState<any>([]);
+  const [FormQuestions, setFormQuestions] = useState<any>([]);
   const [CurUserID, setCurUserID] = useState<any>();
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
@@ -89,6 +93,7 @@ const Onboarding = (props: any) => {
       const user = await sp.web.currentUser();
       console.log("Current User ID:", user.Id);
       setCurUserID(user.Id);
+
       return user.Id;
     } catch (error) {
       console.error("Error getting current user ID:", error);
@@ -111,7 +116,33 @@ const Onboarding = (props: any) => {
       }));
       console.log(titleValues, "dep");
       setDepartments([...titleValues]);
+      getForms();
       console.log(Departments, "SetDep");
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
+  };
+
+  // Get forms
+
+  // Function to fetch Title values
+  const getForms = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle(GCongfig.ListName.Forms)
+        .items.select("Title, ID")
+        .get();
+
+      const FormValues = items.map((item: any) => ({
+        key: item.Title,
+        name: item.Title,
+        ID: item.ID,
+      }));
+
+      setFormsChoice(FormValues);
+      // const firstFormID = FormValues?.[0]?.ID;
+      // setCurFormID(firstFormID);
+      // filterFunc("Forms", firstFormID);
     } catch (error) {
       console.error("Error fetching titles:", error);
     }
@@ -176,13 +207,13 @@ const Onboarding = (props: any) => {
   };
 
   ///Delete component
-  const confirm2 = (id: any) => {
+  const confirm2 = (id: any, index: any) => {
     confirmDialog({
       message: "Do you want to delete this record?",
       header: "Delete Confirmation",
       defaultFocus: "reject",
       acceptClassName: "p-button-danger",
-      accept: () => accept(id),
+      accept: () => accept(id, index),
       reject,
     });
   };
@@ -204,19 +235,22 @@ const Onboarding = (props: any) => {
   };
 
   //Delete componant
-  const accept = (id: any) => {
+  const accept = (id: any, index: any) => {
     try {
+      debugger;
       console.log(id);
 
       sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeOnboarding)
         .items.getById(id)
-        .delete();
-      showSuccess("Delete Sucessfuly");
+        .delete()
+        .then(() => {
+          const afterDelete = filterData.filter((e: any) => e.index !== index);
+          setfilterData(afterDelete);
 
-      fetchQuestions();
-
-      console.log("Employee details updated successfully in SharePoint!");
+          showSuccess("Deleted successfully");
+          console.log("Employee details updated successfully in SharePoint!");
+        });
     } catch (error) {
       console.error("Error saving questions:", error);
     }
@@ -319,8 +353,8 @@ const Onboarding = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigened/ID, Assigened/EMail")
-        .expand("Assigened")
+        .items.select("*,Assigned/ID, Assigned/EMail, Forms/ID")
+        .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "COnfigitems");
@@ -330,6 +364,7 @@ const Onboarding = (props: any) => {
         Id: item.Id,
         isEdit: false,
         QuestionNo: item.Sno,
+        Forms: item.Forms?.ID || null,
         QuestionTitle: item.Title,
         isDelete: item.isDelete,
         Status: item.Status,
@@ -340,10 +375,10 @@ const Onboarding = (props: any) => {
             }
           : null,
         Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigened: item.Assigened?.map((Assigened: any) => {
+        Assigned: item.Assigned?.map((Assigned: any) => {
           return {
-            id: Assigened.ID,
-            Email: Assigened.EMail,
+            id: Assigned.ID,
+            Email: Assigned.EMail,
           };
         }),
       }));
@@ -426,12 +461,19 @@ const Onboarding = (props: any) => {
   };
   console.log(questions);
 
+  const checkFormhaveQuestion = (formID: any) => {
+    const filterFormQuestion = questions.filter(
+      (val: any) => val.Forms === formID
+    );
+    setFormQuestions(filterFormQuestion);
+  };
+
   useEffect(() => {
     fetchQuestions();
     getStsChoices();
   }, []);
 
-  const ActionIcons = (Rowdata: any) => {
+  const ActionIcons = (Rowdata: any, index: any) => {
     return (
       <div className={styles.dashboardActionIcons}>
         <i
@@ -459,7 +501,7 @@ const Onboarding = (props: any) => {
           style={{ fontSize: "1.25rem", color: "red" }}
           onClick={() => {
             console.log("Worked");
-            confirm2(Rowdata.Id);
+            confirm2(Rowdata.Id, index);
             console.log("TRashData ID:", Rowdata.Id);
             setTempEmployeeOnboarding({ ...Rowdata });
           }}
@@ -517,8 +559,6 @@ const Onboarding = (props: any) => {
   const saveEmployeeDetailsToSP = async (): Promise<void> => {
     //EmployeeOnboarding
 
-    console.log(TempEmployeeOnboarding, "TEmp details");
-
     try {
       if (Update) {
         await sp.web.lists
@@ -565,6 +605,7 @@ const Onboarding = (props: any) => {
                   .update({
                     Status: "Satisfactory",
                     CompletedById: CurUserID,
+                    CompletedDateAndTime: new Date().toISOString(),
                   })
               );
             } else {
@@ -606,12 +647,19 @@ const Onboarding = (props: any) => {
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
             SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
+            FormId: CurFormID,
           })
           .then(async (res: any) => {
             try {
               // Using Promise.all to handle multiple asynchronous requests in parallel
+
+              const filterQuestion = questions.filter(
+                (val: any) => val.Forms === CurFormID
+              );
+
+              debugger;
               await Promise.all(
-                questions.map(async (question: any) => {
+                filterQuestion.map(async (question: any) => {
                   // Add each question to the EmployeeResponse list
                   console.log(question.Id);
                   console.log(question.Answer, "Answer");
@@ -623,7 +671,7 @@ const Onboarding = (props: any) => {
                       Title: question.QuestionTitle,
                       Sno: question.QuestionNo,
                       Status: "Pending",
-
+                      FormId: question.Forms,
                       Answer: question.Answer.key,
                       QuestionIDId: question.Id, // Question ID from questions array
                       EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
@@ -700,6 +748,7 @@ const Onboarding = (props: any) => {
         <EmployeeResponseView
           setShowResponseView={setShowResponseView}
           setSelectedEmp={SelectedEmp}
+          context={props.context}
         />
       ) : (
         <div>
@@ -816,7 +865,7 @@ const Onboarding = (props: any) => {
               <Column
                 field="Action"
                 header="Action"
-                body={(Rowdata: any) => ActionIcons(Rowdata)}
+                body={(Rowdata: any, index: any) => ActionIcons(Rowdata, index)}
               />
             </DataTable>
           ) : (
@@ -958,6 +1007,33 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
+
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Form</div>
+                <div className={styles.addDialogInput}>
+                  <Dropdown
+                    value={
+                      FormsChoice
+                        ? FormsChoice?.find(
+                            (choice: any) => choice.ID === CurFormID
+                          ) || null
+                        : null
+                    }
+                    onChange={(e) => {
+                      setCurFormID(e.value.ID);
+                      checkFormhaveQuestion(e.value.ID);
+                    }}
+                    options={FormsChoice || []}
+                    optionLabel="name"
+                    placeholder="Select a Department"
+                  />
+                  {FormQuestions.length === 0 && (
+                    <div className={styles.addEmpInfo}>
+                      This form have no questions
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>PhoneNumber</div>
                 <div className={styles.addDialogInput}>
@@ -1026,7 +1102,10 @@ const Onboarding = (props: any) => {
                       border: "none",
                       width: "100px",
                     }}
-                    disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
+                    disabled={
+                      !TempEmployeeOnboarding?.Employee?.EmployeeEMail ||
+                      FormQuestions.length <= 1
+                    }
                     // onClick={() => saveEmployeeDetailsToSP()}
                     onClick={() => Vaildation()}
                   />

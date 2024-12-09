@@ -4,6 +4,7 @@ export interface IListNames {
   Department: string;
   EmployeeOnboarding: string;
   EmployeeResponse: string;
+  Forms: string;
 }
 
 export interface IAnswerDatas {
@@ -29,6 +30,6 @@ export interface IQuestionDatas {
   isDelete: boolean;
   Answer: IAnswerDatas | null;
   Options: IOptionsDatas[];
-  Assigened: IAssignedData[];
+  Assigned: IAssignedData[];
   TaskName: string | null;
 }

@@ -7,5 +7,6 @@ export namespace GCongfig {
     Department: "Department",
     EmployeeOnboarding: "EmployeeOnboarding",
     EmployeeResponse: "EmployeeResponse",
+    Forms: "Forms",
   };
 }
