@@ -31,7 +31,7 @@
 }
 
 .Bgstyle {
-    background-image: url("../assets//Images//Bg.svg");
+    background-image: url("../assets//Images//EmployeeFormBG.jpg");
     // height: 70vh;
     width: 100%;
     background-size: cover;
@@ -40,12 +40,21 @@
 }
 
 .EmployeeAnsContainer {
-    width: 50%;
+    width: 100%;
     margin: 16px;
     justify-content: center;
     align-items: center;
     border-radius: 5px;
-    background-color: #fff;
+    .AnswerPlayground {
+        padding: 20px 10px;
+        width: 90%;
+        backdrop-filter: blur(15px);
+        box-shadow: 0px 0px 20px rgba(227, 228, 237, 0.35);
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        margin: auto;
+        background: #ffffff61;
+    }
 }
 
 .EmployeeAnsContainerheader {
@@ -59,11 +68,17 @@
         font-size: 16px;
         font-family: interRegular;
     }
-    color: white;
-    background-color: #233b83;
-    width: 100%;
     padding: 10px;
     border-radius: 6px 6px 0px 0px;
+    .formGuide {
+        width: 90%;
+        margin: auto;
+        color: #4a4a4a;
+        h2,
+        h4 {
+            margin: 12px 0;
+        }
+    }
 }
 
 .ProgressBar {
@@ -74,7 +89,6 @@
 
 .EmployeeQuestionContainer {
     display: flex;
-    background-color: white;
     margin: 10px;
 }
 
@@ -117,13 +131,13 @@
 }
 
 .commentsContainer {
-    background-color: #fff;
     margin: 20px 10px;
     padding: 0;
     textarea {
         width: 100%;
         resize: none;
         height: 80px;
+        background: #ffffff85 !important;
     }
     .commentsContainerHeader {
         display: flex;
@@ -139,12 +153,14 @@
     justify-content: flex-end;
     gap: 14px;
     .cancelBtn {
-        background-color: #606060;
-        color: #fff;
+        background-color: #cfcfcf;
+        color: #000;
+        font-weight: 600;
     }
     .primaryBtn {
         background-color: #233b83;
         color: #fff;
+        font-weight: 600;
     }
 }
 
@@ -171,7 +187,6 @@
 .userGreetingSection {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
     gap: 16px;
     font-size: 16px;
     font-weight: 600;
@@ -179,16 +194,11 @@
         display: flex;
         align-items: center;
         gap: 15px;
-        background: linear-gradient(333deg, #bbd6ff 0, #ffffffc4 100%);
         border-radius: 6px;
-        padding-left: 16px;
-        position: relative;
-        top: -10px;
-        right: -10px;
-        border-top-left-radius: 0;
         padding: 12px;
-        color: #233b83;
-        font-weight: 600;
+        font-weight: 300;
+        font-size: 24px;
+        color: #4a4a4a;
     }
     .userAvatar {
         width: 46px;
