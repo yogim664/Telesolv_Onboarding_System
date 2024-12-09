@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-expressions */
@@ -19,6 +20,8 @@ import { useState } from "react";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { Dialog } from "primereact/dialog";
+
 import "./HrPersons";
 import HrPersons from "./HrPersons";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -27,18 +30,35 @@ import { sp } from "@pnp/sp";
 import { _Item } from "@pnp/sp/items/types";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
+import { Dropdown } from "primereact/dropdown";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+let fetchedItems: any[] = [];
+
 const Config = (props: any) => {
-  // const [selectedOptions, setSelectedOptions] = useState<any>({});
+  interface IFilData {
+    Forms: any;
+  }
+
+  let _fkeys: IFilData = {
+    Forms: "",
+  };
+
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [newOptionText, setNewOptionText] = useState("");
   const [Submitted, setSubmitted] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [Newformvalue, setNewformvalue] = useState<any>([]);
+  // const [Forms, setForms] = useState<any>([]);
+  const [CurFormID, setCurFormID] = useState(null);
+  const [FormsChoice, setFormsChoice] = useState<any>([]);
   const [selectedOptionDetails, setselectedOptionDetails] = useState({
     qIndex: null,
     aIndex: null,
   });
-
   const [questions, setQuestions] = useState<any>([]);
+  const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
+  const [filterData, setfilterData] = React.useState<any>([]);
+
   const [changeOption, setchangeOption] = useState<any>([]);
 
   const accept = (id: any, qIndex: number) => {
@@ -68,6 +88,42 @@ const Config = (props: any) => {
       ),
       accept: () => accept(id, qIndex),
     });
+  };
+
+  const deleteOption = (aIndex: any, qIndex: number) => {
+    confirmDialog({
+      group: "templating",
+      header: "Confirmation",
+      message: (
+        <div className="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
+          <span>Are you sure you want to delete this option?</span>
+        </div>
+      ),
+      // accept: () => accept(id, qIndex),
+      accept: () => acceptdeleteOption(aIndex, qIndex),
+    });
+  };
+
+  const acceptdeleteOption = (aIndex: number, qIndex: number) => {
+    const updatedQuestions = filterData.map((question: any, index: number) =>
+      index === qIndex
+        ? {
+            ...question,
+            Options: question.Options.filter(
+              (_: any, optionIndex: number) => optionIndex !== aIndex
+            ),
+          }
+        : question
+    );
+
+    setQuestions(updatedQuestions);
+    setfilterData(updatedQuestions);
+  };
+
+  const handleInputChange = (e: any) => {
+    const value = e.target.value;
+    setNewformvalue(value); // Update state with the new input value
+    console.log(Newformvalue);
   };
 
   const handleChangeOption = (qIndex: any, aIndex: any, e: any) => {
@@ -116,6 +172,7 @@ const Config = (props: any) => {
     );
 
     setQuestions(updatedQuestions);
+    setfilterData(updatedQuestions);
     setselectedOptionDetails({
       qIndex: null,
       aIndex: null,
@@ -126,7 +183,9 @@ const Config = (props: any) => {
 
   const addNewQuestion = () => {
     // Get the last question to determine new Id and QuestionNo
-    const TempQues = questions.filter((_item: any) => !_item.isDelete);
+    const TempQues = questions.filter(
+      (_item: any) => !_item.isDelete && _item.Form === CurFormID
+    );
     const isEmpty = TempQues.length === 0;
     // const newId = isEmpty
     //   ? 1
@@ -148,12 +207,20 @@ const Config = (props: any) => {
       Answer: "",
       isEdit: true,
       isDelete: false,
+      Form: CurFormID,
     };
 
     setQuestions((prevQuestions: any) => [...prevQuestions, newQuestion]);
+    setfilterData((prevQuestions: any) => [...prevQuestions, newQuestion]);
   };
   const handleEditToggle = (questionId: number) => {
     setQuestions((prevQuestions: any) =>
+      prevQuestions.map((question: any) => ({
+        ...question,
+        isEdit: question.Id === questionId ? !question.isEdit : false,
+      }))
+    );
+    setfilterData((prevQuestions: any) =>
       prevQuestions.map((question: any) => ({
         ...question,
         isEdit: question.Id === questionId ? !question.isEdit : false,
@@ -170,6 +237,7 @@ const Config = (props: any) => {
 
     sortQuestion[qIndex].isDelete = true;
     setQuestions(sortQuestion);
+    setfilterData(sortQuestion);
 
     // Call handleReArrange if needed
     handleReArrange(qIndex);
@@ -177,10 +245,10 @@ const Config = (props: any) => {
 
   const handleReArrange = (qIndex: any) => {
     console.log(questions);
-    const updatedQuestion = questions.sort(
+    const updatedQuestion = filterData.sort(
       (a: any, b: any) => a.QuestionNo - b.QuestionNo
     );
-    // const updatedQuestion =
+    //
     updatedQuestion.forEach((qus: any, ind: any) => {
       if (qIndex === ind) {
         qus.isDelete = true;
@@ -200,6 +268,7 @@ const Config = (props: any) => {
     });
 
     setQuestions([...updatedQuestion]);
+    setfilterData([...updatedQuestion]);
   };
 
   const handleQuestionChange = (
@@ -208,9 +277,15 @@ const Config = (props: any) => {
     type: any,
     aIndex?: number
   ) => {
-    let _questions: any = questions.sort(
-      (a: any, b: any) => a.QuestionNo - b.QuestionNo
+    // Separate questions into _masterData and _questions
+    let _masterData: any = questions.filter(
+      (val: any) => val.Form !== CurFormID
     );
+    let _questions: any = questions
+      .filter((val: any) => val.Form === CurFormID)
+      .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+
+    // Update the relevant question or answer
     if (type === "Question") {
       _questions[qIndex].QuestionTitle = value;
     } else {
@@ -220,7 +295,12 @@ const Config = (props: any) => {
       };
     }
 
-    setQuestions([..._questions]);
+    // Combine _masterData and _questions
+    const updatedQuestions = [..._masterData, ..._questions];
+
+    // Update state
+    setQuestions(updatedQuestions); // Update the main questions state
+    setfilterData([..._questions]); // Update the filtered questions state
   };
 
   const handleAddOptionClick = (questionId: any) => {
@@ -241,6 +321,7 @@ const Config = (props: any) => {
           : question
     );
     setQuestions(updatedQuestions);
+    setfilterData(updatedQuestions);
     setNewOptionText("");
     setSelectedQuestionId(null); // Hide the input container
   };
@@ -290,7 +371,8 @@ const Config = (props: any) => {
 
     console.log("After Move:", updatedQuestions);
 
-    setQuestions([...updatedQuestions]);
+    setQuestions([...updatedQuestions]); // New
+    setfilterData([...updatedQuestions]);
   };
 
   // MoveDown
@@ -335,6 +417,7 @@ const Config = (props: any) => {
 
     // Update the state with the new order of questions
     setQuestions(updatedQuestions);
+    setfilterData(updatedQuestions);
     // !Maasi
   };
 
@@ -352,7 +435,12 @@ const Config = (props: any) => {
     } else if (tempquestion.some((_item: any) => !_item.Options.length)) {
       err = true;
       errmsg = "Enter Options";
-    } else if (tempquestion.some((_item: any) => _item.Answer === "")) {
+    } else if (
+      tempquestion.some(
+        (item: any) =>
+          !item.Options.some((option: any) => option.key === item.Answer.key)
+      )
+    ) {
       err = true;
       errmsg = "Select Answer";
     }
@@ -444,6 +532,7 @@ const Config = (props: any) => {
             Answer: question.Answer.key ? question.Answer.key : "",
             TaskName: question.QuestionTitle,
             isDelete: false,
+            FormsId: question.Form,
           });
       });
 
@@ -468,6 +557,7 @@ const Config = (props: any) => {
             Options: JSON.stringify(question.Options), // Convert Options to JSON string
             Answer: question.Answer.key ? question.Answer.key : "",
             isDelete: question.isDelete,
+            FormsId: question.Form,
           });
       });
 
@@ -509,8 +599,8 @@ const Config = (props: any) => {
       // Fetch items from the SharePoint list
       const items: any = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID,Assigned/EMail")
-        .expand("Assigned")
+        .items.select("*,Assigned/ID, Assigned/EMail ,Forms/ID")
+        .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
 
@@ -523,6 +613,7 @@ const Config = (props: any) => {
             QuestionNo: val.Sno,
             QuestionTitle: val.Title,
             isDelete: val.isDelete,
+            Form: val.Forms.ID || null,
             Answer: val.Answer
               ? {
                   key: val.Answer,
@@ -553,12 +644,70 @@ const Config = (props: any) => {
     }
   };
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      const fetchedItems = await questionConfig();
-      setQuestions(fetchedItems); // Store in state
-    };
+  // Function to fetch Title values
+  const getForms = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle(GCongfig.ListName.Forms)
+        .items.select("Title, ID")
+        .get();
 
+      const FormValues = items.map((item: any) => ({
+        key: item.Title,
+        name: item.Title,
+        ID: item.ID,
+      }));
+
+      setFormsChoice(FormValues);
+      const firstFormID = FormValues?.[0]?.ID;
+      setCurFormID(firstFormID);
+      filterFunc("Forms", firstFormID);
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
+  };
+
+  // Filter function
+  const filterFunc = (key: string, val: any): void => {
+    debugger;
+    let filteredData: any[] = [...fetchedItems];
+    let _tempFilterkeys: any = { ...filterkeys };
+    _tempFilterkeys[key] = val;
+    if (_tempFilterkeys?.Forms) {
+      filteredData = filteredData?.filter(
+        (value: any) =>
+          value?.Form === _tempFilterkeys?.Forms &&
+          !val.isDelete &&
+          val.QuestionNo !== 10000
+      );
+    }
+    filteredData?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+    setfilterkeys(_tempFilterkeys);
+    setfilterData([...filteredData]);
+    setVisible(false);
+  };
+
+  const saveNewform = async () => {
+    try {
+      await sp.web.lists.getByTitle(GCongfig.ListName.Forms).items.add({
+        Title: Newformvalue,
+      });
+      await getForms();
+
+      console.log("Questions saved successfully to SharePoint!");
+    } catch (error) {
+      console.error("Error saving questions:", error);
+    }
+  };
+
+  const fetchQuestions = async () => {
+    fetchedItems = await questionConfig();
+    setQuestions(fetchedItems);
+    // setfilterData(fetchedItems);
+    await getForms();
+  };
+
+  useEffect(() => {
     fetchQuestions();
   }, [Submitted]);
 
@@ -580,16 +729,93 @@ const Config = (props: any) => {
 
       {/* Same as */}
       <ToastContainer />
+
+      <div className="card flex justify-content-center">
+        <Dialog
+          header="Add new form"
+          visible={visible}
+          style={{ width: "30vw" }}
+          onHide={() => {
+            if (!visible) return;
+            setVisible(false);
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <InputText
+              value={Newformvalue} // Bind state to input value
+              onChange={handleInputChange} // Handle onChange event
+              placeholder="Enter value"
+            />
+          </div>
+          <div
+            style={{
+              marginTop: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              // width: "50%",
+            }}
+          >
+            <Button
+              label="Cancel"
+              className={styles.cancelBtn}
+              onClick={() => {
+                setVisible(false);
+              }}
+            />
+            <Button
+              label="Save"
+              className={styles.saveBtn}
+              onClick={() => {
+                saveNewform();
+                // setVisible(false);
+              }}
+            />
+          </div>
+        </Dialog>
+      </div>
+
       <ConfirmDialog group="templating" />
 
       <TabView className="CongifTab">
         <TabPanel header="Checkpoints" className="MainTab">
-          {questions.filter(
-            (val: any) => !val.isDelete && val.QuestionNo !== 10000
-          ).length > 0 ? (
-            questions
-              .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
-              .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
+          <div>
+            <Dropdown
+              value={
+                FormsChoice
+                  ? FormsChoice?.find(
+                      (choice: any) => choice.ID === filterkeys.Forms
+                    ) || null
+                  : null
+              }
+              onChange={(e) => {
+                filterFunc("Forms", e.value.ID);
+                setCurFormID(e.value.ID);
+              }}
+              options={FormsChoice || []}
+              optionLabel="name"
+              placeholder="Select a Department"
+            />
+            <Button
+              label="Add new form"
+              className={styles.saveBtn}
+              onClick={() => {
+                setNewformvalue(" ");
+                setVisible(true);
+              }}
+            />
+          </div>
+          {filterData.length > 0 ? (
+            filterData
+              .filter((value: any) => value.QuestionNo !== 10000)
+
               .map((question: any, qIndex: any) => (
                 <div key={question.QuestionNo} className="question-block">
                   <div className={styles.CheckPointSection}>
@@ -623,7 +849,9 @@ const Config = (props: any) => {
                       />
                       <i
                         className="pi pi-arrow-up"
-                        onClick={() => moveQuestionUp(qIndex, false, questions)}
+                        onClick={() =>
+                          moveQuestionUp(qIndex, false, filterData)
+                        }
                         style={{
                           cursor: "pointer",
                           color: "#233b83",
@@ -715,16 +943,30 @@ const Config = (props: any) => {
                                     selectedOptionDetails.qIndex === qIndex &&
                                     selectedOptionDetails.aIndex === aIndex
                                   ) && (
-                                    <i
-                                      className={`${styles.optionEditIcon} pi  pi-pencil`}
-                                      style={{ fontSize: "1rem" }}
-                                      onClick={() =>
-                                        setselectedOptionDetails({
-                                          qIndex: qIndex,
-                                          aIndex: aIndex,
-                                        })
-                                      }
-                                    />
+                                    <>
+                                      <i
+                                        className={`${styles.optionEditIcon} pi  pi-pencil`}
+                                        style={{ fontSize: "1rem" }}
+                                        onClick={() =>
+                                          setselectedOptionDetails({
+                                            qIndex: qIndex,
+                                            aIndex: aIndex,
+                                          })
+                                        }
+                                      />
+                                      <i
+                                        className="pi pi-trash"
+                                        onClick={() => {
+                                          deleteOption(aIndex, qIndex);
+                                        }}
+                                        // deleteQuestion(question.Id)}}
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "red",
+                                          fontSize: "1rem",
+                                        }}
+                                      />
+                                    </>
                                   )}
                                 </div>
 
@@ -843,7 +1085,7 @@ const Config = (props: any) => {
               <span style={{ color: "#233b83" }}>Add new question</span>
             </div>
           </div>
-          {questions.length > 0 && (
+          {filterData.length > 0 && (
             <div className={styles.ConfigBtns}>
               <Button
                 className={styles.cancelBtn}

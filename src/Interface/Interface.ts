@@ -4,6 +4,7 @@ export interface IListNames {
   Department: string;
   EmployeeOnboarding: string;
   EmployeeResponse: string;
+  Forms: string;
 }
 
 export interface IAnswerDatas {

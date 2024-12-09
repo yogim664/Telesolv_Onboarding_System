@@ -150,7 +150,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             Email: item.CompletedBy ? item.CompletedBy.EMail : "",
           },
           Role: item.EmployeeID?.Role || "No Role",
-          CompletedDateAndTime: item.CompletedDateAndTime || "",
+          CompletedDateAndTime: item.CompletedDateAndTime || null,
           Department: item.EmployeeID?.Department || "No Department",
           Assigenee: relatedQitems[0]?.Assigned
             ? relatedQitems[0].Assigned.map((assignee: any) => ({
@@ -406,6 +406,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               field="CompletedDateAndTime"
               header="Completed Date and Time"
               body={(rowData) => {
+                if (!rowData.CompletedDateAndTime) {
+                  return "-"; // Return "N/A" if null or empty
+                }
                 const date = new Date(rowData.CompletedDateAndTime);
                 return format(date, "MM/dd/yyyy hh:mm a");
               }}
