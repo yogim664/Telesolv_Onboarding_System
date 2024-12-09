@@ -657,7 +657,6 @@ const Onboarding = (props: any) => {
                 (val: any) => val.Forms === CurFormID
               );
 
-              debugger;
               await Promise.all(
                 filterQuestion.map(async (question: any) => {
                   // Add each question to the EmployeeResponse list
@@ -882,7 +881,7 @@ const Onboarding = (props: any) => {
             <Dialog
               header={
                 <div style={{ textAlign: "center", width: "100%" }}>
-                  New Employee
+                  {Update ? "Update Employee" : "New Employee"}
                 </div>
               }
               visible={visible}
@@ -952,6 +951,7 @@ const Onboarding = (props: any) => {
                     onChange={(e) => {
                       handleChange("Email", e.target.value);
                     }}
+                    disabled={Update}
                   />
                 </div>
               </div>
@@ -1023,9 +1023,12 @@ const Onboarding = (props: any) => {
                       setCurFormID(e.value.ID);
                       checkFormhaveQuestion(e.value.ID);
                     }}
+                    disabled={Update}
                     options={FormsChoice || []}
+                    style={{ width: "100%" }}
+                    className="w-full md:w-14rem"
                     optionLabel="name"
-                    placeholder="Select a Department"
+                    placeholder="Select a Form"
                   />
                   {FormQuestions.length === 0 && (
                     <div className={styles.addEmpInfo}>
@@ -1039,6 +1042,7 @@ const Onboarding = (props: any) => {
                 <div className={styles.addDialogInput}>
                   <InputText
                     placeholder="Enter PhoneNumber"
+                    keyfilter="int"
                     style={{ width: "100%", color: "black" }}
                     value={TempEmployeeOnboarding?.PhoneNumber || ""}
                     onChange={(e) => {

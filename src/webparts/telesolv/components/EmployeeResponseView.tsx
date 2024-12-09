@@ -1,3 +1,4 @@
+/* eslint-disable require-atomic-updates */
 /* eslint-disable no-debugger */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -13,12 +14,14 @@ import { Column } from "primereact/column";
 import { GCongfig } from "../../../Config/Config";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
+import { Dialog } from "primereact/dialog";
 // import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import {
   PeoplePicker,
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { format } from "date-fns";
+import { Button } from "primereact/button";
 
 interface IFilData {
   Employee: any;
@@ -41,15 +44,19 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   const [statusChoices, setStatusChoices] = useState<IDrop[]>([]);
   const [filterkeys, setfilterkeys] = useState<IFilData>({ ..._fkeys });
   const [filterData, setfilterData] = useState<any>([]);
+  const [SelectedItem, setSelectedItem] = useState<any>([]);
   const [ResComment, setResComment] = useState<any>([]);
-
+  const [visible, setVisible] = useState(false);
   const SeelectedEmp = props.setSelectedEmp;
   console.log(statusChoices);
   console.log(SeelectedEmp.Employee.EmployeeTitle);
 
   const peopleTemplate = (rowData: any) => {
-    const assignees = rowData.Assigenee || []; // Access Assignees from the rowData
-
+    debugger;
+    const assignees =
+      rowData.Reassigned && rowData.Reassigned.length > 0
+        ? rowData.Reassigned
+        : rowData?.Assigned || [];
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {assignees.map((assignee: any, index: number) => (
@@ -102,20 +109,19 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
   const EmployeeDetails = async () => {
     try {
+      debugger;
       // Fetch items from the SharePoint list
       const employeeIdString = SeelectedEmp.Employee.EmployeeId.toString();
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeResponse)
-
         .items.select(
-          "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
+          "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail"
         )
-        .expand("QuestionID,Employee,EmployeeID")
+        .expand("QuestionID,Employee,EmployeeID,Reassigned")
         .filter(`Employee/ID eq ${employeeIdString}`)
         .get();
+      debugger;
       console.log(items, "items");
-
-      // Get items to SP
 
       // Fetch items from the SharePoint list
       const Qitems = await sp.web.lists
@@ -132,8 +138,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           (qItem: any) => qItem.Id === item.QuestionID?.ID
         );
         console.log(relatedQitems);
-
+        debugger;
         return {
+          Id: item.ID,
           QuestionID: item.QuestionID?.ID,
           QuestionTitle: item.QuestionID?.Title,
           Answer: item.QuestionID?.Answer,
@@ -152,11 +159,18 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           Role: item.EmployeeID?.Role || "No Role",
           CompletedDateAndTime: item.CompletedDateAndTime || null,
           Department: item.EmployeeID?.Department || "No Department",
-          Assigenee: relatedQitems[0]?.Assigned
+          Assigned: relatedQitems[0]?.Assigned
             ? relatedQitems[0].Assigned.map((assignee: any) => ({
                 Id: assignee.ID,
                 Email: assignee.EMail,
                 Title: assignee.Title,
+              }))
+            : [],
+          Reassigned: item?.Reassigned
+            ? item.Reassigned.map((Reassigned: any) => ({
+                Id: Reassigned.ID,
+                Email: Reassigned.EMail,
+                Title: Reassigned.Title,
               }))
             : [],
         };
@@ -170,6 +184,66 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       console.error("Error fetching items:", error);
       return [];
     }
+  };
+
+  const updateAssigenee = async (rowdata: any) => {
+    // Filter the correct question
+    const filteredItems = filterData.filter(
+      (question: any) => question.Id === rowdata.Id
+    );
+
+    // Ensure at least one item is found
+    if (filteredItems.length === 0) {
+      console.error("No matching question found for the given rowdata.");
+      return;
+    }
+
+    // Access the first filtered item
+    const filteredItem = filteredItems[0];
+
+    // Prepare the assigned user IDs
+    const assignedIds =
+      filteredItem.Reassigned?.map((val: any) => val.id) || [];
+    debugger;
+    try {
+      // Update the SharePoint list item
+      await sp.web.lists
+        .getByTitle(GCongfig.ListName.EmployeeResponse)
+        .items.getById(filteredItem.Id)
+        .update({
+          ReassignedId: { results: assignedIds }, // Set the multi-lookup values
+        });
+
+      console.log("Assignee updated successfully.");
+      console.log(filteredItem.index);
+      const indexValue = questions.findIndex((item: any) => {
+        return item.Id === filteredItem.Id;
+      });
+      filterData[indexValue].Reassigned = [...filteredItem];
+      setfilterData([...filterData]);
+      setQuestions([...filterData]);
+
+      setVisible(false);
+    } catch (error) {
+      console.error("Error updating assignee:", error);
+    }
+  };
+
+  const ActionIcons = (Rowdata: any, index: any) => {
+    return (
+      <div>
+        <i
+          className="pi pi-sync"
+          style={{ fontSize: "1.25rem", color: "#233b83" }}
+          onClick={() => {
+            setSelectedItem(Rowdata);
+            setVisible(true);
+
+            console.log(Rowdata);
+          }}
+        />
+      </div>
+    );
   };
 
   const stsTemplate = (rowData: any) => {
@@ -243,7 +317,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     debugger;
     if (curFilterItem.Employee?.length > 0) {
       tempArray = tempArray.filter((_item: any) =>
-        _item.Assigenee?.some((assignedPerson: any) => {
+        _item.Assigned?.some((assignedPerson: any) => {
           // Log to check the data
           console.log("Assigned Person Email: ", assignedPerson.Email);
           return curFilterItem.Employee.some((selectedPerson: any) => {
@@ -268,6 +342,34 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     setfilterData(tempArray);
   };
 
+  const handleChange = (value: any, rowData: any, field: string) => {
+    debugger;
+    const updatedQuestions: any = filterData.map((question: any) =>
+      question.Id === rowData.Id
+        ? {
+            ...question,
+            [field]:
+              field === "Assigned"
+                ? value.map((val: any) => ({
+                    id: val.id,
+                    Email: val.secondaryText,
+                    Title: val.text,
+                  }))
+                : field === "Reassigned"
+                ? value.map((val: any) => ({
+                    id: val.id,
+                    Email: val.secondaryText,
+                    Title: val.text,
+                  }))
+                : value,
+          }
+        : question
+    );
+    setfilterData([...updatedQuestions]);
+
+    console.log(updatedQuestions, "updatedQuestions");
+  };
+
   useEffect(() => {
     const fetchQuestions = async () => {
       const fetchedItems = await EmployeeDetails();
@@ -287,6 +389,82 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   console.log(questions, "questions object");
   return (
     <div className={styles.employeeResponseSection}>
+      <div className="card flex justify-content-center">
+        <Dialog
+          header="Re assigen HR Persons"
+          visible={visible}
+          style={{ width: "30vw" }}
+          onHide={() => {
+            if (!visible) return;
+            setVisible(false);
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <PeoplePicker
+              context={props.context}
+              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+              personSelectionLimit={100}
+              showtooltip={false}
+              ensureUser={true}
+              placeholder={"Search Employee"}
+              onChange={(selectedPeople: any[]) => {
+                handleChange(
+                  selectedPeople,
+                  SelectedItem,
+                  SelectedItem.Reassigned && SelectedItem.Reassigned.length > 0
+                    ? "Reassigned"
+                    : "Assigned"
+                ); // Pass selectedPeople and rowData
+              }}
+              principalTypes={[PrincipalType.User]}
+              defaultSelectedUsers={
+                SelectedItem.Reassigned && SelectedItem.Reassigned.length > 0
+                  ? SelectedItem?.Reassigned?.map(
+                      (assignee: any) => assignee?.Email
+                    )
+                  : SelectedItem?.Assigned?.map(
+                      (assignee: any) => assignee?.Email
+                    ) || []
+              }
+              resolveDelay={1000}
+            />
+          </div>
+          <div
+            style={{
+              marginTop: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              // width: "50%",
+            }}
+          >
+            <Button
+              label="Cancel"
+              className={styles.cancelBtn}
+              onClick={() => {
+                //  setQuestions(questions);
+                setfilterData(questions);
+                setVisible(false);
+              }}
+            />
+            <Button
+              label="Save"
+              className={styles.saveBtn}
+              onClick={() => {
+                updateAssigenee(SelectedItem);
+              }}
+            />
+          </div>
+        </Dialog>
+      </div>
+
       <div className={styles.ResponseHeader}>
         <div className={styles.backIconWithUserName}>
           <i
@@ -387,7 +565,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             <Column field="Answer" header="Answer" />
             <Column field="Status" header="Status" body={stsTemplate} />
             <Column
-              field="Assigenee"
+              field="HR Persons"
               header="Assigned to"
               body={peopleTemplate}
               style={{
@@ -415,6 +593,12 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             />
 
             <Column field="Comments" header="HR Comments" />
+
+            <Column
+              field="Re Assigen"
+              header="Re Assigen"
+              body={(Rowdata: any, index: any) => ActionIcons(Rowdata, index)}
+            />
           </DataTable>
         ) : (
           <div className={styles.noDataFound}>No data found!</div>
