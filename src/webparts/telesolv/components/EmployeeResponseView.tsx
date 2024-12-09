@@ -54,9 +54,10 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   const peopleTemplate = (rowData: any) => {
     debugger;
     const assignees =
-      rowData.Reassigned && rowData.Reassigned.length > 0
-        ? rowData.Reassigned
-        : rowData?.Assigned || [];
+      // rowData.Reassigned && rowData.Reassigned.length > 0
+      //   ? rowData.Reassigned
+      // :
+      rowData?.Assigned || [];
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {assignees.map((assignee: any, index: number) => (
@@ -89,7 +90,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
   //People picker
   const CompletedByPeopleTemplate = (rowData: any) => {
-    const user = rowData.Employee; // Access Employee data from the rowData
+    const user = rowData.CompletedBy; // Access Employee data from the rowData
     return (
       <div style={{ display: "flex", alignItems: "center" }}>
         <img
@@ -121,7 +122,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         .filter(`Employee/ID eq ${employeeIdString}`)
         .get();
       debugger;
-      console.log(items, "items");
 
       // Fetch items from the SharePoint list
       const Qitems = await sp.web.lists
@@ -151,15 +151,22 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             Name: item.Employee ? item.Employee.Title : "",
             Email: item.Employee ? item.Employee.EMail : "",
           },
-
-          CompletedBy: {
-            Name: item.CompletedBy ? item.CompletedBy.Title : "",
-            Email: item.CompletedBy ? item.CompletedBy.EMail : "",
-          },
+          CompletedBy: item.CompletedBy
+            ? {
+                Name: item.CompletedBy ? item.CompletedBy.Title : "",
+                Email: item.CompletedBy ? item.CompletedBy.EMail : "",
+              }
+            : [],
           Role: item.EmployeeID?.Role || "No Role",
           CompletedDateAndTime: item.CompletedDateAndTime || null,
           Department: item.EmployeeID?.Department || "No Department",
-          Assigned: relatedQitems[0]?.Assigned
+          Assigned: item?.Reassigned
+            ? item.Reassigned.map((Reassigned: any) => ({
+                Id: Reassigned.ID,
+                Email: Reassigned.EMail,
+                Title: Reassigned.Title,
+              }))
+            : relatedQitems[0]?.Assigned
             ? relatedQitems[0].Assigned.map((assignee: any) => ({
                 Id: assignee.ID,
                 Email: assignee.EMail,
@@ -186,42 +193,85 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     }
   };
 
+  //  const updateAssigenee = async (rowdata: any) => {
+  //   const filteredItems = filterData.filter(
+  //     (question: any) => question.Id === rowdata.Id
+  //   );
+
+  //   if (filteredItems.length === 0) {
+  //     console.error("No matching question found for the given rowdata.");
+  //     return;
+  //   }
+
+  //   const filteredItem = filteredItems[0];
+  //   const assignedIds =
+  //     filteredItem.Reassigned?.map((val: any) => val.id) || [];
+
+  //   try {
+  //     await sp.web.lists
+  //       .getByTitle(GCongfig.ListName.EmployeeResponse)
+  //       .items.getById(filteredItem.Id)
+  //       .update({
+  //         ReassignedId: { results: assignedIds }, // Set the multi-lookup values
+  //       });
+
+  //     console.log("Assignee updated successfully.");
+
+  //     // Find the index of the item to update
+  //     const indexValue = filterData.findIndex(
+  //       (item: any) => item.Id === filteredItem.Id
+  //     );
+
+  //     if (indexValue !== -1) {
+  //       // Update the Reassigned property
+  //       filterData[indexValue].Reassigned = [...filteredItem.Reassigned];
+  //       setfilterData([...filterData]);
+  //       setQuestions([...filterData]);
+  //     } else {
+  //       console.error("Item not found in filterData.");
+  //     }
+
+  //     setVisible(false);
+  //   } catch (error) {
+  //     console.error("Error updating assignee:", error);
+  //   }
+  // };
+
   const updateAssigenee = async (rowdata: any) => {
-    // Filter the correct question
     const filteredItems = filterData.filter(
       (question: any) => question.Id === rowdata.Id
     );
 
-    // Ensure at least one item is found
     if (filteredItems.length === 0) {
       console.error("No matching question found for the given rowdata.");
       return;
     }
 
-    // Access the first filtered item
     const filteredItem = filteredItems[0];
-
-    // Prepare the assigned user IDs
     const assignedIds =
       filteredItem.Reassigned?.map((val: any) => val.id) || [];
-    debugger;
+
     try {
-      // Update the SharePoint list item
       await sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeResponse)
         .items.getById(filteredItem.Id)
         .update({
-          ReassignedId: { results: assignedIds }, // Set the multi-lookup values
+          ReassignedId: { results: assignedIds },
         });
 
       console.log("Assignee updated successfully.");
-      console.log(filteredItem.index);
-      const indexValue = questions.findIndex((item: any) => {
-        return item.Id === filteredItem.Id;
-      });
-      filterData[indexValue].Reassigned = [...filteredItem];
-      setfilterData([...filterData]);
-      setQuestions([...filterData]);
+
+      const indexValue = filterData.findIndex(
+        (item: any) => item.Id === filteredItem.Id
+      );
+
+      if (indexValue !== -1) {
+        filterData[indexValue].Reassigned = [...filteredItem.Reassigned];
+        setfilterData([...filterData]);
+        setQuestions([...filterData]);
+      } else {
+        console.error("Item not found in filterData.");
+      }
 
       setVisible(false);
     } catch (error) {
@@ -231,15 +281,24 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
   const ActionIcons = (Rowdata: any, index: any) => {
     return (
-      <div>
+      <div
+        style={{
+          pointerEvents:
+            Rowdata.Status === "Satisfactory" || Rowdata.Status === "Resolved"
+              ? "none"
+              : "auto",
+          opacity:
+            Rowdata.Status === "Satisfactory" || Rowdata.Status === "Resolved"
+              ? 0.5
+              : 1,
+        }}
+      >
         <i
           className="pi pi-sync"
           style={{ fontSize: "1.25rem", color: "#233b83" }}
           onClick={() => {
             setSelectedItem(Rowdata);
             setVisible(true);
-
-            console.log(Rowdata);
           }}
         />
       </div>
@@ -349,13 +408,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         ? {
             ...question,
             [field]:
-              field === "Assigned"
-                ? value.map((val: any) => ({
-                    id: val.id,
-                    Email: val.secondaryText,
-                    Title: val.text,
-                  }))
-                : field === "Reassigned"
+              field === "Reassigned"
                 ? value.map((val: any) => ({
                     id: val.id,
                     Email: val.secondaryText,
@@ -366,7 +419,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         : question
     );
     setfilterData([...updatedQuestions]);
-
     console.log(updatedQuestions, "updatedQuestions");
   };
 
@@ -414,13 +466,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               ensureUser={true}
               placeholder={"Search Employee"}
               onChange={(selectedPeople: any[]) => {
-                handleChange(
-                  selectedPeople,
-                  SelectedItem,
-                  SelectedItem.Reassigned && SelectedItem.Reassigned.length > 0
-                    ? "Reassigned"
-                    : "Assigned"
-                ); // Pass selectedPeople and rowData
+                handleChange(selectedPeople, SelectedItem, "Reassigned"); // Pass selectedPeople and rowData
               }}
               principalTypes={[PrincipalType.User]}
               defaultSelectedUsers={
@@ -457,6 +503,11 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             <Button
               label="Save"
               className={styles.saveBtn}
+              disabled={filterData.some(
+                (item: any) =>
+                  item.Id === SelectedItem.Id &&
+                  (!item.Reassigned || item.Reassigned.length === 0)
+              )}
               onClick={() => {
                 updateAssigenee(SelectedItem);
               }}
