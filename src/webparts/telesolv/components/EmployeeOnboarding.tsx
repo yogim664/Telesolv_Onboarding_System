@@ -65,6 +65,9 @@ const Onboarding = (props: any) => {
   const [Departments, setDepartments] = useState<any>([]);
   const [filterData, setfilterData] = React.useState<any>([]);
   const [statusChoices, setStatusChoices] = useState<any[]>([]);
+  const [CurFormID, setCurFormID] = useState(null);
+  const [FormsChoice, setFormsChoice] = useState<any>([]);
+  const [FormQuestions, setFormQuestions] = useState<any>([]);
   const [CurUserID, setCurUserID] = useState<any>();
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
@@ -90,6 +93,7 @@ const Onboarding = (props: any) => {
       const user = await sp.web.currentUser();
       console.log("Current User ID:", user.Id);
       setCurUserID(user.Id);
+
       return user.Id;
     } catch (error) {
       console.error("Error getting current user ID:", error);
@@ -112,7 +116,33 @@ const Onboarding = (props: any) => {
       }));
       console.log(titleValues, "dep");
       setDepartments([...titleValues]);
+      getForms();
       console.log(Departments, "SetDep");
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
+  };
+
+  // Get forms
+
+  // Function to fetch Title values
+  const getForms = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle(GCongfig.ListName.Forms)
+        .items.select("Title, ID")
+        .get();
+
+      const FormValues = items.map((item: any) => ({
+        key: item.Title,
+        name: item.Title,
+        ID: item.ID,
+      }));
+
+      setFormsChoice(FormValues);
+      // const firstFormID = FormValues?.[0]?.ID;
+      // setCurFormID(firstFormID);
+      // filterFunc("Forms", firstFormID);
     } catch (error) {
       console.error("Error fetching titles:", error);
     }
@@ -324,8 +354,8 @@ const Onboarding = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID, Assigned/EMail")
-        .expand("Assigned")
+        .items.select("*,Assigned/ID, Assigned/EMail, Forms/ID")
+        .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "COnfigitems");
@@ -335,6 +365,7 @@ const Onboarding = (props: any) => {
         Id: item.Id,
         isEdit: false,
         QuestionNo: item.Sno,
+        Forms: item.Forms?.ID || null,
         QuestionTitle: item.Title,
         isDelete: item.isDelete,
         Status: item.Status,
@@ -430,6 +461,13 @@ const Onboarding = (props: any) => {
     }
   };
   console.log(questions);
+
+  const checkFormhaveQuestion = (formID: any) => {
+    const filterFormQuestion = questions.filter(
+      (val: any) => val.Forms === formID
+    );
+    setFormQuestions(filterFormQuestion);
+  };
 
   useEffect(() => {
     fetchQuestions();
@@ -610,12 +648,19 @@ const Onboarding = (props: any) => {
             PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
             SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
+            FormId: CurFormID,
           })
           .then(async (res: any) => {
             try {
               // Using Promise.all to handle multiple asynchronous requests in parallel
+
+              const filterQuestion = questions.filter(
+                (val: any) => val.Forms === CurFormID
+              );
+
+              debugger;
               await Promise.all(
-                questions.map(async (question: any) => {
+                filterQuestion.map(async (question: any) => {
                   // Add each question to the EmployeeResponse list
                   console.log(question.Id);
                   console.log(question.Answer, "Answer");
@@ -627,7 +672,7 @@ const Onboarding = (props: any) => {
                       Title: question.QuestionTitle,
                       Sno: question.QuestionNo,
                       Status: "Pending",
-
+                      FormId: question.Forms,
                       Answer: question.Answer.key,
                       QuestionIDId: question.Id, // Question ID from questions array
                       EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
@@ -963,6 +1008,33 @@ const Onboarding = (props: any) => {
                   />
                 </div>
               </div>
+
+              <div className={styles.addDialog}>
+                <div className={styles.addDialogHeader}>Form</div>
+                <div className={styles.addDialogInput}>
+                  <Dropdown
+                    value={
+                      FormsChoice
+                        ? FormsChoice?.find(
+                            (choice: any) => choice.ID === CurFormID
+                          ) || null
+                        : null
+                    }
+                    onChange={(e) => {
+                      setCurFormID(e.value.ID);
+                      checkFormhaveQuestion(e.value.ID);
+                    }}
+                    options={FormsChoice || []}
+                    optionLabel="name"
+                    placeholder="Select a Department"
+                  />
+                  {FormQuestions.length === 0 && (
+                    <div className={styles.addEmpInfo}>
+                      This form have no questions
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>PhoneNumber</div>
                 <div className={styles.addDialogInput}>
@@ -1031,7 +1103,10 @@ const Onboarding = (props: any) => {
                       border: "none",
                       width: "100px",
                     }}
-                    disabled={!TempEmployeeOnboarding?.Employee?.EmployeeEMail}
+                    disabled={
+                      !TempEmployeeOnboarding?.Employee?.EmployeeEMail ||
+                      FormQuestions.length <= 1
+                    }
                     // onClick={() => saveEmployeeDetailsToSP()}
                     onClick={() => Vaildation()}
                   />

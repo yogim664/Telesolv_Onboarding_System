@@ -24,12 +24,14 @@ import { IQuestionDatas } from "../../../Interface/Interface";
 
 interface IFilterKeys {
   people: string[];
+  search: string;
 }
 
 const HrPersons = (props: any) => {
   // variables
   let _fkeys: IFilterKeys = {
     people: [],
+    search: "",
   };
 
   const [hrperson, setHRperon] = React.useState<any>([]);
@@ -55,8 +57,8 @@ const HrPersons = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID,Assigned/EMail")
-        .expand("Assigned")
+        .items.select("*,Assigned/ID,Assigned/EMail, Forms/ID")
+        .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "items");
@@ -69,6 +71,7 @@ const HrPersons = (props: any) => {
         QuestionTitle: item.Title,
         isDelete: item.isDelete,
         TaskName: item.TaskName,
+        Form: item.Forms?.ID,
         Answer: item.Answer
           ? {
               key: item.Answer,
@@ -100,15 +103,30 @@ const HrPersons = (props: any) => {
     let _masterData = [...hrperson];
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
+
+    debugger;
     if (_tempFilterkeys.people.length) {
       _masterData = _masterData.filter(
         (_item) =>
           _item.Assigned.length &&
           _item.Assigned.some((_a: any) =>
-            val.some((_v: any) => _a.Email == _v.secondaryText)
+            // val.some((_v: any) => _a.Email === _v.secondaryText)
+            _tempFilterkeys.people.some(
+              (_v: any) => _a.Email === _v.secondaryText
+            )
           )
       );
     }
+
+    if (_tempFilterkeys.search) {
+      const searchKey = _tempFilterkeys.search.toLowerCase();
+      _masterData = _masterData?.filter(
+        (value: any) =>
+          value?.QuestionTitle?.toLowerCase().includes(searchKey) ||
+          value?.TaskName?.toLowerCase().includes(searchKey)
+      );
+    }
+
     setfilterkeys({ ..._tempFilterkeys });
     setfilterData([..._masterData]);
   };
@@ -280,6 +298,15 @@ const HrPersons = (props: any) => {
       <ToastContainer />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
+          <InputText
+            placeholder={"Search Role"}
+            // className={styles.filterRole}
+            onChange={(e) => {
+              console.log(e.target.value);
+
+              filterFunc("search", e.target.value);
+            }}
+          />
           <div className="HRPersonPeopleSearch">
             <PeoplePicker
               context={props.context}
@@ -311,6 +338,22 @@ const HrPersons = (props: any) => {
               fetchQuestions();
             }}
           />
+          <i
+            className="pi pi-refresh"
+            style={{
+              backgroundColor: "#223b83",
+              padding: 10,
+              borderRadius: 4,
+              color: "#fff",
+            }}
+            onClick={() => {
+              filterkeys.people = [];
+
+              filterkeys.search = "";
+
+              setfilterData(hrperson);
+            }}
+          />
         </div>
         <DataTable className={styles.HRConfigDataTable} value={[...filterData]}>
           <Column
@@ -324,6 +367,7 @@ const HrPersons = (props: any) => {
             header="Task Name"
             body={peopleTask}
           ></Column>
+          <Column field="Form" header="Form"></Column>
           <Column
             className={styles.HRPersonsList}
             field="Assigenee"
