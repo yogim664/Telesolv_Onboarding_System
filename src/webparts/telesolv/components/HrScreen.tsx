@@ -1,3 +1,6 @@
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable prefer-const */
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -96,10 +99,8 @@ const HrScreen = (props: any): JSX.Element => {
     }
 
     if (_tempFilterkey?.status) {
-      temp = temp?.filter((value: any) =>
-        value?.Status.key
-          .toLowerCase()
-          .includes(_tempFilterkey.status.toLowerCase())
+      temp = temp?.filter(
+        (value: any) => value?.Status.key === _tempFilterkey.status
       );
     }
     if (_tempFilterkey?.search) {
@@ -126,14 +127,14 @@ const HrScreen = (props: any): JSX.Element => {
   const getAllTitles = async () => {
     try {
       const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
-        .items.select("Title") // Fetch only the Title column
+        .getByTitle(GCongfig.ListName.Department)
+        .items.select("Title")
         .get();
 
       // Format the fetched items for react-select
       const titleValues = items.map((item: any) => ({
-        key: item.Title, // Unique identifier
-        name: item.Title, // Display name
+        key: item.Title,
+        name: item.Title,
       }));
       console.log(titleValues, "dep");
       setDepartments([...titleValues]);
@@ -151,7 +152,7 @@ const HrScreen = (props: any): JSX.Element => {
       .get()
       .then((data: any) => {
         const ChoicesCollection = data.Choices.filter(
-          (choice: any) => choice !== "Satisfactory" && choice !== "Resolved"
+          (choice: any) => choice !== "Satisfactory"
         ).map((choice: any) => ({
           key: choice,
           name: choice,
@@ -165,12 +166,6 @@ const HrScreen = (props: any): JSX.Element => {
       })
       .catch((err) => console.error("Error fetching choices:", err));
   };
-
-  // Call the function on component mount
-  useEffect(() => {
-    getStsChoices();
-    getAllTitles();
-  }, []);
 
   const questionConfig = async (assArray: any[] = []): Promise<void> => {
     await sp.web.lists
@@ -239,6 +234,7 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const AssigendPerson = async (): Promise<void> => {
+    debugger;
     await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
       .items.select("*, Assigned/ID, Assigned/EMail")
@@ -384,6 +380,8 @@ const HrScreen = (props: any): JSX.Element => {
 
   useEffect(() => {
     AssigendPerson();
+    getStsChoices();
+    getAllTitles();
   }, []);
 
   return (

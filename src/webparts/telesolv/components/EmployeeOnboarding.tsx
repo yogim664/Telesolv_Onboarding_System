@@ -243,15 +243,14 @@ const Onboarding = (props: any) => {
       sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeOnboarding)
         .items.getById(id)
-        .delete();
-      showSuccess("Delete Sucessfuly");
+        .delete()
+        .then(() => {
+          const afterDelete = filterData.filter((e: any) => e.index !== index);
+          setfilterData(afterDelete);
 
-      //  fetchQuestions();
-
-      const afterDelete = filterData.filter((e: any) => e.index !== index);
-      setfilterData(afterDelete);
-
-      console.log("Employee details updated successfully in SharePoint!");
+          showSuccess("Deleted successfully");
+          console.log("Employee details updated successfully in SharePoint!");
+        });
     } catch (error) {
       console.error("Error saving questions:", error);
     }
