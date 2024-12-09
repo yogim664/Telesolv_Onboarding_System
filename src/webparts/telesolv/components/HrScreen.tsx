@@ -74,7 +74,7 @@ const HrScreen = (props: any): JSX.Element => {
   const [PageNationRows, setPageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
-  const [filArray, setFilArray] = useState<any[]>([]);
+  const [filterArray, setfilterArray] = useState<any[]>([]);
 
   const handleChange = (key: string, value: any) => {
     const curObj: any = { ...TempEmployeeDetails };
@@ -119,7 +119,7 @@ const HrScreen = (props: any): JSX.Element => {
     }
 
     setSearchTerms({ ..._tempFilterkey });
-    setFilArray([...temp]);
+    setfilterArray([...temp]);
   };
 
   //Get Departments
@@ -168,12 +168,13 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const questionConfig = async (assArray: any[] = []): Promise<void> => {
+    debugger;
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
-        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/TaskName, Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role,EmployeeID/SecondaryEmail"
+        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/TaskName,  Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role, EmployeeID/SecondaryEmail , Reassigned/ID, Reassigned/EMail, Reassigned/Title"
       )
-      .expand("QuestionID,Employee,EmployeeID")
+      .expand("QuestionID,Employee,EmployeeID,Reassigned")
       .get()
       .then(async (_items: any) => {
         console.log("Fetched items:", _items); // Log fetched items
@@ -190,8 +191,6 @@ const HrScreen = (props: any): JSX.Element => {
             Answer: item.QuestionID?.Answer || "No Answer",
             SecondaryEmail:
               item.EmployeeID?.SecondaryEmail || "No SecondaryEmail",
-
-            //Status: item.Status || "No Status",
             Status: item.Status
               ? { key: item?.Status, name: item?.Status }
               : "",
@@ -203,6 +202,17 @@ const HrScreen = (props: any): JSX.Element => {
                   name: item.Response,
                 }
               : "",
+            Assigned:
+              item.Reassigned && item.Reassigned.length > 0
+                ? item.Reassigned.map((Reassigned: any) => ({
+                    id: Reassigned.ID,
+                    Email: Reassigned.EMail,
+                  }))
+                : item.Assigned?.map((Assigned: any) => ({
+                    id: Assigned.ID,
+                    Email: Assigned.EMail,
+                  })) || [],
+
             Employee: {
               Name: item.Employee ? item.Employee.Title : "",
               Email: item.Employee ? item.Employee.EMail : "",
@@ -212,19 +222,23 @@ const HrScreen = (props: any): JSX.Element => {
         console.log("Transformed array: ", _tempArr);
 
         const tempAssigenQuestion = await Promise.all(
-          _tempArr?.filter((item: any) =>
-            assArray?.some(
-              (val: any) =>
-                val?.ID === item?.QuestionID &&
-                item.Status.key !== "Satisfactory" &&
-                item.Status.key !== "Resolved"
-            )
+          _tempArr?.filter(
+            (item: any) =>
+              (assArray?.some((val: any) => val?.ID === item?.QuestionID) ||
+                item.Assigned?.some(
+                  (assigned: any) =>
+                    assigned?.Email?.toLowerCase() ===
+                    CurUser?.Email.toLowerCase()
+                )) &&
+              item.Status.key !== "Satisfactory" &&
+              item.Status.key !== "Resolved"
           ) || []
         );
+        debugger;
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
 
         setListItems(tempAssigenQuestion);
-        setFilArray(tempAssigenQuestion);
+        setfilterArray(tempAssigenQuestion);
 
         getStsChoices();
       })
@@ -571,14 +585,14 @@ const HrScreen = (props: any): JSX.Element => {
               filData.status = "";
               filData.search = "";
               setSearchTerms({ ...filData });
-              setFilArray(ListItems);
+              setfilterArray(ListItems);
             }}
           />
         </div>
       </div>
 
       <DataTable
-        value={filArray?.slice(
+        value={filterArray?.slice(
           PageNationRows.first,
           PageNationRows.first + PageNationRows.rows
         )}

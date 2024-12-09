@@ -132,7 +132,7 @@ const Config = (props: any) => {
     if (!e || e.trim() === "") {
       setchangeOption(null);
     } else {
-      setchangeOption(e);
+      setchangeOption(e.trim());
     }
     console.log(changeOption);
   };
@@ -688,15 +688,35 @@ const Config = (props: any) => {
   };
 
   const saveNewform = async () => {
-    try {
-      await sp.web.lists.getByTitle(GCongfig.ListName.Forms).items.add({
-        Title: Newformvalue,
+    debugger;
+    if (
+      FormsChoice.some(
+        (e: any) => e.key.toLowerCase() === Newformvalue.toLowerCase()
+      )
+    ) {
+      toast.error("Form already exists.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
-      await getForms();
+    } else {
+      try {
+        await sp.web.lists.getByTitle(GCongfig.ListName.Forms).items.add({
+          Title: Newformvalue,
+        });
+        setNewformvalue("");
+        await getForms();
 
-      console.log("Questions saved successfully to SharePoint!");
-    } catch (error) {
-      console.error("Error saving questions:", error);
+        console.log("Questions saved successfully to SharePoint!");
+      } catch (error) {
+        console.error("Error saving questions:", error);
+      }
     }
   };
 
@@ -748,9 +768,9 @@ const Config = (props: any) => {
             }}
           >
             <InputText
-              value={Newformvalue} // Bind state to input value
+              value={Newformvalue || ""} // Bind state to input value
               onChange={handleInputChange} // Handle onChange event
-              placeholder="Enter value"
+              placeholder="Enter New form"
             />
           </div>
           <div
@@ -773,6 +793,7 @@ const Config = (props: any) => {
             <Button
               label="Save"
               className={styles.saveBtn}
+              disabled={!Newformvalue}
               onClick={() => {
                 saveNewform();
                 // setVisible(false);
@@ -807,7 +828,7 @@ const Config = (props: any) => {
               label="Add new form"
               className={styles.saveBtn}
               onClick={() => {
-                setNewformvalue(" ");
+                setNewformvalue(null);
                 setVisible(true);
               }}
             />

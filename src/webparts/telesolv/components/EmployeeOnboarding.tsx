@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 /* eslint-disable no-debugger */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-empty-function */
@@ -79,7 +80,7 @@ const Onboarding = (props: any) => {
       EmployeeEMail: "",
       EmployeeTitle: "",
     },
-
+    Forms: "",
     Role: "",
     Department: { key: "", name: "" },
     Email: "",
@@ -293,15 +294,17 @@ const Onboarding = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeOnboarding)
-        .items.select("*,Employee/ID,Employee/EMail,Employee/Title")
-        .expand("Employee")
+        .items.select("*,Employee/ID,Employee/EMail,Employee/Title,Form/ID")
+        .expand("Employee,Form")
         .filter("isDelete ne 1")
         .get();
       console.log(items, "items");
 
       // Map the items to create an array of values
-      const formattedItems = items.map((item: any) => ({
+      const formattedItems = items.map((item: any, index: any) => ({
+        index: index,
         Id: item.Id,
+        Forms: item.Form?.ID || null,
         Employee: item.Employee?.Title
           ? {
               EmployeeId: item.Employee.ID || null,
@@ -360,7 +363,8 @@ const Onboarding = (props: any) => {
       console.log(items, "COnfigitems");
 
       // Map the items to create an array of values
-      const formattedQuestions = items.map((item: any) => ({
+      const formattedQuestions = items.map((item: any, i: number) => ({
+        index: i,
         Id: item.Id,
         isEdit: false,
         QuestionNo: item.Sno,
@@ -407,8 +411,9 @@ const Onboarding = (props: any) => {
       console.log(items, "items");
 
       // Format EmployeeResponse items and link to assigned values
-      const formattedResponseItems = items.map((item: any) => {
+      const formattedResponseItems = items.map((item: any, index: any) => {
         return {
+          index: index,
           QuestionID: item.QuestionID?.ID,
           QuestionTitle: item.QuestionID?.Title,
           Answer: item.QuestionID?.Answer,
@@ -491,8 +496,8 @@ const Onboarding = (props: any) => {
             setUpdate(true);
             setVisible(true);
 
-            console.log(Update);
-            console.log(Rowdata);
+            checkFormhaveQuestion(Rowdata.Forms);
+
             setTempEmployeeOnboarding({ ...Rowdata });
           }}
         />
@@ -561,6 +566,7 @@ const Onboarding = (props: any) => {
 
     try {
       if (Update) {
+        debugger;
         await sp.web.lists
           .getByTitle(GCongfig.ListName.EmployeeOnboarding)
           .items.getById(TempEmployeeOnboarding.Id)
@@ -572,69 +578,123 @@ const Onboarding = (props: any) => {
             EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
             SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
             Status: TempEmployeeOnboarding.Status,
-          });
-
-        sp.web.lists
-          .getByTitle(GCongfig.ListName.EmployeeResponse)
-          .items.select("Employee/EMail,Id,ID") // Fetch only necessary fields
-          .expand("Employee")
-          .get()
-          .then(async (_items: any) => {
-            console.log(_items, "Response84848");
-            console.log(TempEmployeeOnboarding);
-
-            console.log(TempEmployeeOnboarding.Status, "Statusfinanl");
-
-            // Filter items based on employee email
-            const filteredItems = _items.filter(
-              (item: any) =>
-                item?.Employee?.EMail?.toLowerCase() ===
-                TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
-            );
-
-            if (TempEmployeeOnboarding.Status === "Completed") {
-              console.log(
-                filteredItems,
-                "tempItemstempItemstempItemstempItems"
-              );
-
-              filteredItems.map((_Empitem: any) =>
-                sp.web.lists
-                  .getByTitle(GCongfig.ListName.EmployeeResponse)
-                  .items.getById(_Empitem.Id)
-                  .update({
-                    Status: "Satisfactory",
-                    CompletedById: CurUserID,
-                    CompletedDateAndTime: new Date().toISOString(),
-                  })
-              );
-            } else {
-              console.log(CurUserID);
-
-              console.log(
-                "Employee status is not 'Completed'. No updates performed."
-              );
-            }
           })
+          .then(async () => {
+            const updatedEmployeeOnboarding = [...EmployeeOnboarding];
+            updatedEmployeeOnboarding[TempEmployeeOnboarding.index] = {
+              ...TempEmployeeOnboarding,
+            };
+            setfilterData(updatedEmployeeOnboarding);
+            setEmployeeOnboarding(updatedEmployeeOnboarding);
+            debugger;
+            console.log(
+              "Updated Employee Onboarding:",
+              updatedEmployeeOnboarding
+            );
+            await sp.web.lists
+              .getByTitle(GCongfig.ListName.EmployeeResponse)
+              .items.select("Employee/EMail,Id,ID") // Fetch only necessary fields
+              .expand("Employee")
+              .get()
+              .then(async (_items: any) => {
+                console.log(_items, "Response84848");
+                console.log(TempEmployeeOnboarding);
 
-          .catch((error) => {
-            console.error("Error fetching EmployeeResponse items:", error);
+                console.log(TempEmployeeOnboarding.Status, "Statusfinanl");
+
+                // Filter items based on employee email
+                // const filteredItems = _items.filter(
+                //   (item: any) =>
+                //     item?.Employee?.EMail?.toLowerCase() ===
+                //     TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
+                // );
+
+                // if (TempEmployeeOnboarding.Status === "Completed") {
+                //   console.log(
+                //     filteredItems,
+                //     "tempItemstempItemstempItemstempItems"
+                //   );
+
+                //   filteredItems.map((_Empitem: any) =>
+                //     sp.web.lists
+                //       .getByTitle(GCongfig.ListName.EmployeeResponse)
+                //       .items.getById(_Empitem.Id)
+                //       .update({
+                //         Status: "Satisfactory",
+                //         CompletedById: CurUserID,
+                //         CompletedDateAndTime: new Date().toISOString(),
+                //       })
+                //   );
+                //   toast.success("Employee Updated Successfully", {
+                //     position: "top-right",
+                //     autoClose: 5000,
+                //     hideProgressBar: false,
+                //     closeOnClick: true,
+                //     pauseOnHover: true,
+                //     draggable: true,
+                //     progress: undefined,
+                //     theme: "light",
+                //     transition: Bounce,
+                //   });
+                //   setUpdate(false);
+
+                //new
+
+                const filteredItems = _items.filter(
+                  (item: any) =>
+                    item?.Employee?.EMail?.toLowerCase() ===
+                    TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
+                );
+
+                if (TempEmployeeOnboarding.Status === "Completed") {
+                  console.log(filteredItems, "Filtered Items");
+
+                  // Create an array of promises for updates
+                  const updatePromises = filteredItems.map((_Empitem: any) =>
+                    sp.web.lists
+                      .getByTitle(GCongfig.ListName.EmployeeResponse)
+                      .items.getById(_Empitem.Id)
+                      .update({
+                        Status: "Satisfactory",
+                        CompletedById: CurUserID,
+                        CompletedDateAndTime: new Date().toISOString(),
+                      })
+                  );
+
+                  // Wait for all promises to complete
+                  Promise.all(updatePromises)
+                    .then(() => {
+                      console.log("All updates completed successfully!");
+
+                      toast.success("Employee Updated Successfully", {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        transition: Bounce,
+                      });
+                      setUpdate(false);
+                    })
+                    .catch((error) => {
+                      console.error("Error during updates:", error);
+                    });
+                } else {
+                  console.log(CurUserID);
+
+                  console.log(
+                    "Employee status is not 'Completed'. No updates performed."
+                  );
+                }
+              })
+
+              .catch((error) => {
+                console.error("Error fetching EmployeeResponse items:", error);
+              });
           });
-
-        toast.success("Employee Updated Successfully", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        });
-        setUpdate(false);
-
-        fetchQuestions();
       } else {
         // Create new item
         await sp.web.lists
@@ -699,7 +759,7 @@ const Onboarding = (props: any) => {
           });
       }
 
-      fetchQuestions();
+      // fetchQuestions();
       setVisible(false);
       console.log("Questions saved successfully to SharePoint!");
     } catch (error) {
@@ -1013,15 +1073,25 @@ const Onboarding = (props: any) => {
                 <div className={styles.addDialogInput}>
                   <Dropdown
                     value={
-                      FormsChoice
-                        ? FormsChoice?.find(
+                      TempEmployeeOnboarding.Forms
+                        ? FormsChoice.find(
+                            (choice: any) =>
+                              choice.ID === TempEmployeeOnboarding.Forms
+                          ) || null
+                        : FormsChoice.find(
                             (choice: any) => choice.ID === CurFormID
                           ) || null
-                        : null
+
+                      // FormsChoice
+                      //   ? FormsChoice?.find(
+                      //       (choice: any) => choice.ID === CurFormID
+                      //     ) || null
+                      //   : null
                     }
                     onChange={(e) => {
                       setCurFormID(e.value.ID);
                       checkFormhaveQuestion(e.value.ID);
+                      debugger;
                     }}
                     disabled={Update}
                     options={FormsChoice || []}
@@ -1108,9 +1178,11 @@ const Onboarding = (props: any) => {
                     }}
                     disabled={
                       !TempEmployeeOnboarding?.Employee?.EmployeeEMail ||
-                      FormQuestions.length <= 1
+                      FormQuestions.length <= 1 ||
+                      //  TempEmployeeOnboarding?.Status === "Completed"
+                      filterData[TempEmployeeOnboarding?.index]?.Status ===
+                        "Completed"
                     }
-                    // onClick={() => saveEmployeeDetailsToSP()}
                     onClick={() => Vaildation()}
                   />
                 </div>

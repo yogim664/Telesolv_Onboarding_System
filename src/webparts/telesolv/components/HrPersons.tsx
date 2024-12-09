@@ -355,7 +355,6 @@ const HrPersons = (props: any) => {
             value={filterkeys.search || ""}
             onChange={(e) => {
               console.log(e.target.value);
-
               filterFunc("search", e.target.value);
             }}
           />
@@ -387,7 +386,6 @@ const HrPersons = (props: any) => {
             }}
             onClick={() => {
               setisEdit(!isEdit);
-              fetchQuestions();
             }}
           />
           <i
