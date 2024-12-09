@@ -1,87 +1,88 @@
 .employeeResponseSection {
-  padding: 16px;
-  width: 75%;
-  margin: auto;
-  .ResponseHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    .backIconWithUserName {
-      display: flex;
-      gap: 8px;
-      align-items: center;
+    padding: 16px;
+    width: 75%;
+    margin: auto;
+    .ResponseHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        .backIconWithUserName {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .backIcon {
+            color: #233b83;
+            font-size: 2rem;
+        }
+        .userName {
+            // font-size: 18px;
+            color: #233b83;
+            font-weight: 600;
+        }
+        .FilterOption {
+            display: flex;
+            gap: 8px;
+        }
     }
-    .backIcon {
-      color: #233b83;
-      font-size: 2rem;
+    .employeeResponseDataTable {
+        th {
+            padding: 16px !important;
+        }
+        td {
+            min-width: 200px;
+        }
+        td:nth-child(1) {
+            min-width: 480px;
+            font-weight: 600;
+        }
+        td:nth-child(3) {
+            min-width: 100px;
+            font-weight: 600;
+        }
     }
-    .userName {
-      // font-size: 18px;
-      color: #233b83;
-      font-weight: 600;
+    .noDataFound {
+        display: flex;
+        justify-content: center;
+        color: #233b83;
+        font-weight: 500;
+        height: 100px;
+        font-weight: 600;
     }
-    .FilterOption {
-      display: flex;
-      gap: 8px;
-    }
-  }
-  .employeeResponseDataTable {
-    th {
-      padding: 16px !important;
-    }
-    td {
-      min-width: 200px;
-    }
-    td:nth-child(1) {
-      min-width: 300px;
-      font-weight: 600;
-    }
-    td:nth-child(3) {
-      min-width: 100px;
-      font-weight: 600;
-    }
-  }
-  .noDataFound {
-    display: flex;
-    justify-content: center;
-    color: #233b83;
-    font-weight: 500;
-    height: 100px;
-    font-weight: 600;
-  }
 }
 
 .pageTitle {
-  color: #233b83;
-  font-weight: 500;
+    color: #233b83;
+    font-weight: 500;
 }
 
 .pendingSts {
-  padding: 6px 12px;
-  border-radius: 20px;
-  text-align: center;
-  font-size: 14px;
-  width: max-content;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 500;
-  .statusDot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 14px;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    .statusDot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
 }
+
 .commentSection {
-  margin-top: 10px;
-  .CommentBox {
-    // border: 1px solid;
-    padding: 10px;
-    //   border: 1px solid;
-    border-radius: 4px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  }
+    margin-top: 10px;
+    .CommentBox {
+        // border: 1px solid;
+        padding: 10px;
+        //   border: 1px solid;
+        border-radius: 4px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    }
 }
 
 .cancelBtn {

@@ -18,7 +18,7 @@ import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
-const logoImg: string = require("../assets/Images/Logo.svg");
+// const logoImg: string = require("../assets/Images/Logo.svg");
 
 const Telesolve = (props: any): JSX.Element => {
   const [isLoader, setIsLoader] = useState(true);
@@ -99,10 +99,10 @@ const Telesolve = (props: any): JSX.Element => {
           </button>
 
           <div className={styles.navBar}>
-            <div className={styles.navRightContainers}>
+            {/* <div className={styles.navRightContainers}>
               <img src={logoImg} alt="logo" />
-            </div>
-
+            </div> */}
+            <h2>Onboarding App</h2>
             <div className={styles.navLeftContainers}>
               <TabView
                 activeIndex={activeIndex}
