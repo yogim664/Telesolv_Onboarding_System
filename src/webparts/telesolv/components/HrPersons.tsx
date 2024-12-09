@@ -10,7 +10,7 @@ import { DataTable } from "primereact/datatable";
 import "../assets/style/HrPersonStyle.css";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -21,10 +21,12 @@ import { sp } from "@pnp/sp";
 import { InputText } from "primereact/inputtext";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
+import { Dropdown } from "primereact/dropdown";
 
 interface IFilterKeys {
   people: string[];
   search: string;
+  Forms: any;
 }
 
 const HrPersons = (props: any) => {
@@ -32,13 +34,15 @@ const HrPersons = (props: any) => {
   let _fkeys: IFilterKeys = {
     people: [],
     search: "",
+    Forms: "",
   };
 
-  const [hrperson, setHRperon] = React.useState<any>([]);
-  const [isEdit, setisEdit] = React.useState(true);
-  const [filterkeys, setfilterkeys] = React.useState<IFilterKeys>(_fkeys);
-  const [filterData, setfilterData] = React.useState<any>([]);
-
+  const [hrperson, setHRperon] = useState<any>([]);
+  const [isEdit, setisEdit] = useState(true);
+  const [filterkeys, setfilterkeys] = useState<IFilterKeys>(_fkeys);
+  const [filterData, setfilterData] = useState<any>([]);
+  const [CurFormID, setCurFormID] = useState(null);
+  const [FormsChoice, setFormsChoice] = useState<any>([]);
   // style variables
   const peoplePickerStyles = {
     root: {
@@ -57,7 +61,7 @@ const HrPersons = (props: any) => {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID,Assigned/EMail, Forms/ID")
+        .items.select("*,Assigned/ID,Assigned/EMail, Forms/ID, Forms/Title")
         .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
@@ -71,7 +75,8 @@ const HrPersons = (props: any) => {
         QuestionTitle: item.Title,
         isDelete: item.isDelete,
         TaskName: item.TaskName,
-        Form: item.Forms?.ID,
+        FormID: item.Forms?.ID,
+        FormTitle: item.Forms?.Title,
         Answer: item.Answer
           ? {
               key: item.Answer,
@@ -104,7 +109,12 @@ const HrPersons = (props: any) => {
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
 
-    debugger;
+    if (_tempFilterkeys?.Forms) {
+      _masterData = _masterData?.filter(
+        (value: any) => value?.FormID === _tempFilterkeys?.Forms
+      );
+    }
+
     if (_tempFilterkeys.people.length) {
       _masterData = _masterData.filter(
         (_item) =>
@@ -137,8 +147,32 @@ const HrPersons = (props: any) => {
     setfilterData([...fetchedItems]);
   };
 
+  // Function to fetch Title values
+  const getForms = async () => {
+    try {
+      const items = await sp.web.lists
+        .getByTitle(GCongfig.ListName.Forms)
+        .items.select("Title, ID")
+        .get();
+
+      const FormValues = items.map((item: any) => ({
+        key: item.Title,
+        name: item.Title,
+        ID: item.ID,
+      }));
+
+      setFormsChoice(FormValues);
+      const firstFormID = FormValues?.[0]?.ID;
+      setCurFormID(firstFormID);
+      // filterFunc("Forms", firstFormID);
+    } catch (error) {
+      console.error("Error fetching titles:", error);
+    }
+  };
+
   useEffect(() => {
     fetchQuestions();
+    getForms();
     // }, [isEdit]);
   }, []);
 
@@ -298,9 +332,27 @@ const HrPersons = (props: any) => {
       <ToastContainer />
       <div className={styles.card}>
         <div className={styles.HrEditContainer}>
+          <Dropdown
+            value={
+              FormsChoice
+                ? FormsChoice?.find(
+                    (choice: any) => choice.ID === filterkeys.Forms
+                  ) || ""
+                : ""
+            }
+            onChange={(e) => {
+              filterFunc("Forms", e.value.ID);
+              setCurFormID(e.value.ID);
+              console.log(CurFormID);
+            }}
+            options={FormsChoice || []}
+            optionLabel="name"
+            placeholder="Select a Form"
+          />
+
           <InputText
-            placeholder={"Search Role"}
-            // className={styles.filterRole}
+            placeholder={"Search"}
+            value={filterkeys.search || ""}
             onChange={(e) => {
               console.log(e.target.value);
 
@@ -314,7 +366,7 @@ const HrPersons = (props: any) => {
               personSelectionLimit={100}
               showtooltip={false}
               ensureUser={true}
-              placeholder={""}
+              placeholder={"Search HR Persons"}
               onChange={(selectedPeople: any[]) => {
                 filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
               }}
@@ -348,7 +400,7 @@ const HrPersons = (props: any) => {
             }}
             onClick={() => {
               filterkeys.people = [];
-
+              filterkeys.Forms = "";
               filterkeys.search = "";
 
               setfilterData(hrperson);
@@ -367,7 +419,7 @@ const HrPersons = (props: any) => {
             header="Task Name"
             body={peopleTask}
           ></Column>
-          <Column field="Form" header="Form"></Column>
+          <Column field="FormTitle" header="Form"></Column>
           <Column
             className={styles.HRPersonsList}
             field="Assigenee"
