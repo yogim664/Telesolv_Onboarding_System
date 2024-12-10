@@ -230,7 +230,6 @@ const HrScreen = (props: any): JSX.Element => {
                     assigned?.Email?.toLowerCase() ===
                     CurUser?.Email.toLowerCase()
                 )) &&
-              item.Status.key !== "Satisfactory" &&
               item.Status.key !== "Resolved"
           ) || []
         );

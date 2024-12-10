@@ -435,6 +435,9 @@ const Config = (props: any) => {
     } else if (tempquestion.some((_item: any) => !_item.Options.length)) {
       err = true;
       errmsg = "Enter Options";
+    } else if (tempquestion.some((_item: any) => _item.Options.length < 2)) {
+      err = true;
+      errmsg = "Each question must have at least two options.";
     } else if (
       tempquestion.some(
         (item: any) =>
@@ -670,6 +673,7 @@ const Config = (props: any) => {
   // Filter function
   const filterFunc = (key: string, val: any): void => {
     debugger;
+    //   let filteredData: any[] = [...fetchedItems];
     let filteredData: any[] = [...fetchedItems];
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
