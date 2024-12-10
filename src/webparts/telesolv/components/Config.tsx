@@ -286,6 +286,7 @@ const Config = (props: any) => {
     setquestions(updatedQuestions);
     setfilteredQuestions([..._questions]);
   };
+  //New changes
 
   const handleAddOptionClick = (questionId: any) => {
     setSelectedQuestionId(questionId);
