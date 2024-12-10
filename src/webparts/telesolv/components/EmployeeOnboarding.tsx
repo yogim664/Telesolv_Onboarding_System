@@ -56,130 +56,115 @@ const Onboarding = (props: any) => {
     dept: "",
   };
 
-  const [visible, setVisible] = useState(false);
-  const [Update, setUpdate] = useState(false);
-  const [EmployeeOnboarding, setEmployeeOnboarding] = useState<any>([]);
-  const [SelectedEmp, setSelectedEmp] = useState<any>([]);
+  const [isVisible, setisVisible] = useState(false);
+  const [isUpdate, setisUpdate] = useState(false);
+  const [EmployeeOnboardingDetails, setEmployeeOnboardingDetails] =
+    useState<any>([]);
+  const [selectedEmployeeDetails, setselectedEmployeeDetails] = useState<any>(
+    []
+  );
   const [showResponseView, setShowResponseView] = useState(false);
-  const [questions, setQuestions] = useState<any>([]);
-  const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
-  const [Departments, setDepartments] = useState<any>([]);
-  const [filterData, setfilterData] = React.useState<any>([]);
-  const [statusChoices, setStatusChoices] = useState<any[]>([]);
-  const [CurFormID, setCurFormID] = useState(null);
-  const [FormsChoice, setFormsChoice] = useState<any>([]);
-  const [FormQuestions, setFormQuestions] = useState<any>([]);
-  const [CurUserID, setCurUserID] = useState<any>();
-  const [PageNationRows, setPageNationRows] = useState<IPageSync>({
+  const [questions, setquestions] = useState<any>([]);
+  const [filterkeys, setfilterkeys] = useState<IFilData>(_fkeys);
+  const [departmentsDetails, setdepartmentsDetails] = useState<any>([]);
+  const [
+    filteredEmployeeOnboardingDetails,
+    setfilteredEmployeeOnboardingDetails,
+  ] = useState<any>([]);
+  const [statusDetails, setstatusDetails] = useState<any[]>([]);
+  const [currentFormID, setcurrentFormID] = useState(null);
+  const [formsDetails, setformsDetails] = useState<any>([]);
+  const [formQuestionsDetails, setformQuestionsDetails] = useState<any>([]);
+  const [currentUserID, setcurrentUserID] = useState<any>();
+  const [pageNationRows, setpageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
+  const [tempEmployeeOnboardingDetails, settempEmployeeOnboardingDetails] =
+    useState<any>({
+      Employee: {
+        EmployeeId: null,
+        EmployeeEMail: "",
+        EmployeeTitle: "",
+      },
+      Forms: "",
+      Role: "",
+      Department: { key: "", name: "" },
+      Email: "",
+      PhoneNumber: "",
+      Status: { key: "", name: "" },
+      SecondaryEmail: "",
+    });
 
-  const [TempEmployeeOnboarding, setTempEmployeeOnboarding] = useState<any>({
-    Employee: {
-      EmployeeId: null,
-      EmployeeEMail: "",
-      EmployeeTitle: "",
-    },
-    Forms: "",
-    Role: "",
-    Department: { key: "", name: "" },
-    Email: "",
-    PhoneNumber: "",
-    Status: { key: "", name: "" },
-    SecondaryEmail: "",
-  });
-
-  const getCurrentUserId = async () => {
+  const handlerGetCurrentUserId = async () => {
     try {
       const user = await sp.web.currentUser();
       console.log("Current User ID:", user.Id);
-      setCurUserID(user.Id);
-
+      setcurrentUserID(user.Id);
       return user.Id;
     } catch (error) {
       console.error("Error getting current user ID:", error);
     }
   };
-
   //Get Departments
-  // Function to fetch Title values
-  const getAllTitles = async () => {
-    try {
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
-        .items.select("Title") // Fetch only the Title column
-        .get();
-
-      // Format the fetched items for react-select
-      const titleValues = items.map((item: any) => ({
-        key: item.Title, // Unique identifier
-        name: item.Title, // Display name
-      }));
-      console.log(titleValues, "dep");
-      setDepartments([...titleValues]);
-      getForms();
-      console.log(Departments, "SetDep");
-    } catch (error) {
-      console.error("Error fetching titles:", error);
-    }
+  const handlerGetDepartments = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
+      .items.select("Title") // Fetch only the Title column
+      .get()
+      .then((items) => {
+        const titleValues = items.map((item: any) => ({
+          key: item.Title, // Unique identifier
+          name: item.Title, // Display name
+        }));
+        setdepartmentsDetails([...titleValues]);
+        handlerGetCurrentUserId();
+        handlerGetForms();
+        console.log(departmentsDetails, "SetDep");
+      })
+      .catch((error) => {
+        console.error("Error fetching titles:", error);
+      });
   };
 
-  // Get forms
-
-  // Function to fetch Title values
-  const getForms = async () => {
-    try {
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.Forms)
-        .items.select("Title, ID")
-        .get();
-
-      const FormValues = items.map((item: any) => ({
-        key: item.Title,
-        name: item.Title,
-        ID: item.ID,
-      }));
-
-      setFormsChoice(FormValues);
-      // const firstFormID = FormValues?.[0]?.ID;
-      // setCurFormID(firstFormID);
-      // filterFunc("Forms", firstFormID);
-    } catch (error) {
-      console.error("Error fetching titles:", error);
-    }
+  // Get Forms
+  const handlerGetForms = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.Forms)
+      .items.select("Title, ID")
+      .get()
+      .then((item) => {
+        const FormValues = item.map((item: any) => ({
+          key: item.Title,
+          name: item.Title,
+          ID: item.ID,
+        }));
+        setformsDetails(FormValues);
+      })
+      .catch((error) => {
+        console.error("Error fetching titles:", error);
+      });
   };
 
-  // Fetch titles when the component mounts
-  useEffect(() => {
-    getAllTitles();
-    getCurrentUserId();
-  }, []);
-
-  const onPageChange = (event: any) => {
-    setPageNationRows({
+  const handleronPageChange = (event: any) => {
+    setpageNationRows({
       first: event?.first || defaultPagination.first,
       rows: event?.rows || defaultPagination.rows,
     });
   };
-
-  const filterFunc = (key: string, val: any): void => {
-    let filteredData: any[] = [...EmployeeOnboarding];
+  const hanlderfilter = (key: string, val: any): void => {
+    let filteredData: any[] = [...EmployeeOnboardingDetails];
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
-    console.log("_tempFilterkeys: ", _tempFilterkeys);
-
     if (_tempFilterkeys?.dept) {
       filteredData = filteredData?.filter(
         (value: any) => value?.Department?.key === _tempFilterkeys?.dept
       );
     }
-
     if (_tempFilterkeys.Employee.length > 0) {
       filteredData = filteredData?.filter((_item: any) =>
         val.some((_v: any) => _item.Employee.EmployeeEMail === _v.secondaryText)
       );
     }
-
     if (_tempFilterkeys.search) {
       filteredData = filteredData?.filter((value: any) =>
         value?.Role?.toLowerCase().includes(
@@ -189,83 +174,61 @@ const Onboarding = (props: any) => {
     }
 
     setfilterkeys(_tempFilterkeys);
-    setfilterData(filteredData);
+    setfilteredEmployeeOnboardingDetails(filteredData);
   };
 
-  const handleChange = (key: string, value: any) => {
-    const curObj: any = { ...TempEmployeeOnboarding };
+  const handlerEditDetails = (key: string, value: any) => {
+    const curObj: any = { ...tempEmployeeOnboardingDetails };
     curObj[key] = value;
-
     if (key === "Employee") {
       curObj[key].EmployeeId = value.id;
       curObj[key].EmployeeEMail = value.secondaryText;
       curObj[key].EmployeeTitle = value.text;
     }
-    setTempEmployeeOnboarding(curObj);
-
-    console.log(curObj);
-    console.log(TempEmployeeOnboarding);
+    settempEmployeeOnboardingDetails(curObj);
   };
 
-  ///Delete component
-  const confirm2 = (id: any, index: any) => {
+  const showConfirmationPopup = (id: any, index: any) => {
     confirmDialog({
       message: "Do you want to delete this record?",
       header: "Delete Confirmation",
       defaultFocus: "reject",
       acceptClassName: "p-button-danger",
-      accept: () => accept(id, index),
-      reject,
-    });
-  };
-
-  //Success Tost
-  const showSuccess = (string: any) => {
-    fetchQuestions();
-    toast.success("Deleted Successfully", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Bounce,
+      accept: () => handleDeletion(id, index),
     });
   };
 
   //Delete componant
-  const accept = (id: any, index: any) => {
-    try {
-      debugger;
-      console.log(id);
-
-      sp.web.lists
-        .getByTitle(GCongfig.ListName.EmployeeOnboarding)
-        .items.getById(id)
-        .delete()
-        .then(() => {
-          const afterDelete = filterData.filter((e: any) => e.index !== index);
-          setfilterData(afterDelete);
-
-          showSuccess("Deleted successfully");
-          console.log("Employee details updated successfully in SharePoint!");
+  const handleDeletion = (id: any, index: any) => {
+    sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+      .items.getById(id)
+      .delete()
+      .then(() => {
+        const afterDelete = filteredEmployeeOnboardingDetails.filter(
+          (e: any) => e.index !== index
+        );
+        setfilteredEmployeeOnboardingDetails(afterDelete);
+        toast.success("Deleted Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
         });
-    } catch (error) {
-      console.error("Error saving questions:", error);
-    }
-  };
-
-  const reject = () => {
-    {
-      console.log("reject");
-    }
+      })
+      .catch((error) => {
+        console.error("Error saving questions:", error);
+      });
   };
 
   //Get choice
 
-  const getStsChoices = (): void => {
+  const handlerGetStatusValues = (): void => {
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeOnboarding)
       .fields.getByInternalNameOrTitle("Status")
@@ -277,21 +240,14 @@ const Onboarding = (props: any) => {
           key: choice,
           name: choice,
         }));
-
-        console.log(ChoicesCollection);
-
-        // Update the state
-        setStatusChoices(ChoicesCollection);
+        setstatusDetails(ChoicesCollection);
         console.log("Choices fetched and set:", ChoicesCollection);
       })
       .catch((err) => console.error("Error fetching choices:", err));
   };
 
-  //Get data from sp list
-
-  const EmployeeOnboardingDetails = async (formattedQuestions: any) => {
+  const handlerEmployeeOnboardingDetails = async (formattedQuestions: any) => {
     try {
-      // Fetch items from the SharePoint list
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeOnboarding)
         .items.select("*,Employee/ID,Employee/EMail,Employee/Title,Form/ID")
@@ -300,7 +256,6 @@ const Onboarding = (props: any) => {
         .get();
       console.log(items, "items");
 
-      // Map the items to create an array of values
       const formattedItems = items.map((item: any, index: any) => ({
         index: index,
         Id: item.Id,
@@ -349,9 +304,8 @@ const Onboarding = (props: any) => {
       return [];
     }
   };
-
   // Get items to SP
-  const questionConfig = async () => {
+  const handlerGetQuestionDetails = async () => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
@@ -360,9 +314,6 @@ const Onboarding = (props: any) => {
         .expand("Assigned,Forms")
         .filter("isDelete ne 1")
         .get();
-      console.log(items, "COnfigitems");
-
-      // Map the items to create an array of values
       const formattedQuestions = items.map((item: any, i: number) => ({
         index: i,
         Id: item.Id,
@@ -386,10 +337,6 @@ const Onboarding = (props: any) => {
           };
         }),
       }));
-
-      console.log("Fetched Items:", formattedQuestions);
-
-      // Return the formatted array
       return formattedQuestions;
     } catch (error) {
       console.error("Error fetching items:", error);
@@ -397,7 +344,7 @@ const Onboarding = (props: any) => {
     }
   };
 
-  const EmployeeDetails = async () => {
+  const handleEmployeeDetails = async () => {
     try {
       // Fetch items from the SharePoint list
       const items = await sp.web.lists
@@ -409,8 +356,6 @@ const Onboarding = (props: any) => {
         .expand("QuestionID,Employee,EmployeeID")
         .get();
       console.log(items, "items");
-
-      // Format EmployeeResponse items and link to assigned values
       const formattedResponseItems = items.map((item: any, index: any) => {
         return {
           index: index,
@@ -442,40 +387,40 @@ const Onboarding = (props: any) => {
 
   const fetchQuestions = async () => {
     try {
-      // Fetch question configuration and store it in state
-      const formattedQuestions = await questionConfig();
+      const formattedQuestions = await handlerGetQuestionDetails();
       let temp: any[] = await Promise.all(formattedQuestions);
       console.log("temp: ", temp);
-      setQuestions(temp);
+      setquestions(temp);
 
-      // Fetch employee onboarding details
-      const fetchedItems = await EmployeeDetails();
+      const fetchedItems = await handleEmployeeDetails();
       let temp2: any[] = await Promise.all(fetchedItems);
       console.log("temp3: ", temp2);
 
       // Fetch employee onboarding details
-      const formattedResponseItems = await EmployeeOnboardingDetails(temp2);
+      const formattedResponseItems = await handlerEmployeeOnboardingDetails(
+        temp2
+      );
       let temp3: any[] = await Promise.all(formattedResponseItems);
       console.log("temp2: ", temp2);
 
-      setEmployeeOnboarding(temp3); // Store the data in state
-      setfilterData(temp3);
+      setEmployeeOnboardingDetails(temp3); // Store the data in state
+      setfilteredEmployeeOnboardingDetails(temp3);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
-  console.log(questions);
 
-  const checkFormhaveQuestion = (formID: any) => {
+  const handleFormQuestions = (formID: any) => {
     const filterFormQuestion = questions.filter(
       (val: any) => val.Forms === formID
     );
-    setFormQuestions(filterFormQuestion);
+    setformQuestionsDetails(filterFormQuestion);
   };
 
   useEffect(() => {
+    handlerGetDepartments();
     fetchQuestions();
-    getStsChoices();
+    handlerGetStatusValues();
   }, []);
 
   const ActionIcons = (Rowdata: any, index: any) => {
@@ -486,19 +431,19 @@ const Onboarding = (props: any) => {
           style={{ fontSize: "1.25rem", color: "green" }}
           onClick={() => {
             setShowResponseView(true);
-            setSelectedEmp(Rowdata);
+            setselectedEmployeeDetails(Rowdata);
           }}
         />
         <i
           className="pi pi-pencil"
           style={{ fontSize: "1.25rem", color: "#233b83" }}
           onClick={() => {
-            setUpdate(true);
-            setVisible(true);
+            setisUpdate(true);
+            setisVisible(true);
 
-            checkFormhaveQuestion(Rowdata.Forms);
+            handleFormQuestions(Rowdata.Forms);
 
-            setTempEmployeeOnboarding({ ...Rowdata });
+            settempEmployeeOnboardingDetails({ ...Rowdata });
           }}
         />
         <i
@@ -506,53 +451,53 @@ const Onboarding = (props: any) => {
           style={{ fontSize: "1.25rem", color: "red" }}
           onClick={() => {
             console.log("Worked");
-            confirm2(Rowdata.Id, index);
+            showConfirmationPopup(Rowdata.Id, index);
             console.log("TRashData ID:", Rowdata.Id);
-            setTempEmployeeOnboarding({ ...Rowdata });
+            settempEmployeeOnboardingDetails({ ...Rowdata });
           }}
         />
       </div>
     );
   };
 
-  const Vaildation = async (): Promise<void> => {
+  const handlerVaildation = async (): Promise<void> => {
     let errmsg: string = "";
     let err: boolean = false;
     const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const EmployeeCount = EmployeeOnboarding.filter(
+    const EmployeeCount = EmployeeOnboardingDetails.filter(
       (item: any) =>
         item?.Employee.EmployeeEMail?.toLowerCase() ===
-        TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
+        tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase()
     );
 
     console.log(EmployeeCount.length, "EmployeeCount");
 
-    if (EmployeeCount.length !== 0 && !Update) {
+    if (EmployeeCount.length !== 0 && !isUpdate) {
       err = true;
       errmsg = "Employee already exists";
-    } else if (!TempEmployeeOnboarding.SecondaryEmail) {
+    } else if (!tempEmployeeOnboardingDetails.SecondaryEmail) {
       err = true;
       errmsg = "Please enter SecondaryEmail";
     } else if (
-      TempEmployeeOnboarding.SecondaryEmail &&
-      !emailFormat.test(TempEmployeeOnboarding.SecondaryEmail)
+      tempEmployeeOnboardingDetails.SecondaryEmail &&
+      !emailFormat.test(tempEmployeeOnboardingDetails.SecondaryEmail)
     ) {
       err = true;
       errmsg = "Please enter a valid SecondaryEmail";
-    } else if (!TempEmployeeOnboarding.Role) {
+    } else if (!tempEmployeeOnboardingDetails.Role) {
       err = true;
       errmsg = "Please enter a Role";
-    } else if (!TempEmployeeOnboarding.Department?.key) {
+    } else if (!tempEmployeeOnboardingDetails.Department?.key) {
       err = true;
       errmsg = "Please Select Department";
-    } else if (!TempEmployeeOnboarding.PhoneNumber) {
+    } else if (!tempEmployeeOnboardingDetails.PhoneNumber) {
       err = true;
       errmsg = "Please enter phonenumber";
     }
 
     if (!err) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      await saveEmployeeDetailsToSP();
+      await handlerSaveEmployeeDetailsToSP();
     } else {
       toast.error(errmsg, {
         position: "top-right",
@@ -569,31 +514,31 @@ const Onboarding = (props: any) => {
   };
 
   // Post into list SP
-  const saveEmployeeDetailsToSP = async (): Promise<void> => {
+  const handlerSaveEmployeeDetailsToSP = async (): Promise<void> => {
     //EmployeeOnboarding
 
     try {
-      if (Update) {
+      if (isUpdate) {
         debugger;
         await sp.web.lists
           .getByTitle(GCongfig.ListName.EmployeeOnboarding)
-          .items.getById(TempEmployeeOnboarding.Id)
+          .items.getById(tempEmployeeOnboardingDetails.Id)
           .update({
-            Role: TempEmployeeOnboarding.Role,
-            Department: TempEmployeeOnboarding.Department.key,
-            Email: TempEmployeeOnboarding.Employee.EmployeeEMail,
-            PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
-            EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
-            SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
-            Status: TempEmployeeOnboarding.Status,
+            Role: tempEmployeeOnboardingDetails.Role,
+            Department: tempEmployeeOnboardingDetails.Department.key,
+            Email: tempEmployeeOnboardingDetails.Employee.EmployeeEMail,
+            PhoneNumber: tempEmployeeOnboardingDetails.PhoneNumber,
+            EmployeeId: tempEmployeeOnboardingDetails.Employee.EmployeeId,
+            SecondaryEmail: tempEmployeeOnboardingDetails.SecondaryEmail,
+            Status: tempEmployeeOnboardingDetails.Status,
           })
           .then(async () => {
-            const updatedEmployeeOnboarding = [...EmployeeOnboarding];
-            updatedEmployeeOnboarding[TempEmployeeOnboarding.index] = {
-              ...TempEmployeeOnboarding,
+            const updatedEmployeeOnboarding = [...EmployeeOnboardingDetails];
+            updatedEmployeeOnboarding[tempEmployeeOnboardingDetails.index] = {
+              ...tempEmployeeOnboardingDetails,
             };
-            setfilterData(updatedEmployeeOnboarding);
-            setEmployeeOnboarding(updatedEmployeeOnboarding);
+            setfilteredEmployeeOnboardingDetails(updatedEmployeeOnboarding);
+            setEmployeeOnboardingDetails(updatedEmployeeOnboarding);
             debugger;
             console.log(
               "Updated Employee Onboarding:",
@@ -606,55 +551,20 @@ const Onboarding = (props: any) => {
               .get()
               .then(async (_items: any) => {
                 console.log(_items, "Response84848");
-                console.log(TempEmployeeOnboarding);
+                console.log(tempEmployeeOnboardingDetails);
 
-                console.log(TempEmployeeOnboarding.Status, "Statusfinanl");
-
-                // Filter items based on employee email
-                // const filteredItems = _items.filter(
-                //   (item: any) =>
-                //     item?.Employee?.EMail?.toLowerCase() ===
-                //     TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
-                // );
-
-                // if (TempEmployeeOnboarding.Status === "Completed") {
-                //   console.log(
-                //     filteredItems,
-                //     "tempItemstempItemstempItemstempItems"
-                //   );
-
-                //   filteredItems.map((_Empitem: any) =>
-                //     sp.web.lists
-                //       .getByTitle(GCongfig.ListName.EmployeeResponse)
-                //       .items.getById(_Empitem.Id)
-                //       .update({
-                //         Status: "Satisfactory",
-                //         CompletedById: CurUserID,
-                //         CompletedDateAndTime: new Date().toISOString(),
-                //       })
-                //   );
-                //   toast.success("Employee Updated Successfully", {
-                //     position: "top-right",
-                //     autoClose: 5000,
-                //     hideProgressBar: false,
-                //     closeOnClick: true,
-                //     pauseOnHover: true,
-                //     draggable: true,
-                //     progress: undefined,
-                //     theme: "light",
-                //     transition: Bounce,
-                //   });
-                //   setUpdate(false);
-
-                //new
+                console.log(
+                  tempEmployeeOnboardingDetails.Status,
+                  "Statusfinanl"
+                );
 
                 const filteredItems = _items.filter(
                   (item: any) =>
                     item?.Employee?.EMail?.toLowerCase() ===
-                    TempEmployeeOnboarding.Employee.EmployeeEMail?.toLowerCase()
+                    tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase()
                 );
 
-                if (TempEmployeeOnboarding.Status === "Completed") {
+                if (tempEmployeeOnboardingDetails.Status === "Completed") {
                   console.log(filteredItems, "Filtered Items");
 
                   // Create an array of promises for updates
@@ -664,7 +574,7 @@ const Onboarding = (props: any) => {
                       .items.getById(_Empitem.Id)
                       .update({
                         Status: "Satisfactory",
-                        CompletedById: CurUserID,
+                        CompletedById: currentUserID,
                         CompletedDateAndTime: new Date().toISOString(),
                       })
                   );
@@ -685,13 +595,13 @@ const Onboarding = (props: any) => {
                         theme: "light",
                         transition: Bounce,
                       });
-                      setUpdate(false);
+                      setisUpdate(false);
                     })
                     .catch((error) => {
                       console.error("Error during updates:", error);
                     });
                 } else {
-                  console.log(CurUserID);
+                  console.log(currentUserID);
 
                   console.log(
                     "Employee status is not 'Completed'. No updates performed."
@@ -708,40 +618,35 @@ const Onboarding = (props: any) => {
         await sp.web.lists
           .getByTitle(GCongfig.ListName.EmployeeOnboarding)
           .items.add({
-            Role: TempEmployeeOnboarding.Role,
-            Department: TempEmployeeOnboarding.Department.key,
-            Email: TempEmployeeOnboarding.Employee.EmployeeEMail,
+            Role: tempEmployeeOnboardingDetails.Role,
+            Department: tempEmployeeOnboardingDetails.Department.key,
+            Email: tempEmployeeOnboardingDetails.Employee.EmployeeEMail,
             Status: "Pending",
-            PhoneNumber: TempEmployeeOnboarding.PhoneNumber,
-            EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
-            SecondaryEmail: TempEmployeeOnboarding.SecondaryEmail,
-            FormId: CurFormID,
+            PhoneNumber: tempEmployeeOnboardingDetails.PhoneNumber,
+            EmployeeId: tempEmployeeOnboardingDetails.Employee.EmployeeId,
+            SecondaryEmail: tempEmployeeOnboardingDetails.SecondaryEmail,
+            FormId: currentFormID,
           })
           .then(async (res: any) => {
             try {
-              // Using Promise.all to handle multiple asynchronous requests in parallel
-
               const filterQuestion = questions.filter(
-                (val: any) => val.Forms === CurFormID
+                (val: any) => val.Forms === currentFormID
               );
 
               await Promise.all(
                 filterQuestion.map(async (question: any) => {
-                  // Add each question to the EmployeeResponse list
-                  console.log(question.Id);
-                  console.log(question.Answer, "Answer");
-
                   await sp.web.lists
                     .getByTitle(GCongfig.ListName.EmployeeResponse)
                     .items.add({
-                      EmployeeIDId: res.data.ID, // Employee ID
+                      EmployeeIDId: res.data.ID,
                       Title: question.QuestionTitle,
                       Sno: question.QuestionNo,
                       Status: "Pending",
                       FormId: question.Forms,
                       Answer: question.Answer.key,
-                      QuestionIDId: question.Id, // Question ID from questions array
-                      EmployeeId: TempEmployeeOnboarding.Employee.EmployeeId,
+                      QuestionIDId: question.Id,
+                      EmployeeId:
+                        tempEmployeeOnboardingDetails.Employee.EmployeeId,
                     });
                 })
               );
@@ -768,7 +673,7 @@ const Onboarding = (props: any) => {
       }
 
       // fetchQuestions();
-      setVisible(false);
+      setisVisible(false);
       console.log("Questions saved successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving questions:", error);
@@ -814,7 +719,7 @@ const Onboarding = (props: any) => {
       {showResponseView ? (
         <EmployeeResponseView
           setShowResponseView={setShowResponseView}
-          setSelectedEmp={SelectedEmp}
+          setselectedEmployeeDetails={selectedEmployeeDetails}
           context={props.context}
         />
       ) : (
@@ -841,16 +746,16 @@ const Onboarding = (props: any) => {
             <div className={styles.OnboardingRightContainer}>
               <Dropdown
                 value={
-                  Departments
-                    ? Departments?.find(
+                  departmentsDetails
+                    ? departmentsDetails?.find(
                         (choice: any) => choice.key === filterkeys.dept
                       ) || null
                     : null
                 }
                 onChange={(e) => {
-                  filterFunc("dept", e.value.key);
+                  hanlderfilter("dept", e.value.key);
                 }}
-                options={Departments || []}
+                options={departmentsDetails || []}
                 optionLabel="name"
                 placeholder="Select a Department"
                 className={`${styles.filterDepartment} w-full md:w-14rem`}
@@ -864,7 +769,7 @@ const Onboarding = (props: any) => {
                   ensureUser={true}
                   placeholder={"Search Employee"}
                   onChange={(selectedPeople: any[]) => {
-                    filterFunc("Employee", selectedPeople); // Pass selectedPeople and rowData
+                    hanlderfilter("Employee", selectedPeople); // Pass selectedPeople and rowData
                   }}
                   principalTypes={[PrincipalType.User]}
                   defaultSelectedUsers={filterkeys.Employee}
@@ -876,7 +781,7 @@ const Onboarding = (props: any) => {
                 placeholder={"Search Role"}
                 className={styles.filterRole}
                 onChange={(e) => {
-                  filterFunc("search", e.target.value);
+                  hanlderfilter("search", e.target.value);
                 }}
               />
               <Button
@@ -884,9 +789,9 @@ const Onboarding = (props: any) => {
                 label="Add"
                 icon="pi pi-plus-circle"
                 onClick={() => {
-                  setTempEmployeeOnboarding([]);
-                  setUpdate(false);
-                  setVisible(true);
+                  settempEmployeeOnboardingDetails([]);
+                  setisUpdate(false);
+                  setisVisible(true);
                 }}
               />
 
@@ -903,18 +808,20 @@ const Onboarding = (props: any) => {
                   filterkeys.dept = "";
                   filterkeys.search = "";
 
-                  setfilterData(EmployeeOnboarding);
+                  setfilteredEmployeeOnboardingDetails(
+                    EmployeeOnboardingDetails
+                  );
                 }}
               />
             </div>
           </div>
 
-          {filterData.length > 0 ? (
+          {filteredEmployeeOnboardingDetails.length > 0 ? (
             <DataTable
               className={styles.onboardingDataTable}
-              value={filterData?.slice(
-                PageNationRows.first,
-                PageNationRows.first + PageNationRows.rows
+              value={filteredEmployeeOnboardingDetails?.slice(
+                pageNationRows.first,
+                pageNationRows.first + pageNationRows.rows
               )}
               tableStyle={{ minWidth: "50rem" }}
             >
@@ -939,20 +846,20 @@ const Onboarding = (props: any) => {
             <div className={styles.noDataFound}>No data found!</div>
           )}
           <Paginator
-            first={PageNationRows.first}
-            rows={PageNationRows.rows}
-            totalRecords={EmployeeOnboarding.length}
-            onPageChange={onPageChange}
+            first={pageNationRows.first}
+            rows={pageNationRows.rows}
+            totalRecords={EmployeeOnboardingDetails.length}
+            onPageChange={handleronPageChange}
           />
 
           <div className={styles.actionDialog}>
             <Dialog
               header={
                 <div style={{ textAlign: "center", width: "100%" }}>
-                  {Update ? "Update Employee" : "New Employee"}
+                  {isUpdate ? "Update Employee" : "New Employee"}
                 </div>
               }
-              visible={visible}
+              visible={isVisible}
               style={{
                 minWidth: "44vw",
                 padding: "10px",
@@ -961,7 +868,7 @@ const Onboarding = (props: any) => {
                 display: "flex",
                 justifyContent: "center !important",
               }}
-              onHide={() => setVisible(false)}
+              onHide={() => setisVisible(false)}
             >
               <div className={styles.addDialog}>
                 <div
@@ -986,19 +893,22 @@ const Onboarding = (props: any) => {
                       onChange={(selectedPeople: any[]) => {
                         console.log(selectedPeople);
                         if (selectedPeople.length !== 0) {
-                          handleChange("Employee", selectedPeople[0]);
+                          handlerEditDetails("Employee", selectedPeople[0]);
                         } else {
-                          handleChange("Employee", []);
+                          handlerEditDetails("Employee", []);
                         }
                       }}
                       principalTypes={[PrincipalType.User]}
                       defaultSelectedUsers={
-                        TempEmployeeOnboarding?.Employee?.EmployeeEMail
-                          ? [TempEmployeeOnboarding?.Employee?.EmployeeEMail]
+                        tempEmployeeOnboardingDetails?.Employee?.EmployeeEMail
+                          ? [
+                              tempEmployeeOnboardingDetails?.Employee
+                                ?.EmployeeEMail,
+                            ]
                           : []
                       }
                       resolveDelay={1000}
-                      disabled={Update}
+                      disabled={isUpdate}
                     />
 
                     <div className={styles.addEmpInfo}>
@@ -1014,12 +924,13 @@ const Onboarding = (props: any) => {
                     placeholder="Enter Email"
                     style={{ width: "100%", color: "black" }}
                     value={
-                      TempEmployeeOnboarding?.Employee?.EmployeeEMail || ""
+                      tempEmployeeOnboardingDetails?.Employee?.EmployeeEMail ||
+                      ""
                     }
                     onChange={(e) => {
-                      handleChange("Email", e.target.value);
+                      handlerEditDetails("Email", e.target.value);
                     }}
-                    disabled={Update}
+                    disabled={isUpdate}
                   />
                 </div>
               </div>
@@ -1029,9 +940,9 @@ const Onboarding = (props: any) => {
                   <InputText
                     placeholder="Enter Secondary Email"
                     style={{ width: "100%", color: "black" }}
-                    value={TempEmployeeOnboarding?.SecondaryEmail || ""}
+                    value={tempEmployeeOnboardingDetails?.SecondaryEmail || ""}
                     onChange={(e) => {
-                      handleChange("SecondaryEmail", e.target.value);
+                      handlerEditDetails("SecondaryEmail", e.target.value);
                     }}
                   />
                 </div>
@@ -1042,9 +953,9 @@ const Onboarding = (props: any) => {
                   <InputText
                     placeholder="Enter Role"
                     style={{ width: "100%", color: "black" }}
-                    value={TempEmployeeOnboarding?.Role || ""}
+                    value={tempEmployeeOnboardingDetails?.Role || ""}
                     onChange={(e) => {
-                      handleChange("Role", e.target.value);
+                      handlerEditDetails("Role", e.target.value);
                     }}
                   />
                 </div>
@@ -1054,21 +965,24 @@ const Onboarding = (props: any) => {
                 <div className={styles.addDialogInput}>
                   <Dropdown
                     value={
-                      TempEmployeeOnboarding?.Department?.key
-                        ? Departments?.filter(
+                      tempEmployeeOnboardingDetails?.Department?.key
+                        ? departmentsDetails?.filter(
                             (val: any) =>
                               val.key ===
-                              TempEmployeeOnboarding?.Department?.key
+                              tempEmployeeOnboardingDetails?.Department?.key
                           )[0] || ""
                         : ""
                     }
                     onChange={(e) => {
-                      console.log(TempEmployeeOnboarding?.Department, "Value");
-                      handleChange("Department", e.value);
+                      console.log(
+                        tempEmployeeOnboardingDetails?.Department,
+                        "Value"
+                      );
+                      handlerEditDetails("Department", e.value);
                       console.log(e.value.key);
                     }}
                     style={{ width: "100%" }}
-                    options={Departments || []}
+                    options={departmentsDetails || []}
                     optionLabel="name"
                     placeholder="Select a Department"
                     className="w-full md:w-14rem"
@@ -1081,28 +995,28 @@ const Onboarding = (props: any) => {
                 <div className={styles.addDialogInput}>
                   <Dropdown
                     value={
-                      TempEmployeeOnboarding.Forms
-                        ? FormsChoice.find(
+                      tempEmployeeOnboardingDetails.Forms
+                        ? formsDetails.find(
                             (choice: any) =>
-                              choice.ID === TempEmployeeOnboarding.Forms
+                              choice.ID === tempEmployeeOnboardingDetails.Forms
                           ) || null
-                        : FormsChoice.find(
-                            (choice: any) => choice.ID === CurFormID
+                        : formsDetails.find(
+                            (choice: any) => choice.ID === currentFormID
                           ) || null
                     }
                     onChange={(e) => {
-                      setCurFormID(e.value.ID);
-                      checkFormhaveQuestion(e.value.ID);
+                      setcurrentFormID(e.value.ID);
+                      handleFormQuestions(e.value.ID);
                       debugger;
                     }}
-                    disabled={Update}
-                    options={FormsChoice || []}
+                    disabled={isUpdate}
+                    options={formsDetails || []}
                     style={{ width: "100%" }}
                     className="w-full md:w-14rem"
                     optionLabel="name"
                     placeholder="Select a Form"
                   />
-                  {FormQuestions.length === 0 && (
+                  {formQuestionsDetails.length === 0 && (
                     <div className={styles.addEmpInfo}>
                       This form have no questions
                     </div>
@@ -1116,15 +1030,15 @@ const Onboarding = (props: any) => {
                     placeholder="Enter PhoneNumber"
                     keyfilter="int"
                     style={{ width: "100%", color: "black" }}
-                    value={TempEmployeeOnboarding?.PhoneNumber || ""}
+                    value={tempEmployeeOnboardingDetails?.PhoneNumber || ""}
                     onChange={(e) => {
-                      handleChange("PhoneNumber", e.target.value);
+                      handlerEditDetails("PhoneNumber", e.target.value);
                     }}
                   />
                 </div>
               </div>
 
-              {Update && (
+              {isUpdate && (
                 <div className={styles.addDialog}>
                   <div className={styles.addDialogHeader}>Status</div>
                   <div className={styles.addDialogInput}>
@@ -1132,21 +1046,21 @@ const Onboarding = (props: any) => {
                       <Dropdown
                         className="w-full md:w-14rem"
                         value={
-                          TempEmployeeOnboarding.Status ||
-                          TempEmployeeOnboarding.Status.key
-                            ? statusChoices?.filter(
+                          tempEmployeeOnboardingDetails.Status ||
+                          tempEmployeeOnboardingDetails.Status.key
+                            ? statusDetails?.filter(
                                 (val: any) =>
                                   val.key ===
-                                  (TempEmployeeOnboarding.Status ||
-                                    TempEmployeeOnboarding.Status.key)
+                                  (tempEmployeeOnboardingDetails.Status ||
+                                    tempEmployeeOnboardingDetails.Status.key)
                               )?.[0]
                             : ""
                         }
                         onChange={(e) => {
-                          handleChange("Status", e.value.key);
+                          handlerEditDetails("Status", e.value.key);
                           console.log(e.value.key, "Selectedkey");
                         }}
-                        options={statusChoices || []}
+                        options={statusDetails || []}
                         optionLabel="name"
                         placeholder="Select a status"
                         style={{ width: "100%" }}
@@ -1167,7 +1081,7 @@ const Onboarding = (props: any) => {
                       border: "none",
                       width: "100px",
                     }}
-                    onClick={() => setVisible(false)}
+                    onClick={() => setisVisible(false)}
                   />
                   <Button
                     label="Save"
@@ -1179,12 +1093,13 @@ const Onboarding = (props: any) => {
                       width: "100px",
                     }}
                     disabled={
-                      !TempEmployeeOnboarding?.Employee?.EmployeeEMail ||
-                      FormQuestions.length === 0 ||
-                      filterData[TempEmployeeOnboarding?.index]?.Status ===
-                        "Completed"
+                      !tempEmployeeOnboardingDetails?.Employee?.EmployeeEMail ||
+                      formQuestionsDetails.length === 0 ||
+                      filteredEmployeeOnboardingDetails[
+                        tempEmployeeOnboardingDetails?.index
+                      ]?.Status === "Completed"
                     }
-                    onClick={() => Vaildation()}
+                    onClick={() => handlerVaildation()}
                   />
                 </div>
               </div>

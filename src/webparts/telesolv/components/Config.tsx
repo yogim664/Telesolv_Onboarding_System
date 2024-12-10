@@ -33,7 +33,6 @@ import { Dropdown } from "primereact/dropdown";
 import AddForm from "./AddForm";
 //import * as strings from "TelesolvWebPartStrings";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-//let fetchedItems: any[] = [];
 
 const Config = (props: any) => {
   interface IFilData {
@@ -51,13 +50,13 @@ const Config = (props: any) => {
   const [newformDetails, setnewformDetails] = useState<any>([]);
   const [currentFormID, setcurrentFormID] = useState(null);
   const [formsDetails, setformsDetails] = useState<any>([]);
+  const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
+  const [filteredQuestions, setfilteredQuestions] = React.useState<any>([]);
+  const [changeOption, setchangeOption] = useState<any>([]);
   const [selectedOption, setselectedOption] = useState({
     qIndex: null,
     aIndex: null,
   });
-  const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
-  const [filteredQuestions, setfilteredQuestions] = React.useState<any>([]);
-  const [changeOption, setchangeOption] = useState<any>([]);
 
   const handlerAcceptance = (id: any, qIndex: number) => {
     toast.success("Deleted Successfully", {
@@ -123,7 +122,6 @@ const Config = (props: any) => {
   const handlenewformChange = (e: any) => {
     const value = e.target.value;
     setnewformDetails(value);
-    console.log(newformDetails);
   };
 
   const handleOptionChange = (qIndex: any, aIndex: any, e: any) => {
@@ -230,11 +228,10 @@ const Config = (props: any) => {
     setquestions(sortQuestion);
     setfilteredQuestions(sortQuestion);
 
-    handleQuestionsReArrange(qIndex);
+    handlerQuestionsReArrange(qIndex);
   };
 
-  const handleQuestionsReArrange = (qIndex: any) => {
-    console.log(questions);
+  const handlerQuestionsReArrange = (qIndex: any) => {
     const updatedQuestion = filteredQuestions.sort(
       (a: any, b: any) => a.QuestionNo - b.QuestionNo
     );
@@ -244,7 +241,7 @@ const Config = (props: any) => {
         qus.isDelete = true;
       }
     });
-    console.log(updatedQuestion);
+
     let sNo = 0;
     updatedQuestion?.forEach((qus: any, ind: any) => {
       // eslint-disable-next-line no-return-assign
@@ -260,7 +257,7 @@ const Config = (props: any) => {
     setfilteredQuestions([...updatedQuestion]);
   };
 
-  const handleQuestionChange = (
+  const handlerQuestionChange = (
     qIndex: number,
     value: any,
     type: any,
@@ -286,13 +283,12 @@ const Config = (props: any) => {
     setquestions(updatedQuestions);
     setfilteredQuestions([..._questions]);
   };
-  //New changes
 
-  const handleAddOptionClick = (questionId: any) => {
+  const handlerAddOptionClick = (questionId: any) => {
     setSelectedQuestionId(questionId);
   };
 
-  const handleAddNewOption = (questionId: any) => {
+  const handlerAddNewOption = (questionId: any) => {
     const updatedQuestions: any = questions.map(
       (question: any, index: number) =>
         index === questionId
@@ -311,19 +307,13 @@ const Config = (props: any) => {
     setSelectedQuestionId(null); // Hide the input container
   };
 
-  // move index UP
-
-  const moveQuestionUp = (index: any, del: boolean, _tempArr?: any) => {
-    // const updatedQuestions = [...questions];
+  const handlermoveQuestionUp = (index: any, del: boolean, _tempArr?: any) => {
     const updatedQuestions = [..._tempArr];
-    // if (!del) {
+
     if (index > 0) {
       const currentQuestion = updatedQuestions[index];
       const previousQuestion = updatedQuestions[index - 1];
-
-      // const tempId = currentQuestion.Id;
       const tempQuestionNo = currentQuestion.QuestionNo;
-
       updatedQuestions[index] = {
         ...currentQuestion,
         QuestionNo: tempQuestionNo,
@@ -332,7 +322,6 @@ const Config = (props: any) => {
         Answer: previousQuestion.Answer,
         isChanged: true,
       };
-
       updatedQuestions[index - 1] = {
         ...previousQuestion,
         QuestionNo: previousQuestion.QuestionNo,
@@ -344,7 +333,6 @@ const Config = (props: any) => {
     } else {
       updatedQuestions[index] = {
         ...updatedQuestions[0],
-        // Id: previousQuestion.Id,
         QuestionNo: updatedQuestions[0].QuestionNo,
         QuestionTitle: updatedQuestions[0].QuestionTitle,
         Options: updatedQuestions[0].Options,
@@ -352,33 +340,23 @@ const Config = (props: any) => {
         isChanged: true,
       };
     }
-    // }
-
-    console.log("After Move:", updatedQuestions);
-
     setquestions([...updatedQuestions]); // New
     setfilteredQuestions([...updatedQuestions]);
   };
 
   // MoveDown
   // !BackUp
-  const moveQuestionDownn = (index: any) => {
+  const handlermoveQuestionDownn = (index: any) => {
     // !Maasi
     // Check if the index is valid and not the last question
     if (index < 0 || index >= questions.length - 1) return;
-
-    console.log("Before Move:", questions);
-
     // Create a copy of the questions array to avoid direct mutation
     const updatedQuestions = [...questions];
-
     // Get the current and next questions
     const currentQuestion = updatedQuestions[index];
     const nextQuestion = updatedQuestions[index + 1];
-
     // Swap the properties between the current and next question
     const tempQuestionNo = currentQuestion.QuestionNo;
-
     updatedQuestions[index] = {
       ...currentQuestion,
       QuestionNo: tempQuestionNo,
@@ -387,7 +365,6 @@ const Config = (props: any) => {
       Answer: nextQuestion.Answer,
       isChanged: true,
     };
-
     updatedQuestions[index + 1] = {
       ...nextQuestion,
       QuestionNo: nextQuestion.QuestionNo,
@@ -397,9 +374,6 @@ const Config = (props: any) => {
       Answer: currentQuestion.Answer,
       isChanged: true,
     };
-
-    console.log("After Move:", updatedQuestions);
-
     // Update the state with the new order of questions
     setquestions(updatedQuestions);
     setfilteredQuestions(updatedQuestions);
@@ -408,12 +382,10 @@ const Config = (props: any) => {
 
   // Post into list SP
 
-  const validation = async (): Promise<void> => {
+  const handlervalidation = async (): Promise<void> => {
     let errmsg: string = "";
     let err: boolean = false;
-
     const tempquestion = questions.filter((item: any) => !item.isDelete);
-
     if (tempquestion.some((_item: any) => _item.QuestionTitle.trim() === "")) {
       err = true;
       errmsg = "Enter Question Title";
@@ -432,39 +404,32 @@ const Config = (props: any) => {
       err = true;
       errmsg = "Select Answer";
     }
-    console.log(errmsg);
-
     if (!err) {
       try {
         const postQuestions: any[] =
           questions?.filter((_item: any) => _item.Id && !_item.isDelete) || [];
-        console.log(postQuestions, "POstQuestiondetaild");
+
         debugger;
         const saveQuestions: any[] =
           questions?.filter(
             (_item: any) => !_item.Id && !_item.isDelete && _item.isEdit
           ) || [];
-        console.log(saveQuestions, "Save");
 
         const deleteQuestions: any[] =
           questions?.filter((_Item: any) => _Item.Id && _Item.isDelete) || [];
-        console.log(deleteQuestions, "Delete");
-        console.log(questions, "Question");
+
         // Execute all operations in parallel
         await Promise.all([
           deleteQuestions?.length
-            ? deleteQuestionsToSP(deleteQuestions)
+            ? handlerDeleteQuestionTOSP(deleteQuestions)
             : Promise.resolve(),
           postQuestions?.length
-            ? updateQuestionsToSP(postQuestions)
+            ? handlerUpdateQuestionsToSP(postQuestions)
             : Promise.resolve(),
           saveQuestions?.length
-            ? saveQuestionsToSP(saveQuestions)
+            ? handlerSaveQuestionsToSP(saveQuestions)
             : Promise.resolve(),
         ]);
-
-        // Show success toast after all operations are complete
-
         toast.success("Questions saved successfully!", {
           position: "top-right",
           autoClose: 5000,
@@ -476,11 +441,8 @@ const Config = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
-
         setisSubmitted(!isSubmitted);
       } catch (error) {
-        console.error("Error processing questions:", error);
-
         toast.error("Failed to process questions.", {
           position: "top-right",
           autoClose: 5000,
@@ -508,7 +470,7 @@ const Config = (props: any) => {
     }
   };
 
-  const saveQuestionsToSP = async (questions: any) => {
+  const handlerSaveQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
         return sp.web.lists
@@ -525,7 +487,6 @@ const Config = (props: any) => {
       });
 
       await Promise.all(promises); // Wait for all items to be saved
-      console.log("Questions saved successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving questions:", error);
     }
@@ -533,7 +494,7 @@ const Config = (props: any) => {
 
   // update sp
 
-  const updateQuestionsToSP = async (questions: any) => {
+  const handlerUpdateQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
         return sp.web.lists
@@ -550,13 +511,12 @@ const Config = (props: any) => {
       });
 
       await Promise.all(promises); // Wait for all items to be saved
-      console.log("Questions saved successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving questions:", error);
     }
   };
 
-  const deleteQuestionsToSP = async (questions: any) => {
+  const handlerDeleteQuestionTOSP = async (questions: any) => {
     try {
       // Create an array of promises to delete questions
       const promises = questions?.map((question: any) =>
@@ -574,15 +534,13 @@ const Config = (props: any) => {
 
       // Wait for all delete operations to complete
       await Promise.all(promises);
-
-      console.log("Questions deleted successfully from SharePoint!");
     } catch (error) {
       console.error("Error in deleteQuestionsToSP function:", error);
     }
   };
 
   // Get items to SP
-  const questionConfig = async (key: any) => {
+  const handlerQuestionConfig = async (key: any) => {
     let formattedItems: IQuestionDatas[] = [];
     await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
@@ -591,7 +549,6 @@ const Config = (props: any) => {
       .filter(`isDelete ne 1 and Forms/Id eq ${key}`)
       .get()
       .then((items) => {
-        console.log(items, "Log itemss");
         formattedItems =
           items?.map((val: any) => {
             return {
@@ -630,23 +587,22 @@ const Config = (props: any) => {
   };
 
   // Function to fetch Title values
-  const getForms = async () => {
+  const hanlderForms = async () => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.Forms)
       .items.select("Title, ID")
       .get()
       .then((li) => {
-        console.log(li);
         let FormValuesDups = li.map((item: any) => ({
           key: item.Title,
           name: item.Title,
           ID: item.ID,
         }));
-        console.log(FormValuesDups);
+
         setformsDetails([...FormValuesDups]);
         const firstFormID = FormValuesDups?.[0]?.ID;
         setcurrentFormID(firstFormID);
-        filterFunc("Forms", firstFormID);
+        hanlderfilter("Forms", firstFormID);
       })
       .catch((err) => {
         console.log(err);
@@ -654,12 +610,10 @@ const Config = (props: any) => {
   };
 
   // Filter function
-  const filterFunc = async (key: string, val: any) => {
+  const hanlderfilter = async (key: string, val: any) => {
     const formValue = val;
-    await questionConfig(formValue)
+    await handlerQuestionConfig(formValue)
       .then((items: any) => {
-        console.log(items, "Question Items");
-
         let filteredData: any[] = [...items];
         let _tempFilterkeys: any = { ...filteredForm };
         _tempFilterkeys[key] = val;
@@ -681,7 +635,7 @@ const Config = (props: any) => {
       });
   };
 
-  const saveNewform = async () => {
+  const handlerSaveForm = async () => {
     if (
       formsDetails.some(
         (e: any) => e.key.toLowerCase() === newformDetails.toLowerCase()
@@ -705,10 +659,8 @@ const Config = (props: any) => {
           Title: newformDetails,
         })
         .then(async (li) => {
-          console.log(li);
           await setnewformDetails("");
-          await getForms();
-          console.log("Questions saved successfully to SharePoint!");
+          await hanlderForms();
         })
         .catch((err) => {
           console.log(err);
@@ -716,12 +668,8 @@ const Config = (props: any) => {
     }
   };
 
-  const fetchQuestions = async () => {
-    await getForms();
-  };
-
   useEffect(() => {
-    fetchQuestions();
+    hanlderForms();
   }, [isSubmitted]);
 
   return (
@@ -788,7 +736,7 @@ const Config = (props: any) => {
               className={styles.saveBtn}
               disabled={!newformDetails}
               onClick={() => {
-                saveNewform();
+                handlerSaveForm();
               }}
             />
           </div>
@@ -816,7 +764,7 @@ const Config = (props: any) => {
                   : null
               }
               onChange={(e) => {
-                filterFunc("Forms", e.value.ID);
+                hanlderfilter("Forms", e.value.ID);
                 setcurrentFormID(e.value.ID);
               }}
               options={formsDetails || []}
@@ -870,7 +818,11 @@ const Config = (props: any) => {
                       <i
                         className="pi pi-arrow-up"
                         onClick={() =>
-                          moveQuestionUp(qIndex, false, filteredQuestions)
+                          handlermoveQuestionUp(
+                            qIndex,
+                            false,
+                            filteredQuestions
+                          )
                         }
                         style={{
                           cursor: "pointer",
@@ -883,7 +835,7 @@ const Config = (props: any) => {
                           cursor: "pointer",
                           color: "#233b83",
                         }}
-                        onClick={() => moveQuestionDownn(qIndex)}
+                        onClick={() => handlermoveQuestionDownn(qIndex)}
                       />
                     </div>
                   </div>
@@ -894,7 +846,7 @@ const Config = (props: any) => {
                       value={question?.QuestionTitle}
                       placeholder="Enter here"
                       onChange={(e) => {
-                        handleQuestionChange(
+                        handlerQuestionChange(
                           //   question?.Id,
                           qIndex,
                           e.target.value,
@@ -933,7 +885,7 @@ const Config = (props: any) => {
                                           onChange={(e) => {
                                             console.log(e, "radio");
 
-                                            handleQuestionChange(
+                                            handlerQuestionChange(
                                               qIndex,
                                               e.target.value,
                                               "Radio",
@@ -1063,7 +1015,7 @@ const Config = (props: any) => {
                       <i
                         className="pi pi-check"
                         style={{ color: "Green" }}
-                        onClick={() => handleAddNewOption(qIndex)}
+                        onClick={() => handlerAddNewOption(qIndex)}
                       />
 
                       <i
@@ -1076,7 +1028,7 @@ const Config = (props: any) => {
                   <div
                     className={styles.AddOptionContainer}
                     onClick={() => {
-                      handleAddOptionClick(qIndex);
+                      handlerAddOptionClick(qIndex);
                       console.log(qIndex);
                     }}
                     style={{
@@ -1117,7 +1069,7 @@ const Config = (props: any) => {
                 label="Save"
                 className={styles.saveBtn}
                 onClick={() => {
-                  validation();
+                  handlervalidation();
                 }}
               />
             </div>
