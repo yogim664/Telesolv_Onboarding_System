@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable react/jsx-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -26,11 +27,11 @@ const cmtImg: string = require("../assets/Images/Comment.png");
 const EmployeeForm = (props: any): JSX.Element => {
   console.log(props);
 
-  const [ListItems, setListItems] = useState<any[]>([]);
+  const [questions, setquestions] = useState<any[]>([]);
   const [ProgressPercent, setProgressPercent] = useState<number>(0);
 
   const [comment, setComment] = useState("");
-  const [EmpConfig, setEmpConfig] = useState<any[]>([]);
+  //const [EmpConfig, setEmpConfig] = useState<any[]>([]);
   const [curUserName, setCurUserName] = useState({ Name: "", Email: "" });
   //Set Value into Comments
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -39,8 +40,6 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   // Define a function to calculate progress percentage
   const calculateProgressPercentage = (_tempArr: any) => {
-    console.log(ListItems, "Progess");
-
     const totalItems = _tempArr.length;
     console.log(totalItems, "totalItems");
 
@@ -64,8 +63,8 @@ const EmployeeForm = (props: any): JSX.Element => {
   };
 
   //Get EmployeeResponse
-  const questionConfig = () => {
-    sp.web.lists
+  const questionConfig = async () => {
+    await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
         "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options, Employee/ID, Employee/EMail"
@@ -113,7 +112,7 @@ const EmployeeForm = (props: any): JSX.Element => {
 
         // Update state
         console.log(_tempArr); // Log for debugging
-        setListItems(_tempArr);
+        setquestions(_tempArr);
         if (_tempArr.length > 0) {
           setComment(_tempArr[0].ResponseComments); // Set the first comment
         } else {
@@ -133,41 +132,44 @@ const EmployeeForm = (props: any): JSX.Element => {
     type: any,
     aIndex?: number
   ) => {
-    let _Listitems: any = ListItems.filter(
-      (val: any) => !val.isDelete && val.QuestionNo !== 10000
-    ).sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
-    if (type === "Question") {
-      _Listitems[qIndex].QuestionTitle = value;
-    } else {
-      _Listitems[qIndex].Response = { key: value, name: value };
-    }
+    let _Listitems: any = questions
+      .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
+      .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
-    setListItems([..._Listitems]);
+    _Listitems[qIndex].Response = { key: value, name: value };
+
+    setquestions([..._Listitems]);
   };
 
   /// validation
 
   const validation = async (): Promise<void> => {
+    debugger;
     let errmsg: string = "";
     let err: boolean = false;
 
     // Check if any response is empty
-    if (ListItems.some((_item: any) => !_item.Response === null)) {
+    if (
+      questions.some(
+        (_item: any) =>
+          !_item.Response || !_item.Response.key || !_item.Response.name
+      )
+    ) {
       err = true;
       errmsg = "Select Answer";
     }
 
     if (!err) {
-      const postQuestions = ListItems?.filter((_item: any) => !!_item.Id) || [];
+      // const postQuestions = questions?.filter((_item: any) => !!_item.Id) || [];
 
       // If there are questions to post, update SharePoint
-      if (postQuestions.length) {
+      if (questions.length) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        await updateQuestionsToSP(postQuestions);
+        await updateQuestionsToSP(questions);
       }
     } else {
       // Show a warning toast if there's an error
-      toast.warn(errmsg, {
+      toast.error(errmsg, {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -182,101 +184,71 @@ const EmployeeForm = (props: any): JSX.Element => {
   };
 
   // update sp
-
   const updateQuestionsToSP: any = async (ListItems: any) => {
-    try {
-      // Map and update each item in SharePoint
-      ListItems.forEach((item: any, i: number) =>
-        sp.web.lists
-          .getByTitle(GCongfig.ListName.EmployeeResponse)
-          .items.getById(item.Id)
-          .update({
-            Response: item.Response ? item.Response.key : "",
-            Status:
-              item.Response.key !== item.Answer
-                ? "Satisfactory"
-                : "To be resolved",
-
-            // Response: "Text",
-            ResponseComments: comment,
-          })
-          .then(() => {
-            // Optionally, show success toast
-            if (ListItems.length - 1 === i)
-              toast.success("Updated Successfully", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Bounce,
-              });
-
-            ///Update notify
-
-            const items = sp.web.lists
+    for (let i: number = 0; questions?.length > i; i++) {
+      await sp.web.lists
+        .getByTitle(GCongfig.ListName.EmployeeResponse)
+        .items.getById(questions[i].Id)
+        .update({
+          Response: questions[i].Response ? questions[i].Response.key : "",
+          Status:
+            questions[i].Response.key !== questions[i].Answer
+              ? "Satisfactory"
+              : "To be resolved",
+          ResponseComments: comment,
+        })
+        .then(async () => {
+          if (questions.length - 1 === i) {
+            await sp.web.lists
               .getByTitle(GCongfig.ListName.EmployeeOnboarding)
               .items.select("*,Employee/ID,Employee/EMail")
               .expand("Employee")
               .get()
-              .then((_items: any) => {
-                console.log(_items, "REsponse");
+              .then(async (_items: any) => {
                 const temp: any = _items?.filter(
                   (val: any) =>
                     val?.Employee?.EMail.toLowerCase() ===
                     CurUser?.Email.toLowerCase()
                 );
 
-                setEmpConfig(temp);
-                console.log(temp, "temp578");
-                console.log(EmpConfig);
-
-                const updatePromises = temp.map((_Empitem: any) =>
+                temp?.map((_Empitem: any) =>
                   sp.web.lists
                     .getByTitle(GCongfig.ListName.EmployeeOnboarding)
                     .items.getById(_Empitem.Id)
                     .update({ isEmployeeCompleted: true })
                 );
-                console.log(updatePromises);
+
+                toast.success("Updated Successfully", {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                  transition: Bounce,
+                });
+
+                setquestions([]);
+                await questionConfig();
               });
-
-            console.log(items);
-
-            setListItems([]);
-            questionConfig();
-          })
-          .catch((err) => console.log(err, "updateQuestionsToSP"))
-      );
-
-      // Wait for all updates to complete
-    } catch (error) {
-      console.error("Error saving questions:", error);
-
-      // Show error toast
-
-      toast.error("error", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+          }
+        })
+        .catch((err) => console.log(err, "updateQuestionsToSP"));
     }
   };
 
-  useEffect(() => {
-    questionConfig();
+  const getCurrentUser = () => {
     sp.web.currentUser.get().then((user) => {
       console.log(user);
       setCurUserName({ Name: user.Title, Email: user.Email });
     });
+    questionConfig();
+  };
+
+  useEffect(() => {
+    getCurrentUser();
   }, []);
 
   return (
@@ -322,8 +294,8 @@ const EmployeeForm = (props: any): JSX.Element => {
               </div>
             </div>
             <div className={styles.AnswerPlayground}>
-              {ListItems.length ===
-              ListItems.filter((item: any) => item.isAnswered === true)
+              {questions.length ===
+              questions.filter((item: any) => item.isAnswered === true)
                 .length ? (
                 <div className={styles.ProgressBar}>
                   <ProgressBar value={ProgressPercent} />
@@ -333,10 +305,9 @@ const EmployeeForm = (props: any): JSX.Element => {
               <div className="QuestionSection">
                 <div className={styles.EmployeeQuestionContainer}>
                   <div style={{ width: "100%" }}>
-                    {ListItems.length &&
-                      ListItems.sort(
-                        (a: any, b: any) => a.QuestionNo - b.QuestionNo
-                      ) // Direct number comparison
+                    {questions.length &&
+                      questions
+                        .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
 
                         .map((_item: any, qIndex: any) => (
                           <div className={styles.question}>
@@ -434,8 +405,8 @@ const EmployeeForm = (props: any): JSX.Element => {
                     </span>
                   </div>
 
-                  {ListItems.length !==
-                  ListItems.filter((item) => item.isAnswered === true)
+                  {questions.length !==
+                  questions.filter((item) => item.isAnswered === true)
                     .length ? (
                     <InputTextarea
                       placeholder="Enter comments"
@@ -448,8 +419,8 @@ const EmployeeForm = (props: any): JSX.Element => {
                 </div>
               </div>
 
-              {ListItems.length !==
-              ListItems.filter((item) => item.isAnswered === true).length ? (
+              {questions.length !==
+              questions.filter((item) => item.isAnswered === true).length ? (
                 <div className={styles.employeeFormFooter}>
                   <Button className={styles.cancelBtn}>Cancel</Button>
                   <Button

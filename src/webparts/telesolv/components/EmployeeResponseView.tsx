@@ -41,23 +41,18 @@ const _fkeys: IFilData = {
 const EmployeeResponseView = (props: any): JSX.Element => {
   let curFilterItem: IFilData = _fkeys;
   const [questions, setQuestions] = useState<any>([]);
-  const [statusChoices, setStatusChoices] = useState<IDrop[]>([]);
+  const [statusValues, setstatusValues] = useState<IDrop[]>([]);
   const [filterkeys, setfilterkeys] = useState<IFilData>({ ..._fkeys });
-  const [filterData, setfilterData] = useState<any>([]);
-  const [SelectedItem, setSelectedItem] = useState<any>([]);
-  const [ResComment, setResComment] = useState<any>([]);
-  const [visible, setVisible] = useState(false);
-  const SeelectedEmp = props.setSelectedEmp;
-  console.log(statusChoices);
-  console.log(SeelectedEmp.Employee.EmployeeTitle);
+  const [filteredQuestions, setfilteredQuestions] = useState<any>([]);
+  const [selectedQuestionDetails, setselectedQuestionDetails] = useState<any>(
+    []
+  );
+  const [responseComments, setresponseComments] = useState<any>([]);
+  const [isvisible, setisVisible] = useState(false);
+  const selectedEmployeeDetails = props.setselectedEmployeeDetails;
 
-  const peopleTemplate = (rowData: any) => {
-    debugger;
-    const assignees =
-      // rowData.Reassigned && rowData.Reassigned.length > 0
-      //   ? rowData.Reassigned
-      // :
-      rowData?.Assigned || [];
+  const handlerAssignedPersonDetails = (rowData: any) => {
+    const assignees = rowData?.Assigned || [];
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {assignees.map((assignee: any, index: number) => (
@@ -89,8 +84,11 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   };
 
   //People picker
-  const CompletedByPeopleTemplate = (rowData: any) => {
+  const handlerCompletedByPersonDetails = (rowData: any) => {
     const user = rowData.CompletedBy;
+    if (rowData.CompletedBy.length === 0) {
+      return <span>-</span>;
+    }
     return (
       <div style={{ display: "flex", alignItems: "center" }}>
         <img
@@ -103,142 +101,125 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             marginRight: "10px",
           }}
         />
-        <span>{user.Name}</span>
+        <span>{rowData?.CompletedBy.Name}</span>
       </div>
     );
   };
+  const handlerGetStatusValues = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
+      .fields.getByInternalNameOrTitle("Status")
+      .select("Choices,ID") // Ensure 'Choices' is available
+      .get()
+      .then((data: any) => {
+        if (data.Choices && Array.isArray(data.Choices)) {
+          const ChoicesCollection: IDrop[] = data.Choices.map(
+            (choice: string) => ({
+              key: choice,
+              name: choice,
+            })
+          );
 
-  const EmployeeDetails = async () => {
-    try {
-      debugger;
-      // Fetch items from the SharePoint list
-      const employeeIdString = SeelectedEmp.Employee.EmployeeId.toString();
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.EmployeeResponse)
-        .items.select(
-          "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail"
-        )
-        .expand("QuestionID,Employee,EmployeeID,Reassigned")
-        .filter(`Employee/ID eq ${employeeIdString}`)
-        .get();
-      debugger;
-
-      // Fetch items from the SharePoint list
-      const Qitems = await sp.web.lists
-        .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID,Assigned/EMail,Assigned/Title")
-        .expand("Assigned")
-        .filter("isDelete ne 1")
-        .get();
-      console.log(Qitems, "Quwsrtion");
-
-      // Format EmployeeResponse items and link to assigned values
-      const formattedItems = items.map((item: any) => {
-        const relatedQitems: any = Qitems.filter(
-          (qItem: any) => qItem.Id === item.QuestionID?.ID
-        );
-        console.log(relatedQitems);
-        debugger;
-        return {
-          Id: item.ID,
-          QuestionID: item.QuestionID?.ID,
-          QuestionTitle: item.QuestionID?.Title,
-          Answer: item.QuestionID?.Answer,
-          Status: item.Status,
-          Comments: item.Comments,
-          ResponseComments: item.ResponseComments,
-          Employee: {
-            Name: item.Employee ? item.Employee.Title : "",
-            Email: item.Employee ? item.Employee.EMail : "",
-          },
-          CompletedBy: item.CompletedBy
-            ? {
-                Name: item.CompletedBy ? item.CompletedBy.Title : "",
-                Email: item.CompletedBy ? item.CompletedBy.EMail : "",
-              }
-            : [],
-          Role: item.EmployeeID?.Role || "No Role",
-          CompletedDateAndTime: item.CompletedDateAndTime || null,
-          Department: item.EmployeeID?.Department || "No Department",
-          Assigned: item?.Reassigned
-            ? item.Reassigned.map((Reassigned: any) => ({
-                Id: Reassigned.ID,
-                Email: Reassigned.EMail,
-                Title: Reassigned.Title,
-              }))
-            : relatedQitems[0]?.Assigned
-            ? relatedQitems[0].Assigned.map((assignee: any) => ({
-                Id: assignee.ID,
-                Email: assignee.EMail,
-                Title: assignee.Title,
-              }))
-            : [],
-          Reassigned: item?.Reassigned
-            ? item.Reassigned.map((Reassigned: any) => ({
-                Id: Reassigned.ID,
-                Email: Reassigned.EMail,
-                Title: Reassigned.Title,
-              }))
-            : [],
-        };
-      });
-
-      console.log("Fetched Items:", formattedItems);
-
-      // Return the formatted array
-      return formattedItems;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      return [];
-    }
+          setstatusValues(ChoicesCollection); // Update state with choices
+        } else {
+          console.warn("No choices found in the Status field");
+        }
+      })
+      .catch((err) => console.error("Error fetching choices:", err));
   };
 
-  //  const updateAssigenee = async (rowdata: any) => {
-  //   const filteredItems = filterData.filter(
-  //     (question: any) => question.Id === rowdata.Id
-  //   );
+  const handlerEmployeeDetails = async () => {
+    const employeeIdString =
+      selectedEmployeeDetails.Employee.EmployeeId.toString();
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
+      .items.select(
+        "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail, CompletedBy/ID, CompletedBy/Title, CompletedBy/EMail"
+      )
+      .expand("QuestionID,Employee,EmployeeID,Reassigned,CompletedBy")
+      .filter(`Employee/ID eq ${employeeIdString}`)
+      .get()
+      .then(async (items: any) => {
+        await sp.web.lists
+          .getByTitle(GCongfig.ListName.CheckpointConfig)
+          .items.select("*,Assigned/ID,Assigned/EMail,Assigned/Title")
+          .expand("Assigned")
+          .filter("isDelete ne 1")
+          .get()
+          .then(async (Qitems: any) => {
+            const formattedItems =
+              items?.map((item: any) => {
+                const relatedQitems: any = Qitems.filter(
+                  (qItem: any) => qItem.Id === item.QuestionID?.ID
+                );
+                console.log(relatedQitems, "relatedQitems");
+                debugger;
+                console.log(item, "Checktems");
+                console.log(Qitems, "Qitems");
+                return {
+                  Id: item.ID,
+                  QuestionID: item.QuestionID?.ID,
+                  QuestionTitle: item.QuestionID?.Title,
+                  Answer: item.QuestionID?.Answer,
+                  Status: item.Status,
+                  Comments: item.Comments,
+                  ResponseComments: item.ResponseComments,
+                  Employee: {
+                    Name: item.Employee ? item.Employee.Title : "",
+                    Email: item.Employee ? item.Employee.EMail : "",
+                  },
+                  CompletedBy: item.CompletedBy
+                    ? {
+                        Name: item.CompletedBy ? item.CompletedBy.Title : "",
+                        Email: item.CompletedBy ? item.CompletedBy.EMail : "",
+                      }
+                    : [],
+                  Role: item.EmployeeID?.Role || "No Role",
+                  CompletedDateAndTime: item.CompletedDateAndTime || null,
+                  Department: item.EmployeeID?.Department || "No Department",
+                  Assigned: item?.Reassigned
+                    ? item.Reassigned.map((Reassigned: any) => ({
+                        Id: Reassigned.ID,
+                        Email: Reassigned.EMail,
+                        Title: Reassigned.Title,
+                      }))
+                    : relatedQitems[0]?.Assigned
+                    ? relatedQitems[0].Assigned.map((assignee: any) => ({
+                        Id: assignee.ID,
+                        Email: assignee.EMail,
+                        Title: assignee.Title,
+                      }))
+                    : [],
+                  Reassigned: item?.Reassigned
+                    ? item.Reassigned.map((Reassigned: any) => ({
+                        Id: Reassigned.ID,
+                        Email: Reassigned.EMail,
+                        Title: Reassigned.Title,
+                      }))
+                    : [],
+                };
+              }) || [];
 
-  //   if (filteredItems.length === 0) {
-  //     console.error("No matching question found for the given rowdata.");
-  //     return;
-  //   }
+            setresponseComments(
+              formattedItems?.[0].ResponseComments
+                ? formattedItems?.[0].ResponseComments
+                : ""
+            );
+            setQuestions(formattedItems);
+            setfilteredQuestions(formattedItems);
+            await handlerGetStatusValues();
+          })
+          .catch((error: any) => {
+            console.log("error: ", error);
+          });
+      })
+      .catch((error: any) => {
+        console.log("error: ", error);
+      });
+  };
 
-  //   const filteredItem = filteredItems[0];
-  //   const assignedIds =
-  //     filteredItem.Reassigned?.map((val: any) => val.id) || [];
-
-  //   try {
-  //     await sp.web.lists
-  //       .getByTitle(GCongfig.ListName.EmployeeResponse)
-  //       .items.getById(filteredItem.Id)
-  //       .update({
-  //         ReassignedId: { results: assignedIds }, // Set the multi-lookup values
-  //       });
-
-  //     console.log("Assignee updated successfully.");
-
-  //     // Find the index of the item to update
-  //     const indexValue = filterData.findIndex(
-  //       (item: any) => item.Id === filteredItem.Id
-  //     );
-
-  //     if (indexValue !== -1) {
-  //       // Update the Reassigned property
-  //       filterData[indexValue].Reassigned = [...filteredItem.Reassigned];
-  //       setfilterData([...filterData]);
-  //       setQuestions([...filterData]);
-  //     } else {
-  //       console.error("Item not found in filterData.");
-  //     }
-
-  //     setVisible(false);
-  //   } catch (error) {
-  //     console.error("Error updating assignee:", error);
-  //   }
-  // };
-
-  const updateAssigenee = async (rowdata: any) => {
-    const filteredItems = filterData.filter(
+  const handlerUpdateAssigeneDetails = async (rowdata: any) => {
+    const filteredItems = filteredQuestions.filter(
       (question: any) => question.Id === rowdata.Id
     );
 
@@ -246,7 +227,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       console.error("No matching question found for the given rowdata.");
       return;
     }
-
     const filteredItem = filteredItems[0];
     const assignedIds =
       filteredItem.Reassigned?.map((val: any) => val.id) || [];
@@ -257,29 +237,32 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         .items.getById(filteredItem.Id)
         .update({
           ReassignedId: { results: assignedIds },
+        })
+        .then(async () => {
+          await handlerEmployeeDetails();
+          setisVisible(false);
         });
 
-      console.log("Assignee updated successfully.");
+      // console.log("Assignee updated successfully.");
 
-      const indexValue = filterData.findIndex(
-        (item: any) => item.Id === filteredItem.Id
-      );
+      // const indexValue = filteredQuestions.findIndex(
+      //   (item: any) => item.Id === filteredItem.Id
+      // );
 
-      if (indexValue !== -1) {
-        filterData[indexValue].Reassigned = [...filteredItem.Reassigned];
-        setfilterData([...filterData]);
-        setQuestions([...filterData]);
-      } else {
-        console.error("Item not found in filterData.");
-      }
-
-      setVisible(false);
+      // if (indexValue !== -1) {
+      //   filteredQuestions[indexValue].Reassigned = [...filteredItem.Reassigned];
+      //   setfilteredQuestions([...filteredQuestions]);
+      //  handlerEmployeeDetails();
+      // setQuestions([...filteredQuestions]);
+      // } else {
+      //   console.error("Item not found in filterData.");
+      // }
     } catch (error) {
       console.error("Error updating assignee:", error);
     }
   };
 
-  const ActionIcons = (Rowdata: any, index: any) => {
+  const handlerActionIcons = (Rowdata: any, index: any) => {
     return (
       <div
         style={{
@@ -297,15 +280,15 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           className="pi pi-sync"
           style={{ fontSize: "1.25rem", color: "#233b83" }}
           onClick={() => {
-            setSelectedItem(Rowdata);
-            setVisible(true);
+            setselectedQuestionDetails(Rowdata);
+            setisVisible(true);
           }}
         />
       </div>
     );
   };
 
-  const stsTemplate = (rowData: any) => {
+  const handlerStatusDetails = (rowData: any) => {
     return (
       <div
         className={styles.pendingSts}
@@ -340,30 +323,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     );
   };
 
-  const getStsChoices = (): void => {
-    sp.web.lists
-      .getByTitle(GCongfig.ListName.EmployeeResponse)
-      .fields.getByInternalNameOrTitle("Status")
-      .select("Choices,ID") // Ensure 'Choices' is available
-      .get()
-      .then((data: any) => {
-        if (data.Choices && Array.isArray(data.Choices)) {
-          const ChoicesCollection: IDrop[] = data.Choices.map(
-            (choice: string) => ({
-              key: choice,
-              name: choice,
-            })
-          );
-
-          setStatusChoices(ChoicesCollection); // Update state with choices
-        } else {
-          console.warn("No choices found in the Status field");
-        }
-      })
-      .catch((err) => console.error("Error fetching choices:", err));
-  };
-
-  const filterFunc = (): void => {
+  const handlerFilter = (): void => {
     let tempArray: any[] = [...questions];
 
     if (curFilterItem.search) {
@@ -398,12 +358,12 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       );
     }
 
-    setfilterData(tempArray);
+    setfilteredQuestions(tempArray);
   };
 
-  const handleChange = (value: any, rowData: any, field: string) => {
+  const handlerReassignedChange = (value: any, rowData: any, field: string) => {
     debugger;
-    const updatedQuestions: any = filterData.map((question: any) =>
+    const updatedQuestions: any = filteredQuestions.map((question: any) =>
       question.Id === rowData.Id
         ? {
             ...question,
@@ -418,24 +378,12 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           }
         : question
     );
-    setfilterData([...updatedQuestions]);
+    setfilteredQuestions([...updatedQuestions]);
     console.log(updatedQuestions, "updatedQuestions");
   };
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const fetchedItems = await EmployeeDetails();
-      setResComment(
-        fetchedItems?.[0].ResponseComments
-          ? fetchedItems?.[0].ResponseComments
-          : ""
-      );
-      setQuestions(fetchedItems);
-      setfilterData(fetchedItems);
-    };
-
-    fetchQuestions();
-    getStsChoices();
+    handlerEmployeeDetails();
   }, []);
 
   console.log(questions, "questions object");
@@ -444,11 +392,11 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       <div className="card flex justify-content-center">
         <Dialog
           header="Re assigen HR Persons"
-          visible={visible}
+          visible={isvisible}
           style={{ width: "30vw" }}
           onHide={() => {
-            if (!visible) return;
-            setVisible(false);
+            if (!isvisible) return;
+            setisVisible(false);
           }}
         >
           <div
@@ -466,15 +414,20 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               ensureUser={true}
               placeholder={"Search Employee"}
               onChange={(selectedPeople: any[]) => {
-                handleChange(selectedPeople, SelectedItem, "Reassigned"); // Pass selectedPeople and rowData
+                handlerReassignedChange(
+                  selectedPeople,
+                  selectedQuestionDetails,
+                  "Reassigned"
+                ); // Pass selectedPeople and rowData
               }}
               principalTypes={[PrincipalType.User]}
               defaultSelectedUsers={
-                SelectedItem.Reassigned && SelectedItem.Reassigned.length > 0
-                  ? SelectedItem?.Reassigned?.map(
+                selectedQuestionDetails.Reassigned &&
+                selectedQuestionDetails.Reassigned.length > 0
+                  ? selectedQuestionDetails?.Reassigned?.map(
                       (assignee: any) => assignee?.Email
                     )
-                  : SelectedItem?.Assigned?.map(
+                  : selectedQuestionDetails?.Assigned?.map(
                       (assignee: any) => assignee?.Email
                     ) || []
               }
@@ -496,20 +449,20 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               className={styles.cancelBtn}
               onClick={() => {
                 //  setQuestions(questions);
-                setfilterData(questions);
-                setVisible(false);
+                setfilteredQuestions(questions);
+                setisVisible(false);
               }}
             />
             <Button
               label="Save"
               className={styles.saveBtn}
-              disabled={filterData.some(
+              disabled={filteredQuestions.some(
                 (item: any) =>
-                  item.Id === SelectedItem.Id &&
+                  item.Id === selectedQuestionDetails.Id &&
                   (!item.Reassigned || item.Reassigned.length === 0)
               )}
               onClick={() => {
-                updateAssigenee(SelectedItem);
+                handlerUpdateAssigeneDetails(selectedQuestionDetails);
               }}
             />
           </div>
@@ -525,15 +478,15 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             }}
           />
           <h2 className={styles.userName}>
-            {SeelectedEmp.Employee.EmployeeTitle}
+            {selectedEmployeeDetails.Employee.EmployeeTitle}
           </h2>
         </div>
 
         <div className={styles.FilterOption}>
           <Dropdown
             value={
-              statusChoices
-                ? statusChoices?.find(
+              statusValues
+                ? statusValues?.find(
                     (choice: any) => choice.key === filterkeys.Status
                   ) || null
                 : null
@@ -544,9 +497,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
               curFilterItem.Status = value;
               setfilterkeys({ ...curFilterItem });
-              filterFunc();
+              handlerFilter();
             }}
-            options={statusChoices || []}
+            options={statusValues || []}
             optionLabel="name"
             placeholder="Select a status"
           />
@@ -563,7 +516,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 console.log("Selected People:", selectedPeople);
                 curFilterItem.Employee = selectedPeople;
                 setfilterkeys({ ...curFilterItem });
-                filterFunc();
+                handlerFilter();
               }}
               principalTypes={[PrincipalType.User]}
               defaultSelectedUsers={
@@ -582,7 +535,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               const value: any = e.target.value.trimStart();
               curFilterItem.search = value;
               setfilterkeys({ ...curFilterItem });
-              filterFunc();
+              handlerFilter();
             }}
           />
 
@@ -599,7 +552,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               curFilterItem.Status = "";
               curFilterItem.Employee = [];
               setfilterkeys({ ..._fkeys });
-              filterFunc();
+              handlerFilter();
             }}
           />
         </div>
@@ -609,16 +562,20 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           <DataTable
             className={styles.employeeResponseDataTable}
             //  value={questions}
-            value={filterData}
+            value={filteredQuestions}
             tableStyle={{ minWidth: "50rem" }}
           >
             <Column field="QuestionTitle" header="Questions" />
             <Column field="Answer" header="Answer" />
-            <Column field="Status" header="Status" body={stsTemplate} />
+            <Column
+              field="Status"
+              header="Status"
+              body={handlerStatusDetails}
+            />
             <Column
               field="HR Persons"
               header="Assigned to"
-              body={peopleTemplate}
+              body={handlerAssignedPersonDetails}
               style={{
                 width: "65%",
               }}
@@ -626,7 +583,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             <Column
               field="completedBy"
               header="Completed by"
-              body={CompletedByPeopleTemplate}
+              body={handlerCompletedByPersonDetails}
               style={{
                 width: "65%",
               }}
@@ -648,17 +605,19 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             <Column
               field="Re Assigen"
               header="Re Assigen"
-              body={(Rowdata: any, index: any) => ActionIcons(Rowdata, index)}
+              body={(Rowdata: any, index: any) =>
+                handlerActionIcons(Rowdata, index)
+              }
             />
           </DataTable>
         ) : (
           <div className={styles.noDataFound}>No data found!</div>
         )}
       </div>
-      {ResComment && questions.length > 0 && (
+      {responseComments && questions.length > 0 && (
         <div className={styles.commentSection}>
           <h4>Comments</h4>
-          <div className={styles.CommentBox}>{ResComment}</div>
+          <div className={styles.CommentBox}>{responseComments}</div>
         </div>
       )}
     </div>

@@ -120,7 +120,6 @@ const HrPersons = (props: any) => {
         (_item) =>
           _item.Assigned.length &&
           _item.Assigned.some((_a: any) =>
-            // val.some((_v: any) => _a.Email === _v.secondaryText)
             _tempFilterkeys.people.some(
               (_v: any) => _a.Email === _v.secondaryText
             )

@@ -59,18 +59,6 @@ const Config = (props: any) => {
   });
 
   const handlerAcceptance = (id: any, qIndex: number) => {
-    toast.success("Deleted Successfully", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Bounce,
-    });
-
     handlerQuestionDeletion(id, qIndex);
   };
 
@@ -147,6 +135,10 @@ const Config = (props: any) => {
       });
       return;
     }
+    // const tempQuestions = questions.map(
+    //   (question: any, index: number) => index === qIndex
+    // );
+
     const updatedQuestions = questions.map((question: any, index: number) =>
       index === qIndex
         ? {
@@ -215,7 +207,8 @@ const Config = (props: any) => {
   };
 
   const handlerQuestionDeletion = (id: number, qIndex: number) => {
-    const sortQuestion = questions
+    debugger;
+    const sortQuestion = filteredQuestions
       .filter(
         (val: any) =>
           !val.isDelete &&
@@ -252,6 +245,17 @@ const Config = (props: any) => {
       } else {
         return (qus.QuestionNo = 10000);
       }
+    });
+    toast.success("Deleted Successfully", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
     });
     setquestions([...updatedQuestion]);
     setfilteredQuestions([...updatedQuestion]);

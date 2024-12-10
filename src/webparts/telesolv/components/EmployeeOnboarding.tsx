@@ -95,34 +95,149 @@ const Onboarding = (props: any) => {
       SecondaryEmail: "",
     });
 
-  const handlerGetCurrentUserId = async () => {
-    try {
-      const user = await sp.web.currentUser();
-      console.log("Current User ID:", user.Id);
-      setcurrentUserID(user.Id);
-      return user.Id;
-    } catch (error) {
-      console.error("Error getting current user ID:", error);
-    }
-  };
-  //Get Departments
-  const handlerGetDepartments = async () => {
+  //Get choice
+  const handlerGetStatusValues = async () => {
     await sp.web.lists
-      .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
-      .items.select("Title") // Fetch only the Title column
+      .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+      .fields.getByInternalNameOrTitle("Status")
+      .select("Choices,ID")
       .get()
-      .then((items) => {
-        const titleValues = items.map((item: any) => ({
-          key: item.Title, // Unique identifier
-          name: item.Title, // Display name
+      .then((data: any) => {
+        const ChoicesCollection = data.Choices.map((choice: string) => ({
+          key: choice,
+          name: choice,
         }));
-        setdepartmentsDetails([...titleValues]);
-        handlerGetCurrentUserId();
-        handlerGetForms();
-        console.log(departmentsDetails, "SetDep");
+        setstatusDetails(ChoicesCollection);
       })
-      .catch((error) => {
-        console.error("Error fetching titles:", error);
+      .catch((err) => console.error("Error fetching choices:", err));
+  };
+
+  const handlerEmployeeOnboardingDetails = async (formattedQuestions: any) => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeOnboarding)
+      .items.select("*,Employee/ID,Employee/EMail,Employee/Title,Form/ID")
+      .expand("Employee,Form")
+      .filter("isDelete ne 1")
+      .get()
+      .then(async (items: any) => {
+        const formattedItems =
+          items?.map((item: any, index: any) => ({
+            index: index,
+            Id: item.Id,
+            Forms: item.Form?.ID || null,
+            Employee: item.Employee?.Title
+              ? {
+                  EmployeeId: item.Employee.ID || null,
+                  EmployeeEMail: item.Employee.EMail || "",
+                  EmployeeTitle: item.Employee.Title || "",
+                }
+              : "",
+            Role: item.Role ? item.Role : "",
+            Department: item.Department
+              ? {
+                  key: item.Department,
+                  name: item.Department,
+                }
+              : {},
+            Email: item.Email ? item.Email : "",
+            PhoneNumber: item.PhoneNumber ? item.PhoneNumber : "",
+            Status:
+              formattedQuestions.filter(
+                (Qitem: any) => Qitem.Employee.EmployeeId === item.Employee.ID
+              ).length !==
+              formattedQuestions.filter(
+                (Qitem: any) =>
+                  (Qitem.Status === "Satisfactory" ||
+                    Qitem.Status === "Resolved") &&
+                  Qitem.Employee.EmployeeId === item.Employee.ID
+              ).length
+                ? "Pending"
+                : "Completed",
+            SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
+          })) || [];
+
+        setEmployeeOnboardingDetails(formattedItems);
+        setfilteredEmployeeOnboardingDetails(formattedItems);
+        await handlerGetStatusValues();
+      })
+      .catch((error: any) => {
+        console.log("error: ", error);
+      });
+  };
+
+  const handleEmployeeDetails = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
+      .items.select(
+        "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
+      )
+      .expand("QuestionID,Employee,EmployeeID")
+      .get()
+      .then(async (items: any) => {
+        const formattedResponseItems =
+          items?.map((item: any, index: any) => {
+            return {
+              index: index,
+              QuestionID: item.QuestionID?.ID,
+              QuestionTitle: item.QuestionID?.Title,
+              Answer: item.QuestionID?.Answer,
+              Status: item.Status,
+              Comments: item.Comments,
+              Employee: {
+                EmployeeName: item.Employee ? item.Employee.Title : "",
+                EmployeeEmail: item.Employee ? item.Employee.EMail : "",
+                EmployeeId: item.Employee.ID || null,
+              },
+              Role: item.EmployeeID?.Role || "No Role",
+              Department: item.EmployeeID?.Department || "No Department",
+              SecondaryEmail: item.SecondaryEmail || "No Email",
+            };
+          }) || [];
+
+        await handlerEmployeeOnboardingDetails(formattedResponseItems);
+      })
+      .catch((error: any) => {
+        console.log("error: ", error);
+      });
+  };
+
+  // Get items to SP
+  const handlerGetQuestionDetails = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.CheckpointConfig)
+      .items.select("*,Assigned/ID, Assigned/EMail, Forms/ID")
+      .expand("Assigned,Forms")
+      .filter("isDelete ne 1")
+      .get()
+      .then(async (items: any) => {
+        const formattedQuestions = items.map((item: any, i: number) => ({
+          index: i,
+          Id: item.Id,
+          isEdit: false,
+          QuestionNo: item.Sno,
+          Forms: item.Forms?.ID || null,
+          QuestionTitle: item.Title,
+          isDelete: item.isDelete,
+          Status: item.Status,
+          Answer: item.Answer
+            ? {
+                key: item.Answer,
+                name: item.Answer,
+              }
+            : null,
+          Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
+          Assigned: item.Assigned?.map((Assigned: any) => {
+            return {
+              id: Assigned.ID,
+              Email: Assigned.EMail,
+            };
+          }),
+        }));
+        setquestions(formattedQuestions);
+        await handleEmployeeDetails();
+      })
+      .catch((error: any) => {
+        console.log("error: ", error);
       });
   };
 
@@ -132,13 +247,45 @@ const Onboarding = (props: any) => {
       .getByTitle(GCongfig.ListName.Forms)
       .items.select("Title, ID")
       .get()
-      .then((item) => {
+      .then(async (item) => {
         const FormValues = item.map((item: any) => ({
           key: item.Title,
           name: item.Title,
           ID: item.ID,
         }));
         setformsDetails(FormValues);
+        await handlerGetQuestionDetails();
+      })
+      .catch((error) => {
+        console.error("Error fetching titles:", error);
+      });
+  };
+
+  const handlerGetCurrentUserId = async () => {
+    await sp.web
+      .currentUser()
+      .then(async (user: any) => {
+        setcurrentUserID(user.Id);
+        await handlerGetForms();
+      })
+      .catch((error: any) => {
+        console.error("Error getting current user ID:", error);
+      });
+  };
+
+  //Get Departments
+  const handlerGetDepartments = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
+      .items.select("*, Title") // Fetch only the Title column
+      .get()
+      .then(async (items) => {
+        const titleValues = items.map((item: any) => ({
+          key: item.Title, // Unique identifier
+          name: item.Title, // Display name
+        }));
+        setdepartmentsDetails([...titleValues]);
+        await handlerGetCurrentUserId();
       })
       .catch((error) => {
         console.error("Error fetching titles:", error);
@@ -151,6 +298,7 @@ const Onboarding = (props: any) => {
       rows: event?.rows || defaultPagination.rows,
     });
   };
+
   const hanlderfilter = (key: string, val: any): void => {
     let filteredData: any[] = [...EmployeeOnboardingDetails];
     let _tempFilterkeys: any = { ...filterkeys };
@@ -205,8 +353,9 @@ const Onboarding = (props: any) => {
       .items.getById(id)
       .delete()
       .then(() => {
+        debugger;
         const afterDelete = filteredEmployeeOnboardingDetails.filter(
-          (e: any) => e.index !== index
+          (e: any) => e.Id !== id
         );
         setfilteredEmployeeOnboardingDetails(afterDelete);
         toast.success("Deleted Successfully", {
@@ -226,190 +375,6 @@ const Onboarding = (props: any) => {
       });
   };
 
-  //Get choice
-
-  const handlerGetStatusValues = (): void => {
-    sp.web.lists
-      .getByTitle(GCongfig.ListName.EmployeeOnboarding)
-      .fields.getByInternalNameOrTitle("Status")
-      .select("Choices,ID")
-      .get()
-      .then((data: any) => {
-        // Transform the choices into an array of objects
-        const ChoicesCollection = data.Choices.map((choice: string) => ({
-          key: choice,
-          name: choice,
-        }));
-        setstatusDetails(ChoicesCollection);
-        console.log("Choices fetched and set:", ChoicesCollection);
-      })
-      .catch((err) => console.error("Error fetching choices:", err));
-  };
-
-  const handlerEmployeeOnboardingDetails = async (formattedQuestions: any) => {
-    try {
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.EmployeeOnboarding)
-        .items.select("*,Employee/ID,Employee/EMail,Employee/Title,Form/ID")
-        .expand("Employee,Form")
-        .filter("isDelete ne 1")
-        .get();
-      console.log(items, "items");
-
-      const formattedItems = items.map((item: any, index: any) => ({
-        index: index,
-        Id: item.Id,
-        Forms: item.Form?.ID || null,
-        Employee: item.Employee?.Title
-          ? {
-              EmployeeId: item.Employee.ID || null,
-              EmployeeEMail: item.Employee.EMail || "",
-              EmployeeTitle: item.Employee.Title || "",
-            }
-          : "",
-        Role: item.Role ? item.Role : "",
-
-        Department: item.Department
-          ? {
-              key: item.Department,
-              name: item.Department,
-            }
-          : {},
-
-        Email: item.Email ? item.Email : "",
-        PhoneNumber: item.PhoneNumber ? item.PhoneNumber : "",
-
-        Status:
-          formattedQuestions.filter(
-            (Qitem: any) => Qitem.Employee.EmployeeId === item.Employee.ID
-          ).length !==
-          //formattedQuestions.length
-          formattedQuestions.filter(
-            (Qitem: any) =>
-              (Qitem.Status === "Satisfactory" ||
-                Qitem.Status === "Resolved") &&
-              Qitem.Employee.EmployeeId === item.Employee.ID
-          ).length
-            ? "Pending"
-            : "Completed",
-
-        SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
-      }));
-      console.log("Fetched Items:", formattedItems);
-
-      // Return the formatted array
-      return formattedItems;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      return [];
-    }
-  };
-  // Get items to SP
-  const handlerGetQuestionDetails = async () => {
-    try {
-      // Fetch items from the SharePoint list
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID, Assigned/EMail, Forms/ID")
-        .expand("Assigned,Forms")
-        .filter("isDelete ne 1")
-        .get();
-      const formattedQuestions = items.map((item: any, i: number) => ({
-        index: i,
-        Id: item.Id,
-        isEdit: false,
-        QuestionNo: item.Sno,
-        Forms: item.Forms?.ID || null,
-        QuestionTitle: item.Title,
-        isDelete: item.isDelete,
-        Status: item.Status,
-        Answer: item.Answer
-          ? {
-              key: item.Answer,
-              name: item.Answer,
-            }
-          : null,
-        Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigned: item.Assigned?.map((Assigned: any) => {
-          return {
-            id: Assigned.ID,
-            Email: Assigned.EMail,
-          };
-        }),
-      }));
-      return formattedQuestions;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      return [];
-    }
-  };
-
-  const handleEmployeeDetails = async () => {
-    try {
-      // Fetch items from the SharePoint list
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.EmployeeResponse)
-
-        .items.select(
-          "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
-        )
-        .expand("QuestionID,Employee,EmployeeID")
-        .get();
-      console.log(items, "items");
-      const formattedResponseItems = items.map((item: any, index: any) => {
-        return {
-          index: index,
-          QuestionID: item.QuestionID?.ID,
-          QuestionTitle: item.QuestionID?.Title,
-          Answer: item.QuestionID?.Answer,
-          Status: item.Status,
-          Comments: item.Comments,
-          Employee: {
-            EmployeeName: item.Employee ? item.Employee.Title : "",
-            EmployeeEmail: item.Employee ? item.Employee.EMail : "",
-            EmployeeId: item.Employee.ID || null,
-          },
-          Role: item.EmployeeID?.Role || "No Role",
-          Department: item.EmployeeID?.Department || "No Department",
-          SecondaryEmail: item.SecondaryEmail || "No Email",
-        };
-      });
-
-      console.log("Fetched Items:", formattedResponseItems);
-
-      // Return the formatted array
-      return formattedResponseItems;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      return [];
-    }
-  };
-
-  const fetchQuestions = async () => {
-    try {
-      const formattedQuestions = await handlerGetQuestionDetails();
-      let temp: any[] = await Promise.all(formattedQuestions);
-      console.log("temp: ", temp);
-      setquestions(temp);
-
-      const fetchedItems = await handleEmployeeDetails();
-      let temp2: any[] = await Promise.all(fetchedItems);
-      console.log("temp3: ", temp2);
-
-      // Fetch employee onboarding details
-      const formattedResponseItems = await handlerEmployeeOnboardingDetails(
-        temp2
-      );
-      let temp3: any[] = await Promise.all(formattedResponseItems);
-      console.log("temp2: ", temp2);
-
-      setEmployeeOnboardingDetails(temp3); // Store the data in state
-      setfilteredEmployeeOnboardingDetails(temp3);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
   const handleFormQuestions = (formID: any) => {
     const filterFormQuestion = questions.filter(
       (val: any) => val.Forms === formID
@@ -419,8 +384,6 @@ const Onboarding = (props: any) => {
 
   useEffect(() => {
     handlerGetDepartments();
-    fetchQuestions();
-    handlerGetStatusValues();
   }, []);
 
   const ActionIcons = (Rowdata: any, index: any) => {
@@ -450,7 +413,7 @@ const Onboarding = (props: any) => {
           className="pi pi-trash"
           style={{ fontSize: "1.25rem", color: "red" }}
           onClick={() => {
-            console.log("Worked");
+            console.log("Worked", index);
             showConfirmationPopup(Rowdata.Id, index);
             console.log("TRashData ID:", Rowdata.Id);
             settempEmployeeOnboardingDetails({ ...Rowdata });
@@ -464,7 +427,7 @@ const Onboarding = (props: any) => {
     let errmsg: string = "";
     let err: boolean = false;
     const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const EmployeeCount = EmployeeOnboardingDetails.filter(
+    const EmployeeCount = filteredEmployeeOnboardingDetails.filter(
       (item: any) =>
         item?.Employee.EmployeeEMail?.toLowerCase() ===
         tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase()
@@ -484,7 +447,10 @@ const Onboarding = (props: any) => {
     ) {
       err = true;
       errmsg = "Please enter a valid SecondaryEmail";
-    } else if (!tempEmployeeOnboardingDetails.Role) {
+    } else if (
+      !tempEmployeeOnboardingDetails.Role ||
+      !tempEmployeeOnboardingDetails.Role.trim()
+    ) {
       err = true;
       errmsg = "Please enter a Role";
     } else if (!tempEmployeeOnboardingDetails.Department?.key) {
@@ -546,22 +512,17 @@ const Onboarding = (props: any) => {
             );
             await sp.web.lists
               .getByTitle(GCongfig.ListName.EmployeeResponse)
-              .items.select("Employee/EMail,Id,ID") // Fetch only necessary fields
+              .items.select("*,Employee/EMail,Id,ID") // Fetch only necessary fields
+
               .expand("Employee")
               .get()
               .then(async (_items: any) => {
-                console.log(_items, "Response84848");
-                console.log(tempEmployeeOnboardingDetails);
-
-                console.log(
-                  tempEmployeeOnboardingDetails.Status,
-                  "Statusfinanl"
-                );
-
                 const filteredItems = _items.filter(
                   (item: any) =>
-                    item?.Employee?.EMail?.toLowerCase() ===
-                    tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase()
+                    (item?.Employee?.EMail?.toLowerCase() ===
+                      tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase() &&
+                      item?.Status === "To be resolved") ||
+                    item?.Status === "Pending"
                 );
 
                 if (tempEmployeeOnboardingDetails.Status === "Completed") {
@@ -650,8 +611,9 @@ const Onboarding = (props: any) => {
                     });
                 })
               );
+
               console.log("Employee responses saved successfully.");
-              fetchQuestions();
+              await handlerGetQuestionDetails();
               toast.success("Employee add Successfully", {
                 position: "top-right",
                 autoClose: 5000,
@@ -708,7 +670,7 @@ const Onboarding = (props: any) => {
           style={{
             background: rowData.Status === "Completed" ? " #437426" : "#1e71b9",
           }}
-        ></div>
+        />
         <div>{rowData.Status}</div>
       </div>
     );
@@ -791,6 +753,7 @@ const Onboarding = (props: any) => {
                 onClick={() => {
                   settempEmployeeOnboardingDetails([]);
                   setisUpdate(false);
+                  setcurrentFormID(null);
                   setisVisible(true);
                 }}
               />
