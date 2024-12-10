@@ -518,7 +518,7 @@ const Onboarding = (props: any) => {
   const Vaildation = async (): Promise<void> => {
     let errmsg: string = "";
     let err: boolean = false;
-
+    const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const EmployeeCount = EmployeeOnboarding.filter(
       (item: any) =>
         item?.Employee.EmployeeEMail?.toLowerCase() ===
@@ -531,15 +531,17 @@ const Onboarding = (props: any) => {
       err = true;
       errmsg = "Employee already exists";
     }
-
-    const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (
       TempEmployeeOnboarding.SecondaryEmail &&
       !emailFormat.test(TempEmployeeOnboarding.SecondaryEmail)
     ) {
       err = true;
       errmsg = "Please enter a valid SecondaryEmail";
+    }
+
+    if (!TempEmployeeOnboarding.Role) {
+      err = true;
+      errmsg = "Please enter a Role";
     }
 
     if (!err) {
@@ -1081,12 +1083,6 @@ const Onboarding = (props: any) => {
                         : FormsChoice.find(
                             (choice: any) => choice.ID === CurFormID
                           ) || null
-
-                      // FormsChoice
-                      //   ? FormsChoice?.find(
-                      //       (choice: any) => choice.ID === CurFormID
-                      //     ) || null
-                      //   : null
                     }
                     onChange={(e) => {
                       setCurFormID(e.value.ID);
@@ -1178,8 +1174,7 @@ const Onboarding = (props: any) => {
                     }}
                     disabled={
                       !TempEmployeeOnboarding?.Employee?.EmployeeEMail ||
-                      FormQuestions.length <= 1 ||
-                      //  TempEmployeeOnboarding?.Status === "Completed"
+                      FormQuestions.length === 0 ||
                       filterData[TempEmployeeOnboarding?.index]?.Status ===
                         "Completed"
                     }
