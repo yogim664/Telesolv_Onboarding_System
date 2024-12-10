@@ -51,9 +51,8 @@ const HrScreen = (props: any): JSX.Element => {
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
     ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
   };
-
+  const [render, setRerender] = useState(true);
   const [ListItems, setListItems] = useState<any[]>([]);
-  const [AssignedQuestion, setAssignedQuestion] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
   const [Departments, setDepartments] = useState<any>([]);
   const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
@@ -150,25 +149,23 @@ const HrScreen = (props: any): JSX.Element => {
       .fields.getByInternalNameOrTitle("Status")
       .select("Choices,ID")
       .get()
-      .then((data: any) => {
+      .then(async (data: any) => {
         const ChoicesCollection = data.Choices.filter(
           (choice: any) => choice !== "Satisfactory"
         ).map((choice: any) => ({
           key: choice,
           name: choice,
         }));
-
-        console.log(ChoicesCollection);
-
         // Update the state
-        setStatusChoices(ChoicesCollection);
-        console.log("Choices fetched and set:", ChoicesCollection);
+        await setStatusChoices(ChoicesCollection);
+        await getAllTitles();
       })
-      .catch((err) => console.error("Error fetching choices:", err));
+      .catch((err) => {
+        console.error("Error fetching choices:", err);
+      });
   };
 
   const questionConfig = async (assArray: any[] = []): Promise<void> => {
-    debugger;
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
@@ -219,8 +216,6 @@ const HrScreen = (props: any): JSX.Element => {
             },
           };
         });
-        console.log("Transformed array: ", _tempArr);
-
         const tempAssigenQuestion = await Promise.all(
           _tempArr?.filter(
             (item: any) =>
@@ -233,12 +228,9 @@ const HrScreen = (props: any): JSX.Element => {
               item.Status.key !== "Resolved"
           ) || []
         );
-        debugger;
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
-
         setListItems(tempAssigenQuestion);
         setfilterArray(tempAssigenQuestion);
-
         getStsChoices();
       })
       .catch((err) => {
@@ -247,28 +239,21 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const AssigendPerson = async (): Promise<void> => {
-    debugger;
     await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
       .items.select("*, Assigned/ID, Assigned/EMail")
       .expand("Assigned")
       .get()
       .then(async (_items: any) => {
-        console.log(_items, "Response");
-
         // Filter based on current user's email
-        const temp: any =
+        const _filteredQuestions: any =
           _items?.filter((val: any) =>
             val?.Assigned?.some(
               (user: any) =>
                 user?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
             )
           ) || [];
-
-        console.log(temp, "Filtered assigen person");
-        setAssignedQuestion(temp);
-        console.log(AssignedQuestion, "AssigenQuestion");
-        await questionConfig(temp);
+        await questionConfig(_filteredQuestions);
       })
       .catch((error: any) => {
         console.error("Error fetching items:", error);
@@ -342,46 +327,41 @@ const HrScreen = (props: any): JSX.Element => {
 
   // update sp
   const updateQuestionsToSP: any = async (TempEmployeeDetails: any) => {
-    try {
-      sp.web.lists
-        .getByTitle(GCongfig.ListName.EmployeeResponse)
-        .items.getById(TempEmployeeDetails.Id)
-        .update({
-          Status: TempEmployeeDetails.Status.key,
-          Comments: TempEmployeeDetails.Comments,
-        })
-        .then(() => {
-          setVisible(false);
-          toast.success("Update Successfully", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Bounce,
-          });
-          AssigendPerson();
-        })
-        .catch((err) => console.log(err, "updateQuestionsToSP"));
-
-      // Wait for all updates to complete
-    } catch (error) {
-      console.error("Error saving questions:", error);
-      toast.error("error", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
+    sp.web.lists
+      .getByTitle(GCongfig.ListName.EmployeeResponse)
+      .items.getById(TempEmployeeDetails.Id)
+      .update({
+        Status: TempEmployeeDetails.Status.key,
+        Comments: TempEmployeeDetails.Comments,
+      })
+      .then(() => {
+        setVisible(false);
+        toast.success("Update Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+        setRerender(true);
+      })
+      .catch((err) => {
+        toast.error("error", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
       });
-    }
   };
 
   const onPageChange = (event: any) => {
@@ -393,9 +373,8 @@ const HrScreen = (props: any): JSX.Element => {
 
   useEffect(() => {
     AssigendPerson();
-    getStsChoices();
-    getAllTitles();
-  }, []);
+    setRerender(false);
+  }, [render]);
 
   return (
     <>
