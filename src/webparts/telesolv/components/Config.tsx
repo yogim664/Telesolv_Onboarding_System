@@ -43,26 +43,23 @@ const Config = (props: any) => {
   let _fkeys: IFilData = {
     Forms: "",
   };
-
+  const [questions, setquestions] = useState<any>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
-  const [newOptionText, setNewOptionText] = useState("");
-  const [Submitted, setSubmitted] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const [Newformvalue, setNewformvalue] = useState<any>([]);
-  // const [Forms, setForms] = useState<any>([]);
-  const [CurFormID, setCurFormID] = useState(null);
-  const [FormsChoice, setFormsChoice] = useState<any>([]);
-  const [selectedOptionDetails, setselectedOptionDetails] = useState({
+  const [newOptionValue, setnewOptionValue] = useState("");
+  const [isSubmitted, setisSubmitted] = useState(false);
+  const [isVisible, setisVisible] = useState(false);
+  const [newformDetails, setnewformDetails] = useState<any>([]);
+  const [currentFormID, setcurrentFormID] = useState(null);
+  const [formsDetails, setformsDetails] = useState<any>([]);
+  const [selectedOption, setselectedOption] = useState({
     qIndex: null,
     aIndex: null,
   });
-  const [questions, setQuestions] = useState<any>([]);
-  const [filterkeys, setfilterkeys] = React.useState<IFilData>(_fkeys);
-  const [filterData, setfilterData] = React.useState<any>([]);
-
+  const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
+  const [filteredQuestions, setfilteredQuestions] = React.useState<any>([]);
   const [changeOption, setchangeOption] = useState<any>([]);
 
-  const accept = (id: any, qIndex: number) => {
+  const handlerAcceptance = (id: any, qIndex: number) => {
     toast.success("Deleted Successfully", {
       position: "top-right",
       autoClose: 5000,
@@ -75,10 +72,10 @@ const Config = (props: any) => {
       transition: Bounce,
     });
 
-    deleteQuestion(id, qIndex);
+    handlerQuestionDeletion(id, qIndex);
   };
 
-  const showTemplate = (id: any, qIndex: number) => {
+  const showConfirmationPopup = (id: any, qIndex: number) => {
     confirmDialog({
       group: "templating",
       header: "Confirmation",
@@ -87,11 +84,14 @@ const Config = (props: any) => {
           <span>Are you sure you want to delete this question?</span>
         </div>
       ),
-      accept: () => accept(id, qIndex),
+      accept: () => handlerAcceptance(id, qIndex),
     });
   };
 
-  const deleteOption = (aIndex: any, qIndex: number) => {
+  const handlerDeleteOptionConfirmationPopup = (
+    aIndex: any,
+    qIndex: number
+  ) => {
     confirmDialog({
       group: "templating",
       header: "Confirmation",
@@ -101,45 +101,40 @@ const Config = (props: any) => {
         </div>
       ),
       // accept: () => accept(id, qIndex),
-      accept: () => acceptdeleteOption(aIndex, qIndex),
+      accept: () => handleDeletion(aIndex, qIndex),
     });
   };
 
-  const acceptdeleteOption = (aIndex: number, qIndex: number) => {
-    const updatedQuestions = filterData.map((question: any, index: number) =>
-      index === qIndex
-        ? {
-            ...question,
-            Options: question.Options.filter(
-              (_: any, optionIndex: number) => optionIndex !== aIndex
-            ),
-          }
-        : question
+  const handleDeletion = (aIndex: number, qIndex: number) => {
+    const updatedQuestions = filteredQuestions.map(
+      (question: any, index: number) =>
+        index === qIndex
+          ? {
+              ...question,
+              Options: question.Options.filter(
+                (_: any, optionIndex: number) => optionIndex !== aIndex
+              ),
+            }
+          : question
     );
-    setfilterData(updatedQuestions);
+    setfilteredQuestions(updatedQuestions);
   };
 
-  const handleInputChange = (e: any) => {
+  const handlenewformChange = (e: any) => {
     const value = e.target.value;
-    setNewformvalue(value); // Update state with the new input value
-    console.log(Newformvalue);
+    setnewformDetails(value);
+    console.log(newformDetails);
   };
 
-  const handleChangeOption = (qIndex: any, aIndex: any, e: any) => {
-    console.log("qIndex", qIndex, aIndex, e);
-
+  const handleOptionChange = (qIndex: any, aIndex: any, e: any) => {
     if (!e || e.trim() === "") {
       setchangeOption(null);
     } else {
       setchangeOption(e.trim());
     }
-    console.log(changeOption);
   };
 
-  const optionChange = (qIndex: number, aIndex: number) => {
-    console.log(changeOption, "Infunction");
-
-    // Check if `changeOption` is blank
+  const handlerOptionChange = (qIndex: number, aIndex: number) => {
     if (!changeOption.length) {
       toast.warn("Please enter value", {
         position: "top-right",
@@ -152,11 +147,8 @@ const Config = (props: any) => {
         theme: "light",
         transition: Bounce,
       });
-
       return;
     }
-
-    // Proceed with updating the questions
     const updatedQuestions = questions.map((question: any, index: number) =>
       index === qIndex
         ? {
@@ -170,35 +162,26 @@ const Config = (props: any) => {
         : question
     );
 
-    // setQuestions(updatedQuestions);
-    setfilterData(updatedQuestions);
-    setselectedOptionDetails({
+    setfilteredQuestions(updatedQuestions);
+    setselectedOption({
       qIndex: null,
       aIndex: null,
     });
     setchangeOption([]);
-    setSelectedQuestionId(null); // Hide the input container
+    setSelectedQuestionId(null);
   };
 
-  const addNewQuestion = () => {
-    // Get the last question to determine new Id and QuestionNo
-    //  const TempQues = questions.filter(
-    const TempQues = filterData.filter(
+  const handlerAddNewQuestion = () => {
+    const TempQues = filteredQuestions.filter(
       (_item: any) =>
         !_item.isDelete &&
-        _item.Form === CurFormID &&
+        _item.Form === currentFormID &&
         _item.QuestionNo !== 10000
     );
     const isEmpty = TempQues.length === 0;
-    // const newId = isEmpty
-    //   ? 1
-    //   : Math.max(...questions.map((q: any) => q.Id)) + 1;
     const newQuestionNo = isEmpty
       ? 1
-      : //  : questions[questions.length - 1].QuestionNo + 1;
-        Math.max(...TempQues.map((q: any) => q.QuestionNo)) + 1;
-
-    // Create the new question
+      : Math.max(...TempQues.map((q: any) => q.QuestionNo)) + 1;
     const newQuestion = {
       Id: null,
       QuestionNo: newQuestionNo,
@@ -210,20 +193,22 @@ const Config = (props: any) => {
       Answer: "",
       isEdit: true,
       isDelete: false,
-      Form: CurFormID,
+      Form: currentFormID,
     };
-
-    //setQuestions((prevQuestions: any) => [...prevQuestions, newQuestion]);
-    setfilterData((prevQuestions: any) => [...prevQuestions, newQuestion]);
+    setfilteredQuestions((prevQuestions: any) => [
+      ...prevQuestions,
+      newQuestion,
+    ]);
   };
-  const handleEditToggle = (questionId: number) => {
-    setQuestions((prevQuestions: any) =>
+
+  const handlerEditQuestions = (questionId: number) => {
+    setquestions((prevQuestions: any) =>
       prevQuestions.map((question: any) => ({
         ...question,
         isEdit: question.Id === questionId ? !question.isEdit : false,
       }))
     );
-    setfilterData((prevQuestions: any) =>
+    setfilteredQuestions((prevQuestions: any) =>
       prevQuestions.map((question: any) => ({
         ...question,
         isEdit: question.Id === questionId ? !question.isEdit : false,
@@ -231,30 +216,29 @@ const Config = (props: any) => {
     );
   };
 
-  // Update the state with the modified questions array
-
-  const deleteQuestion = (id: number, qIndex: number) => {
+  const handlerQuestionDeletion = (id: number, qIndex: number) => {
     const sortQuestion = questions
       .filter(
         (val: any) =>
-          !val.isDelete && val.QuestionNo !== 10000 && val.Form === CurFormID
+          !val.isDelete &&
+          val.QuestionNo !== 10000 &&
+          val.Form === currentFormID
       )
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
     sortQuestion[qIndex].isDelete = true;
-    setQuestions(sortQuestion);
-    setfilterData(sortQuestion);
+    setquestions(sortQuestion);
+    setfilteredQuestions(sortQuestion);
 
-    // Call handleReArrange if needed
-    handleReArrange(qIndex);
+    handleQuestionsReArrange(qIndex);
   };
 
-  const handleReArrange = (qIndex: any) => {
+  const handleQuestionsReArrange = (qIndex: any) => {
     console.log(questions);
-    const updatedQuestion = filterData.sort(
+    const updatedQuestion = filteredQuestions.sort(
       (a: any, b: any) => a.QuestionNo - b.QuestionNo
     );
-    //
+
     updatedQuestion.forEach((qus: any, ind: any) => {
       if (qIndex === ind) {
         qus.isDelete = true;
@@ -272,9 +256,8 @@ const Config = (props: any) => {
         return (qus.QuestionNo = 10000);
       }
     });
-
-    setQuestions([...updatedQuestion]);
-    setfilterData([...updatedQuestion]);
+    setquestions([...updatedQuestion]);
+    setfilteredQuestions([...updatedQuestion]);
   };
 
   const handleQuestionChange = (
@@ -283,15 +266,12 @@ const Config = (props: any) => {
     type: any,
     aIndex?: number
   ) => {
-    // Separate questions into _masterData and _questions
-    let _masterData: any = filterData.filter(
-      (val: any) => val.Form !== CurFormID
+    let _masterData: any = filteredQuestions.filter(
+      (val: any) => val.Form !== currentFormID
     );
-    let _questions: any = filterData
-      .filter((val: any) => val.Form === CurFormID)
+    let _questions: any = filteredQuestions
+      .filter((val: any) => val.Form === currentFormID)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
-
-    // Update the relevant question or answer
     if (type === "Question") {
       _questions[qIndex].QuestionTitle = value;
     } else {
@@ -301,13 +281,12 @@ const Config = (props: any) => {
       };
     }
 
-    // Combine _masterData and _questions
     const updatedQuestions = [..._masterData, ..._questions];
 
-    // Update state
-    setQuestions(updatedQuestions); // Update the main questions state
-    setfilterData([..._questions]); // Update the filtered questions state
+    setquestions(updatedQuestions);
+    setfilteredQuestions([..._questions]);
   };
+  //New changes
 
   const handleAddOptionClick = (questionId: any) => {
     setSelectedQuestionId(questionId);
@@ -321,14 +300,14 @@ const Config = (props: any) => {
               ...question,
               Options: [
                 ...question.Options,
-                { key: newOptionText, name: newOptionText },
+                { key: newOptionValue, name: newOptionValue },
               ],
             }
           : question
     );
-    setQuestions(updatedQuestions);
-    setfilterData(updatedQuestions);
-    setNewOptionText("");
+    setquestions(updatedQuestions);
+    setfilteredQuestions(updatedQuestions);
+    setnewOptionValue("");
     setSelectedQuestionId(null); // Hide the input container
   };
 
@@ -377,8 +356,8 @@ const Config = (props: any) => {
 
     console.log("After Move:", updatedQuestions);
 
-    setQuestions([...updatedQuestions]); // New
-    setfilterData([...updatedQuestions]);
+    setquestions([...updatedQuestions]); // New
+    setfilteredQuestions([...updatedQuestions]);
   };
 
   // MoveDown
@@ -422,8 +401,8 @@ const Config = (props: any) => {
     console.log("After Move:", updatedQuestions);
 
     // Update the state with the new order of questions
-    setQuestions(updatedQuestions);
-    setfilterData(updatedQuestions);
+    setquestions(updatedQuestions);
+    setfilteredQuestions(updatedQuestions);
     // !Maasi
   };
 
@@ -498,7 +477,7 @@ const Config = (props: any) => {
           transition: Bounce,
         });
 
-        setSubmitted(!Submitted);
+        setisSubmitted(!isSubmitted);
       } catch (error) {
         console.error("Error processing questions:", error);
 
@@ -664,9 +643,9 @@ const Config = (props: any) => {
           ID: item.ID,
         }));
         console.log(FormValuesDups);
-        setFormsChoice([...FormValuesDups]);
+        setformsDetails([...FormValuesDups]);
         const firstFormID = FormValuesDups?.[0]?.ID;
-        setCurFormID(firstFormID);
+        setcurrentFormID(firstFormID);
         filterFunc("Forms", firstFormID);
       })
       .catch((err) => {
@@ -682,7 +661,7 @@ const Config = (props: any) => {
         console.log(items, "Question Items");
 
         let filteredData: any[] = [...items];
-        let _tempFilterkeys: any = { ...filterkeys };
+        let _tempFilterkeys: any = { ...filteredForm };
         _tempFilterkeys[key] = val;
         if (_tempFilterkeys?.Forms) {
           filteredData = filteredData?.filter(
@@ -693,9 +672,9 @@ const Config = (props: any) => {
           );
         }
         filteredData?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
-        setfilterkeys(_tempFilterkeys);
-        setfilterData([...filteredData]);
-        setVisible(false);
+        setfilteredForm(_tempFilterkeys);
+        setfilteredQuestions([...filteredData]);
+        setisVisible(false);
       })
       .catch((err) => {
         console.log(err);
@@ -704,8 +683,8 @@ const Config = (props: any) => {
 
   const saveNewform = async () => {
     if (
-      FormsChoice.some(
-        (e: any) => e.key.toLowerCase() === Newformvalue.toLowerCase()
+      formsDetails.some(
+        (e: any) => e.key.toLowerCase() === newformDetails.toLowerCase()
       )
     ) {
       toast.error("Form already exists.", {
@@ -723,11 +702,11 @@ const Config = (props: any) => {
       await sp.web.lists
         .getByTitle(GCongfig.ListName.Forms)
         .items.add({
-          Title: Newformvalue,
+          Title: newformDetails,
         })
         .then(async (li) => {
           console.log(li);
-          await setNewformvalue("");
+          await setnewformDetails("");
           await getForms();
           console.log("Questions saved successfully to SharePoint!");
         })
@@ -738,14 +717,12 @@ const Config = (props: any) => {
   };
 
   const fetchQuestions = async () => {
-    //  fetchedItems = await questionConfig();
-    // setQuestions(fetchedItems);
     await getForms();
   };
 
   useEffect(() => {
     fetchQuestions();
-  }, [Submitted]);
+  }, [isSubmitted]);
 
   return (
     <div style={{ padding: 10 }}>
@@ -769,11 +746,11 @@ const Config = (props: any) => {
       <div className="card flex justify-content-center">
         <Dialog
           header="Add new form"
-          visible={visible}
+          visible={isVisible}
           style={{ width: "30vw" }}
           onHide={() => {
-            if (!visible) return;
-            setVisible(false);
+            if (!isVisible) return;
+            setisVisible(false);
           }}
         >
           <div
@@ -784,8 +761,8 @@ const Config = (props: any) => {
             }}
           >
             <InputText
-              value={Newformvalue || ""} // Bind state to input value
-              onChange={handleInputChange} // Handle onChange event
+              value={newformDetails || ""} // Bind state to input value
+              onChange={handlenewformChange} // Handle onChange event
               placeholder="Enter New form"
             />
           </div>
@@ -803,16 +780,15 @@ const Config = (props: any) => {
               label="Cancel"
               className={styles.cancelBtn}
               onClick={() => {
-                setVisible(false);
+                setisVisible(false);
               }}
             />
             <Button
               label="Save"
               className={styles.saveBtn}
-              disabled={!Newformvalue}
+              disabled={!newformDetails}
               onClick={() => {
                 saveNewform();
-                // setVisible(false);
               }}
             />
           </div>
@@ -833,17 +809,17 @@ const Config = (props: any) => {
           >
             <Dropdown
               value={
-                FormsChoice
-                  ? FormsChoice?.find(
-                      (choice: any) => choice.ID === filterkeys.Forms
+                formsDetails
+                  ? formsDetails?.find(
+                      (choice: any) => choice.ID === filteredForm.Forms
                     ) || null
                   : null
               }
               onChange={(e) => {
                 filterFunc("Forms", e.value.ID);
-                setCurFormID(e.value.ID);
+                setcurrentFormID(e.value.ID);
               }}
-              options={FormsChoice || []}
+              options={formsDetails || []}
               optionLabel="name"
               placeholder="Select a Department"
             />
@@ -851,14 +827,14 @@ const Config = (props: any) => {
               label="Add new form"
               className={styles.saveBtn}
               onClick={() => {
-                setNewformvalue(null);
-                setVisible(true);
+                setnewformDetails(null);
+                setisVisible(true);
               }}
             />
             <AddForm />
           </div>
-          {filterData.length > 0 ? (
-            filterData
+          {filteredQuestions.length > 0 ? (
+            filteredQuestions
               .filter((value: any) => value.QuestionNo !== 10000)
 
               .map((question: any, qIndex: any) => (
@@ -882,20 +858,19 @@ const Config = (props: any) => {
                       <i
                         className="pi  pi-pencil"
                         style={{ fontSize: "1rem" }}
-                        onClick={() => handleEditToggle(question.Id)}
+                        onClick={() => handlerEditQuestions(question.Id)}
                       />
                       <i
                         className="pi pi-trash"
                         onClick={() => {
-                          showTemplate(question.Id, qIndex);
+                          showConfirmationPopup(question.Id, qIndex);
                         }}
-                        // deleteQuestion(question.Id)}}
                         style={{ cursor: "pointer", color: "red" }}
                       />
                       <i
                         className="pi pi-arrow-up"
                         onClick={() =>
-                          moveQuestionUp(qIndex, false, filterData)
+                          moveQuestionUp(qIndex, false, filteredQuestions)
                         }
                         style={{
                           cursor: "pointer",
@@ -944,11 +919,9 @@ const Config = (props: any) => {
                             >
                               <div className={styles.optionSection}>
                                 <div className={styles.optionChoice}>
-                                  {/* {selectedOptionDetails.aIndex !== aIndex &&
-                                    selectedOptionDetails.qIndex !== qIndex && ( */}
                                   {!(
-                                    selectedOptionDetails.qIndex === qIndex &&
-                                    selectedOptionDetails.aIndex === aIndex
+                                    selectedOption.qIndex === qIndex &&
+                                    selectedOption.aIndex === aIndex
                                   ) && (
                                     <div className={styles.radioOption}>
                                       <>
@@ -985,15 +958,15 @@ const Config = (props: any) => {
                                     </div>
                                   )}
                                   {!(
-                                    selectedOptionDetails.qIndex === qIndex &&
-                                    selectedOptionDetails.aIndex === aIndex
+                                    selectedOption.qIndex === qIndex &&
+                                    selectedOption.aIndex === aIndex
                                   ) && (
                                     <>
                                       <i
                                         className={`${styles.optionEditIcon} pi  pi-pencil`}
                                         style={{ fontSize: "1rem" }}
                                         onClick={() =>
-                                          setselectedOptionDetails({
+                                          setselectedOption({
                                             qIndex: qIndex,
                                             aIndex: aIndex,
                                           })
@@ -1002,7 +975,10 @@ const Config = (props: any) => {
                                       <i
                                         className="pi pi-trash"
                                         onClick={() => {
-                                          deleteOption(aIndex, qIndex);
+                                          handlerDeleteOptionConfirmationPopup(
+                                            aIndex,
+                                            qIndex
+                                          );
                                         }}
                                         // deleteQuestion(question.Id)}}
                                         style={{
@@ -1015,8 +991,8 @@ const Config = (props: any) => {
                                   )}
                                 </div>
 
-                                {selectedOptionDetails.aIndex === aIndex &&
-                                  selectedOptionDetails.qIndex === qIndex && (
+                                {selectedOption.aIndex === aIndex &&
+                                  selectedOption.qIndex === qIndex && (
                                     <div
                                       className={styles.ChangeOptionContainer}
                                     >
@@ -1024,7 +1000,7 @@ const Config = (props: any) => {
                                         className={styles.questionInput}
                                         placeholder="Enter here"
                                         onChange={(e) =>
-                                          handleChangeOption(
+                                          handleOptionChange(
                                             qIndex,
                                             aIndex,
                                             e.target.value
@@ -1037,7 +1013,7 @@ const Config = (props: any) => {
                                         <div
                                           className={styles.actionBtn}
                                           onClick={() =>
-                                            optionChange(qIndex, aIndex)
+                                            handlerOptionChange(qIndex, aIndex)
                                           }
                                         >
                                           <i
@@ -1048,7 +1024,7 @@ const Config = (props: any) => {
                                         <div
                                           className={styles.actionBtn}
                                           onClick={() =>
-                                            setselectedOptionDetails({
+                                            setselectedOption({
                                               qIndex: null,
                                               aIndex: null,
                                             })
@@ -1080,9 +1056,9 @@ const Config = (props: any) => {
                     <div className={styles.NewOptionContainer}>
                       <InputText
                         placeholder="Enter your new option"
-                        value={newOptionText}
+                        value={newOptionValue}
                         style={{ marginLeft: "2.5rem", marginTop: 10 }}
-                        onChange={(e) => setNewOptionText(e.target.value)}
+                        onChange={(e) => setnewOptionValue(e.target.value)}
                       />
                       <i
                         className="pi pi-check"
@@ -1123,14 +1099,14 @@ const Config = (props: any) => {
 
           <div
             className={styles.addNewQuestionSection}
-            onClick={addNewQuestion}
+            onClick={handlerAddNewQuestion}
           >
             <div className={styles.addNewQuestionBtn}>
               <i className="pi pi-plus-circle" style={{ color: "#233b83" }} />
               <span style={{ color: "#233b83" }}>Add new question</span>
             </div>
           </div>
-          {filterData.length > 0 && (
+          {filteredQuestions.length > 0 && (
             <div className={styles.ConfigBtns}>
               <Button
                 className={styles.cancelBtn}
