@@ -90,7 +90,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
   //People picker
   const CompletedByPeopleTemplate = (rowData: any) => {
-    const user = rowData.CompletedBy; // Access Employee data from the rowData
+    const user = rowData.CompletedBy;
     return (
       <div style={{ display: "flex", alignItems: "center" }}>
         <img

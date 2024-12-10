@@ -19,9 +19,8 @@ import "../assets/style/CheckPoints.css";
 import { useState } from "react";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import "./AddForm";
 import { Dialog } from "primereact/dialog";
-
 import "./HrPersons";
 import HrPersons from "./HrPersons";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -31,8 +30,10 @@ import { _Item } from "@pnp/sp/items/types";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
 import { Dropdown } from "primereact/dropdown";
+import AddForm from "./AddForm";
+//import * as strings from "TelesolvWebPartStrings";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-let fetchedItems: any[] = [];
+//let fetchedItems: any[] = [];
 
 const Config = (props: any) => {
   interface IFilData {
@@ -115,8 +116,6 @@ const Config = (props: any) => {
           }
         : question
     );
-
-    setQuestions(updatedQuestions);
     setfilterData(updatedQuestions);
   };
 
@@ -171,7 +170,7 @@ const Config = (props: any) => {
         : question
     );
 
-    setQuestions(updatedQuestions);
+    // setQuestions(updatedQuestions);
     setfilterData(updatedQuestions);
     setselectedOptionDetails({
       qIndex: null,
@@ -183,8 +182,12 @@ const Config = (props: any) => {
 
   const addNewQuestion = () => {
     // Get the last question to determine new Id and QuestionNo
-    const TempQues = questions.filter(
-      (_item: any) => !_item.isDelete && _item.Form === CurFormID
+    //  const TempQues = questions.filter(
+    const TempQues = filterData.filter(
+      (_item: any) =>
+        !_item.isDelete &&
+        _item.Form === CurFormID &&
+        _item.QuestionNo !== 10000
     );
     const isEmpty = TempQues.length === 0;
     // const newId = isEmpty
@@ -210,7 +213,7 @@ const Config = (props: any) => {
       Form: CurFormID,
     };
 
-    setQuestions((prevQuestions: any) => [...prevQuestions, newQuestion]);
+    //setQuestions((prevQuestions: any) => [...prevQuestions, newQuestion]);
     setfilterData((prevQuestions: any) => [...prevQuestions, newQuestion]);
   };
   const handleEditToggle = (questionId: number) => {
@@ -232,7 +235,10 @@ const Config = (props: any) => {
 
   const deleteQuestion = (id: number, qIndex: number) => {
     const sortQuestion = questions
-      .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
+      .filter(
+        (val: any) =>
+          !val.isDelete && val.QuestionNo !== 10000 && val.Form === CurFormID
+      )
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
     sortQuestion[qIndex].isDelete = true;
@@ -278,10 +284,10 @@ const Config = (props: any) => {
     aIndex?: number
   ) => {
     // Separate questions into _masterData and _questions
-    let _masterData: any = questions.filter(
+    let _masterData: any = filterData.filter(
       (val: any) => val.Form !== CurFormID
     );
-    let _questions: any = questions
+    let _questions: any = filterData
       .filter((val: any) => val.Form === CurFormID)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
@@ -597,102 +603,106 @@ const Config = (props: any) => {
   };
 
   // Get items to SP
-  const questionConfig = async () => {
-    try {
-      // Fetch items from the SharePoint list
-      const items: any = await sp.web.lists
-        .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID, Assigned/EMail ,Forms/ID")
-        .expand("Assigned,Forms")
-        .filter("isDelete ne 1")
-        .get();
+  const questionConfig = async (key: any) => {
+    let formattedItems: IQuestionDatas[] = [];
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.CheckpointConfig)
+      .items.select("*,Assigned/ID, Assigned/EMail ,Forms/ID")
+      .expand("Assigned,Forms")
+      .filter(`isDelete ne 1 and Forms/Id eq ${key}`)
+      .get()
+      .then((items) => {
+        console.log(items, "Log itemss");
+        formattedItems =
+          items?.map((val: any) => {
+            return {
+              Id: val.Id,
+              isEdit: false,
+              QuestionNo: val.Sno,
+              QuestionTitle: val.Title,
+              isDelete: val.isDelete,
+              TaskName: val.TaskName,
+              Form: val.Forms.ID || null,
+              Answer: val.Answer
+                ? {
+                    key: val.Answer,
+                    name: val.Answer,
+                  }
+                : null,
+              Options: val.Options ? JSON.parse(val.Options) : [],
+              Assigned:
+                val?.Assigned?.map((Assigned: any) => {
+                  return {
+                    id: Assigned.ID,
+                    Email: Assigned.EMail,
+                  };
+                }) || [],
+            };
+          }) || [];
 
-      // Map the items to create an array of values
-      const formattedItems: IQuestionDatas[] =
-        items?.map((val: any) => {
-          return {
-            Id: val.Id,
-            isEdit: false,
-            QuestionNo: val.Sno,
-            QuestionTitle: val.Title,
-            isDelete: val.isDelete,
-            Form: val.Forms.ID || null,
-            Answer: val.Answer
-              ? {
-                  key: val.Answer,
-                  name: val.Answer,
-                }
-              : null,
-            Options: val.Options ? JSON.parse(val.Options) : [],
-            Assigned:
-              val?.Assigned?.map((Assigned: any) => {
-                return {
-                  id: Assigned.ID,
-                  Email: Assigned.EMail,
-                };
-              }) || [],
-          };
-        }) || [];
-
-      formattedItems?.sort(
-        (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
-      );
-      console.log("Fetched Items:", formattedItems);
-
-      // Return the formatted array
-      return formattedItems;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      return [];
-    }
+        formattedItems?.sort(
+          (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    return formattedItems;
   };
 
   // Function to fetch Title values
   const getForms = async () => {
-    try {
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.Forms)
-        .items.select("Title, ID")
-        .get();
-
-      const FormValues = items.map((item: any) => ({
-        key: item.Title,
-        name: item.Title,
-        ID: item.ID,
-      }));
-
-      setFormsChoice(FormValues);
-      const firstFormID = FormValues?.[0]?.ID;
-      setCurFormID(firstFormID);
-      filterFunc("Forms", firstFormID);
-    } catch (error) {
-      console.error("Error fetching titles:", error);
-    }
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.Forms)
+      .items.select("Title, ID")
+      .get()
+      .then((li) => {
+        console.log(li);
+        let FormValuesDups = li.map((item: any) => ({
+          key: item.Title,
+          name: item.Title,
+          ID: item.ID,
+        }));
+        console.log(FormValuesDups);
+        setFormsChoice([...FormValuesDups]);
+        const firstFormID = FormValuesDups?.[0]?.ID;
+        setCurFormID(firstFormID);
+        filterFunc("Forms", firstFormID);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   // Filter function
-  const filterFunc = (key: string, val: any): void => {
-    debugger;
-    //   let filteredData: any[] = [...fetchedItems];
-    let filteredData: any[] = [...fetchedItems];
-    let _tempFilterkeys: any = { ...filterkeys };
-    _tempFilterkeys[key] = val;
-    if (_tempFilterkeys?.Forms) {
-      filteredData = filteredData?.filter(
-        (value: any) =>
-          value?.Form === _tempFilterkeys?.Forms &&
-          !val.isDelete &&
-          val.QuestionNo !== 10000
-      );
-    }
-    filteredData?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
-    setfilterkeys(_tempFilterkeys);
-    setfilterData([...filteredData]);
-    setVisible(false);
+  const filterFunc = async (key: string, val: any) => {
+    const formValue = val;
+    await questionConfig(formValue)
+      .then((items: any) => {
+        console.log(items, "Question Items");
+
+        let filteredData: any[] = [...items];
+        let _tempFilterkeys: any = { ...filterkeys };
+        _tempFilterkeys[key] = val;
+        if (_tempFilterkeys?.Forms) {
+          filteredData = filteredData?.filter(
+            (value: any) =>
+              value?.Form === _tempFilterkeys?.Forms &&
+              !val.isDelete &&
+              val.QuestionNo !== 10000
+          );
+        }
+        filteredData?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+        setfilterkeys(_tempFilterkeys);
+        setfilterData([...filteredData]);
+        setVisible(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const saveNewform = async () => {
-    debugger;
     if (
       FormsChoice.some(
         (e: any) => e.key.toLowerCase() === Newformvalue.toLowerCase()
@@ -710,24 +720,26 @@ const Config = (props: any) => {
         transition: Bounce,
       });
     } else {
-      try {
-        await sp.web.lists.getByTitle(GCongfig.ListName.Forms).items.add({
+      await sp.web.lists
+        .getByTitle(GCongfig.ListName.Forms)
+        .items.add({
           Title: Newformvalue,
+        })
+        .then(async (li) => {
+          console.log(li);
+          await setNewformvalue("");
+          await getForms();
+          console.log("Questions saved successfully to SharePoint!");
+        })
+        .catch((err) => {
+          console.log(err);
         });
-        setNewformvalue("");
-        await getForms();
-
-        console.log("Questions saved successfully to SharePoint!");
-      } catch (error) {
-        console.error("Error saving questions:", error);
-      }
     }
   };
 
   const fetchQuestions = async () => {
-    fetchedItems = await questionConfig();
-    setQuestions(fetchedItems);
-    // setfilterData(fetchedItems);
+    //  fetchedItems = await questionConfig();
+    // setQuestions(fetchedItems);
     await getForms();
   };
 
@@ -811,7 +823,14 @@ const Config = (props: any) => {
 
       <TabView className="CongifTab">
         <TabPanel header="Checkpoints" className="MainTab">
-          <div>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "15px",
+            }}
+          >
             <Dropdown
               value={
                 FormsChoice
@@ -836,6 +855,7 @@ const Config = (props: any) => {
                 setVisible(true);
               }}
             />
+            <AddForm />
           </div>
           {filterData.length > 0 ? (
             filterData

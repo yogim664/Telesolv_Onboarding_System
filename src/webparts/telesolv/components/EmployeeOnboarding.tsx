@@ -530,18 +530,24 @@ const Onboarding = (props: any) => {
     if (EmployeeCount.length !== 0 && !Update) {
       err = true;
       errmsg = "Employee already exists";
-    }
-    if (
+    } else if (!TempEmployeeOnboarding.SecondaryEmail) {
+      err = true;
+      errmsg = "Please enter SecondaryEmail";
+    } else if (
       TempEmployeeOnboarding.SecondaryEmail &&
       !emailFormat.test(TempEmployeeOnboarding.SecondaryEmail)
     ) {
       err = true;
       errmsg = "Please enter a valid SecondaryEmail";
-    }
-
-    if (!TempEmployeeOnboarding.Role) {
+    } else if (!TempEmployeeOnboarding.Role) {
       err = true;
       errmsg = "Please enter a Role";
+    } else if (!TempEmployeeOnboarding.Department?.key) {
+      err = true;
+      errmsg = "Please Select Department";
+    } else if (!TempEmployeeOnboarding.PhoneNumber) {
+      err = true;
+      errmsg = "Please enter phonenumber";
     }
 
     if (!err) {
