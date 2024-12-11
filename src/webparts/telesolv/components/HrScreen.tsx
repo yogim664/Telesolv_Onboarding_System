@@ -494,107 +494,107 @@ const HrScreen = (props: any): JSX.Element => {
         </div>
       </Dialog>
 
-      <div>
+      <div className={styles.HrPersonContainer}>
         <div className={styles.navBar}>
-          {/* <div className={styles.navRightContainers}>
-            <img src={logoImg} alt="logo" />
-          </div> */}
           <h2>Onboarding App</h2>
         </div>
-      </div>
-      <div className={styles.HrPersonContainer}>
-        <h2 style={{ color: "#233b83", fontWeight: "bolder" }}>Task details</h2>
-        <div className={styles.HrPersonRightContainer}>
-          <Dropdown
-            className={`w-full md:w-14rem ${styles.filterDepartment}`}
-            value={
-              SearchTerms.dept
-                ? Departments?.find(
-                    (choice: any) => choice.key === SearchTerms.dept
-                  ) || null
-                : null
-            }
-            onChange={(e) => {
-              //   const updatedFilDep = { ...filDrp, dropDown: e.value.key };
-              filterFun([...ListItems], "dept", e.value.key); // Call filter function with the updated ListItems
-            }}
-            style={{ width: "100%" }}
-            options={Departments || []}
-            optionLabel="name"
-            placeholder="Select a Department"
-          />
+        <div className={styles.HRPersonHeaderFilters}>
+          <h2 className={styles.pageTitle}>Task details</h2>
+          <div className={styles.HRPersonFilters}>
+            <Dropdown
+              className={`w-full md:w-14rem ${styles.filterDepartment}`}
+              value={
+                SearchTerms.dept
+                  ? Departments?.find(
+                      (choice: any) => choice.key === SearchTerms.dept
+                    ) || null
+                  : null
+              }
+              onChange={(e) => {
+                //   const updatedFilDep = { ...filDrp, dropDown: e.value.key };
+                filterFun([...ListItems], "dept", e.value.key); // Call filter function with the updated ListItems
+              }}
+              style={{ width: "100%" }}
+              options={Departments || []}
+              optionLabel="name"
+              placeholder="Select a Department"
+            />
 
-          <Dropdown
-            className={`${styles.filterStatus} w-full md:w-14rem`}
-            value={
-              SearchTerms.status
-                ? statusChoices?.filter(
-                    (choice: any) => choice.key === SearchTerms.status
-                  )?.[0]
-                : null
-            } // Use `find` instead of `filter`
-            onChange={(e) => {
-              filterFun([...ListItems], "status", e.value.key);
-            }}
-            options={statusChoices || []}
-            optionLabel="name"
-            placeholder="Select a Status"
-          />
+            <Dropdown
+              className={`${styles.filterStatus} w-full md:w-14rem`}
+              value={
+                SearchTerms.status
+                  ? statusChoices?.filter(
+                      (choice: any) => choice.key === SearchTerms.status
+                    )?.[0]
+                  : null
+              } // Use `find` instead of `filter`
+              onChange={(e) => {
+                filterFun([...ListItems], "status", e.value.key);
+              }}
+              options={statusChoices || []}
+              optionLabel="name"
+              placeholder="Select a Status"
+            />
 
-          <InputText
-            className={styles.filterOverAll}
-            placeholder="Search"
-            value={SearchTerms.search}
-            onChange={(e) => {
-              filterFun([...ListItems], "search", e.target.value);
-            }}
-          />
+            <InputText
+              className={styles.filterOverAll}
+              placeholder="Search"
+              value={SearchTerms.search}
+              onChange={(e) => {
+                filterFun([...ListItems], "search", e.target.value);
+              }}
+            />
 
-          <i
-            className="pi pi-refresh"
-            style={{
-              backgroundColor: "#223b83",
-              padding: 10,
-              borderRadius: 4,
-              color: "#fff",
-            }}
-            onClick={() => {
-              filData.dept = "";
-              filData.status = "";
-              filData.search = "";
-              setSearchTerms({ ...filData });
-              setfilterArray(ListItems);
-            }}
-          />
+            <i
+              className="pi pi-refresh"
+              style={{
+                backgroundColor: "#223b83",
+                padding: 10,
+                borderRadius: 4,
+                color: "#fff",
+              }}
+              onClick={() => {
+                filData.dept = "";
+                filData.status = "";
+                filData.search = "";
+                setSearchTerms({ ...filData });
+                setfilterArray(ListItems);
+              }}
+            />
+          </div>
         </div>
+        <DataTable
+          value={filterArray?.slice(
+            PageNationRows.first,
+            PageNationRows.first + PageNationRows.rows
+          )}
+          className={styles.HRPersonDashboard}
+        >
+          <Column field="Task" header="Task" />
+          <Column
+            field="QuestionTitle"
+            header="To"
+            body={personColumnToPerson}
+          />
+          <Column field="Role" header="Role" style={{ width: "15%" }} />
+          <Column field="Department" header="Department" />
+          <Column field="Status" header="Status" body={stsTemplate} />
+          <Column
+            field="Action"
+            header="Action"
+            body={(Rowdata: any) => ActionIcons(Rowdata)}
+          />{" "}
+          *
+        </DataTable>
+        <Paginator
+          first={PageNationRows.first}
+          rows={PageNationRows.rows}
+          totalRecords={ListItems.length}
+          // rowsPerPageOptions={[10, 20, 30]}
+          onPageChange={onPageChange}
+        />
       </div>
-
-      <DataTable
-        value={filterArray?.slice(
-          PageNationRows.first,
-          PageNationRows.first + PageNationRows.rows
-        )}
-        className={styles.employeeConfig}
-      >
-        <Column field="Task" header="Task" />
-        <Column field="QuestionTitle" header="To" body={personColumnToPerson} />
-        <Column field="Role" header="Role" style={{ width: "15%" }} />
-        <Column field="Department" header="Department" />
-        <Column field="Status" header="Status" body={stsTemplate} />
-        <Column
-          field="Action"
-          header="Action"
-          body={(Rowdata: any) => ActionIcons(Rowdata)}
-        />{" "}
-        *
-      </DataTable>
-      <Paginator
-        first={PageNationRows.first}
-        rows={PageNationRows.rows}
-        totalRecords={ListItems.length}
-        // rowsPerPageOptions={[10, 20, 30]}
-        onPageChange={onPageChange}
-      />
 
       <ToastContainer
         position="top-right"

@@ -956,34 +956,37 @@ const Onboarding = (props: any) => {
               <div className={styles.addDialog}>
                 <div className={styles.addDialogHeader}>Form</div>
                 <div className={styles.addDialogInput}>
-                  <Dropdown
-                    value={
-                      tempEmployeeOnboardingDetails.Forms
-                        ? formsDetails.find(
-                            (choice: any) =>
-                              choice.ID === tempEmployeeOnboardingDetails.Forms
-                          ) || null
-                        : formsDetails.find(
-                            (choice: any) => choice.ID === currentFormID
-                          ) || null
-                    }
-                    onChange={(e) => {
-                      setcurrentFormID(e.value.ID);
-                      handleFormQuestions(e.value.ID);
-                      debugger;
-                    }}
-                    disabled={isUpdate}
-                    options={formsDetails || []}
-                    style={{ width: "100%" }}
-                    className="w-full md:w-14rem"
-                    optionLabel="name"
-                    placeholder="Select a Form"
-                  />
-                  {formQuestionsDetails.length === 0 && (
-                    <div className={styles.addEmpInfo}>
-                      This form have no questions
-                    </div>
-                  )}
+                  <div style={{ width: "100%" }}>
+                    <Dropdown
+                      value={
+                        tempEmployeeOnboardingDetails.Forms
+                          ? formsDetails.find(
+                              (choice: any) =>
+                                choice.ID ===
+                                tempEmployeeOnboardingDetails.Forms
+                            ) || null
+                          : formsDetails.find(
+                              (choice: any) => choice.ID === currentFormID
+                            ) || null
+                      }
+                      onChange={(e) => {
+                        setcurrentFormID(e.value.ID);
+                        handleFormQuestions(e.value.ID);
+                        debugger;
+                      }}
+                      disabled={isUpdate}
+                      options={formsDetails || []}
+                      style={{ width: "100%" }}
+                      className="w-full md:w-14rem"
+                      optionLabel="name"
+                      placeholder="Select a Form"
+                    />
+                    {formQuestionsDetails.length === 0 && (
+                      <div className={styles.addEmpInfo}>
+                        This form have no questions
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className={styles.addDialog}>

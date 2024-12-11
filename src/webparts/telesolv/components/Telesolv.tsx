@@ -93,7 +93,7 @@ const Telesolve = (props: any): JSX.Element => {
       ) : ShowHrPerson ? (
         <HrScreen context={props.context} />
       ) : ShowHrDirectorScreen ? (
-        <div style={{ padding: 10 }}>
+        <div className={styles.configContainer}>
           <button style={{ display: "none" }} onClick={() => {}}>
             Click here
           </button>
