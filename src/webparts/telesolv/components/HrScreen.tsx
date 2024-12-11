@@ -22,6 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Paginator } from "primereact/paginator";
 import { GCongfig } from "../../../Config/Config";
+import { Checkbox } from "primereact/checkbox";
 
 interface IPageSync {
   first: number;
@@ -46,17 +47,19 @@ let filData: IFilData = {
 };
 
 const HrScreen = (props: any): JSX.Element => {
-  const CurUser = {
+  const curUserDetails = {
     Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
     ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
   };
   const [render, setRerender] = useState(true);
-  const [ListItems, setListItems] = useState<any[]>([]);
-  const [visible, setVisible] = useState(false);
-  const [Departments, setDepartments] = useState<any>([]);
-  const [SearchTerms, setSearchTerms] = useState<IFilData>({ ...filData });
-  const [TempEmployeeDetails, setTempEmployeeDetails] = useState<any>({
+  const [employessResponseDetails, setemployessResponseDetails] = useState<
+    any[]
+  >([]);
+  const [isVisible, setisVisible] = useState(false);
+  const [departmentsDetails, setdepartmentsDetails] = useState<any>([]);
+  const [filterKeys, setfilterKeys] = useState<IFilData>({ ...filData });
+  const [tempEmployeeDetails, settempEmployeeDetails] = useState<any>({
     Employee: {
       Name: "",
       Email: "",
@@ -69,26 +72,27 @@ const HrScreen = (props: any): JSX.Element => {
     Status: { key: "", name: "" },
     Comments: "",
   });
-  const [statusChoices, setStatusChoices] = useState<any[]>([]);
-  const [PageNationRows, setPageNationRows] = useState<IPageSync>({
+  const [statusDetails, setstatusDetails] = useState<any[]>([]);
+  const [pageNationRows, setpageNationRows] = useState<IPageSync>({
     ...defaultPagination,
   });
-  const [filterArray, setfilterArray] = useState<any[]>([]);
+  const [
+    filteredEmployessResponseDetails,
+    setfilteredEmployessResponseDetails,
+  ] = useState<any[]>([]);
 
-  const handleChange = (key: string, value: any) => {
-    const curObj: any = { ...TempEmployeeDetails };
+  const handlerChangeEmployessResponseDetails = (key: string, value: any) => {
+    const curObj: any = { ...tempEmployeeDetails };
     curObj[key] = value;
-    setTempEmployeeDetails(curObj);
+    settempEmployeeDetails(curObj);
     console.log(curObj);
-    console.log(TempEmployeeDetails);
+    console.log(tempEmployeeDetails);
   };
 
-  const filterFun = (masData: any[], key: string, val: string) => {
+  const handlerFilterDetails = (masData: any[], key: string, val: string) => {
     let temp: any = [...masData];
-    let _tempFilterkey: any = { ...SearchTerms };
-
+    let _tempFilterkey: any = { ...filterKeys };
     _tempFilterkey[key] = val;
-
     if (_tempFilterkey?.dept) {
       temp = temp?.filter((value: any) =>
         value?.Department?.toLowerCase()?.includes(
@@ -96,7 +100,6 @@ const HrScreen = (props: any): JSX.Element => {
         )
       );
     }
-
     if (_tempFilterkey?.status) {
       temp = temp?.filter(
         (value: any) => value?.Status.key === _tempFilterkey.status
@@ -117,33 +120,30 @@ const HrScreen = (props: any): JSX.Element => {
       );
     }
 
-    setSearchTerms({ ..._tempFilterkey });
-    setfilterArray([...temp]);
+    setfilterKeys({ ..._tempFilterkey });
+    setfilteredEmployessResponseDetails([...temp]);
   };
 
-  //Get Departments
-  // Function to fetch Title values
-  const getAllTitles = async () => {
-    try {
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.Department)
-        .items.select("Title")
-        .get();
-
-      // Format the fetched items for react-select
-      const titleValues = items.map((item: any) => ({
-        key: item.Title,
-        name: item.Title,
-      }));
-      console.log(titleValues, "dep");
-      setDepartments([...titleValues]);
-      console.log(Departments, "SetDep");
-    } catch (error) {
-      console.error("Error fetching titles:", error);
-    }
+  const handlerGetDepartments = async () => {
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.Department)
+      .items.select("Title")
+      .get()
+      .then((items) => {
+        const titleValues = items.map((item: any) => ({
+          key: item.Title,
+          name: item.Title,
+        }));
+        console.log(titleValues, "dep");
+        setdepartmentsDetails([...titleValues]);
+        console.log(departmentsDetails, "SetDep");
+      })
+      .catch((error) => {
+        console.error("Error fetching titles:", error);
+      });
   };
 
-  const getStsChoices = (): void => {
+  const handlerGetStatusValues = (): void => {
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .fields.getByInternalNameOrTitle("Status")
@@ -157,15 +157,17 @@ const HrScreen = (props: any): JSX.Element => {
           name: choice,
         }));
         // Update the state
-        await setStatusChoices(ChoicesCollection);
-        await getAllTitles();
+        await setstatusDetails(ChoicesCollection);
+        await handlerGetDepartments();
       })
       .catch((err) => {
         console.error("Error fetching choices:", err);
       });
   };
 
-  const questionConfig = async (assArray: any[] = []): Promise<void> => {
+  const handlerGetEmployeeResponseDetails = async (
+    assArray: any[] = []
+  ): Promise<void> => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
@@ -223,44 +225,44 @@ const HrScreen = (props: any): JSX.Element => {
                 item.Assigned?.some(
                   (assigned: any) =>
                     assigned?.Email?.toLowerCase() ===
-                    CurUser?.Email.toLowerCase()
+                    curUserDetails?.Email.toLowerCase()
                 )) &&
-              item.Status.key !== "Resolved"
+              item.Status.key !== "Satisfactory"
           ) || []
         );
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
-        setListItems(tempAssigenQuestion);
-        setfilterArray(tempAssigenQuestion);
-        getStsChoices();
+        setemployessResponseDetails(tempAssigenQuestion);
+        setfilteredEmployessResponseDetails(tempAssigenQuestion);
+        handlerGetStatusValues();
       })
       .catch((err) => {
         console.error("Error in questionConfig:", err); // Log error
       });
   };
 
-  const AssigendPerson = async (): Promise<void> => {
+  const handlerCurrentUserTasks = async (): Promise<void> => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
       .items.select("*, Assigned/ID, Assigned/EMail")
       .expand("Assigned")
       .get()
       .then(async (_items: any) => {
-        // Filter based on current user's email
         const _filteredQuestions: any =
           _items?.filter((val: any) =>
             val?.Assigned?.some(
               (user: any) =>
-                user?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
+                user?.EMail.toLowerCase() ===
+                curUserDetails?.Email.toLowerCase()
             )
           ) || [];
-        await questionConfig(_filteredQuestions);
+        await handlerGetEmployeeResponseDetails(_filteredQuestions);
       })
       .catch((error: any) => {
         console.error("Error fetching items:", error);
       });
   };
 
-  const personColumnToPerson = (data: any): any => {
+  const handlerEmployeeDetails = (data: any): any => {
     return (
       <div style={{ display: "flex", alignItems: "center" }}>
         <img
@@ -279,7 +281,7 @@ const HrScreen = (props: any): JSX.Element => {
     );
   };
 
-  const stsTemplate = (rowData: any) => {
+  const handlerStatusDetails = (rowData: any) => {
     let color: string = "";
     let bgColor: string = "";
     if (rowData?.Status?.key === "Pending") {
@@ -309,16 +311,16 @@ const HrScreen = (props: any): JSX.Element => {
     );
   };
 
-  const ActionIcons = (Rowdata: any) => {
+  const handlerActionIcons = (Rowdata: any) => {
     return (
       <div style={{ display: "flex", gap: 6, width: "100%", paddingLeft: 14 }}>
         <i
           className="pi pi-pencil"
           style={{ fontSize: "1rem", color: "#233b83" }}
           onClick={() => {
-            setVisible(true);
+            setisVisible(true);
             console.log(Rowdata);
-            setTempEmployeeDetails({ ...Rowdata });
+            settempEmployeeDetails({ ...Rowdata });
           }}
         />
       </div>
@@ -326,16 +328,17 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   // update sp
-  const updateQuestionsToSP: any = async (TempEmployeeDetails: any) => {
+  const handlerUpdateResponsesToSp: any = async (tempEmployeeDetails: any) => {
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
-      .items.getById(TempEmployeeDetails.Id)
+      .items.getById(tempEmployeeDetails.Id)
       .update({
-        Status: TempEmployeeDetails.Status.key,
-        Comments: TempEmployeeDetails.Comments,
+        Status: tempEmployeeDetails.Status,
+        Comments: tempEmployeeDetails.Comments,
       })
       .then(() => {
-        setVisible(false);
+        setRerender(true);
+        setisVisible(false);
         toast.success("Update Successfully", {
           position: "top-right",
           autoClose: 5000,
@@ -347,7 +350,6 @@ const HrScreen = (props: any): JSX.Element => {
           theme: "light",
           transition: Bounce,
         });
-        setRerender(true);
       })
       .catch((err) => {
         toast.error("error", {
@@ -365,14 +367,14 @@ const HrScreen = (props: any): JSX.Element => {
   };
 
   const onPageChange = (event: any) => {
-    setPageNationRows({
+    setpageNationRows({
       first: event?.first || defaultPagination.first,
       rows: event?.rows || defaultPagination.rows,
     });
   };
 
   useEffect(() => {
-    AssigendPerson();
+    handlerCurrentUserTasks();
     setRerender(false);
   }, [render]);
 
@@ -380,74 +382,81 @@ const HrScreen = (props: any): JSX.Element => {
     <>
       <Dialog
         header="Employee Details"
-        visible={visible}
+        visible={isVisible}
         style={{ width: "34vw", borderRadius: "4px" }}
         onHide={() => {
-          if (!visible) return;
-          setVisible(false);
+          if (!isVisible) return;
+          setisVisible(false);
         }}
       >
         <div className={styles.employeeStatusSection}>
-          <Dropdown
-            className={styles.employeeStatus}
-            value={
-              TempEmployeeDetails?.Status?.key
-                ? statusChoices?.filter(
-                    (val: any) => val.key === TempEmployeeDetails?.Status?.key
-                  )?.[0]
-                : ""
-            }
-            onChange={(e) => {
-              handleChange("Status", e.value);
-              console.log(e.value.key);
-            }}
-            options={statusChoices || []}
-            optionLabel="name"
-            placeholder="Select a City"
-          />
+          {employessResponseDetails.some(
+            (e: any) =>
+              (e.Status.key === "Pending" ||
+                e.Status.key === "To be resolved") &&
+              tempEmployeeDetails.Id === e.Id
+          ) ? (
+            <div className="flex align-items-center">
+              <Checkbox
+                inputId="ingredient1"
+                name="status"
+                value={{ key: "Resolved" }}
+                onChange={(e) => {
+                  console.log("Status", e.value.key);
+                  handlerChangeEmployessResponseDetails("Status", e.value.key);
+                }}
+                checked={tempEmployeeDetails?.Status === "Resolved"}
+              />
+              <label htmlFor="ingredient1" className="ml-2">
+                Resolved
+              </label>
+            </div>
+          ) : (
+            <div>{"Resolved"}</div>
+          )}
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Employee name</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.Employee.Name}
+            {tempEmployeeDetails?.Employee.Name}
           </div>
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Role</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.Role}
+            {tempEmployeeDetails?.Role}
           </div>
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Department</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.Department}
+            {tempEmployeeDetails?.Department}
           </div>
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Email</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.Employee.Email}
+            {tempEmployeeDetails?.Employee.Email}
           </div>
         </div>
 
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>SecondaryEmail</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.SecondaryEmail}
+            {tempEmployeeDetails?.SecondaryEmail}
           </div>
         </div>
 
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Task</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.Task}
+            {tempEmployeeDetails?.Task}
           </div>
         </div>
         <div className={styles.addDialog}>
           <div className={styles.addDialogHeader}>Employee Comments</div>
           <div className={styles.addDialogInput}>
-            {TempEmployeeDetails?.ResponseComments}
+            {tempEmployeeDetails?.ResponseComments}
           </div>
         </div>
 
@@ -457,11 +466,16 @@ const HrScreen = (props: any): JSX.Element => {
             <InputTextarea
               placeholder="Enter comments"
               value={
-                TempEmployeeDetails.Comments ? TempEmployeeDetails.Comments : ""
+                tempEmployeeDetails.Comments ? tempEmployeeDetails.Comments : ""
               }
               style={{ resize: "none", width: "100%", height: "100px" }}
               autoResize={false}
-              onChange={(e) => handleChange("Comments", e.target.value)}
+              onChange={(e) =>
+                handlerChangeEmployessResponseDetails(
+                  "Comments",
+                  e.target.value
+                )
+              }
             />
           </div>
         </div>
@@ -477,19 +491,28 @@ const HrScreen = (props: any): JSX.Element => {
                 border: "none",
                 width: "100px",
               }}
-              onClick={() => setVisible(false)}
+              onClick={() => setisVisible(false)}
             />
-            <Button
-              label="Save"
-              style={{
-                height: "36px",
-                color: "#ffff",
-                backgroundColor: "#233b83",
-                border: "none",
-                width: "100px",
-              }}
-              onClick={() => updateQuestionsToSP(TempEmployeeDetails)}
-            />
+            {employessResponseDetails.some(
+              (e: any) =>
+                (e.Status.key === "Pending" ||
+                  e.Status.key === "To be resolved") &&
+                tempEmployeeDetails.Id === e.Id
+            ) ? (
+              <Button
+                label="Save"
+                style={{
+                  height: "36px",
+                  color: "#ffff",
+                  backgroundColor: "#233b83",
+                  border: "none",
+                  width: "100px",
+                }}
+                onClick={() => handlerUpdateResponsesToSp(tempEmployeeDetails)}
+              />
+            ) : (
+              ""
+            )}
           </div>
         </div>
       </Dialog>
@@ -504,18 +527,22 @@ const HrScreen = (props: any): JSX.Element => {
             <Dropdown
               className={`w-full md:w-14rem ${styles.filterDepartment}`}
               value={
-                SearchTerms.dept
-                  ? Departments?.find(
-                      (choice: any) => choice.key === SearchTerms.dept
+                filterKeys.dept
+                  ? departmentsDetails?.find(
+                      (choice: any) => choice.key === filterKeys.dept
                     ) || null
                   : null
               }
               onChange={(e) => {
                 //   const updatedFilDep = { ...filDrp, dropDown: e.value.key };
-                filterFun([...ListItems], "dept", e.value.key); // Call filter function with the updated ListItems
+                handlerFilterDetails(
+                  [...employessResponseDetails],
+                  "dept",
+                  e.value.key
+                ); // Call filter function with the updated ListItems
               }}
               style={{ width: "100%" }}
-              options={Departments || []}
+              options={departmentsDetails || []}
               optionLabel="name"
               placeholder="Select a Department"
             />
@@ -523,16 +550,20 @@ const HrScreen = (props: any): JSX.Element => {
             <Dropdown
               className={`${styles.filterStatus} w-full md:w-14rem`}
               value={
-                SearchTerms.status
-                  ? statusChoices?.filter(
-                      (choice: any) => choice.key === SearchTerms.status
+                filterKeys.status
+                  ? statusDetails?.filter(
+                      (choice: any) => choice.key === filterKeys.status
                     )?.[0]
                   : null
               } // Use `find` instead of `filter`
               onChange={(e) => {
-                filterFun([...ListItems], "status", e.value.key);
+                handlerFilterDetails(
+                  [...employessResponseDetails],
+                  "status",
+                  e.value.key
+                );
               }}
-              options={statusChoices || []}
+              options={statusDetails || []}
               optionLabel="name"
               placeholder="Select a Status"
             />
@@ -540,9 +571,13 @@ const HrScreen = (props: any): JSX.Element => {
             <InputText
               className={styles.filterOverAll}
               placeholder="Search"
-              value={SearchTerms.search}
+              value={filterKeys.search}
               onChange={(e) => {
-                filterFun([...ListItems], "search", e.target.value);
+                handlerFilterDetails(
+                  [...employessResponseDetails],
+                  "search",
+                  e.target.value
+                );
               }}
             />
 
@@ -558,16 +593,16 @@ const HrScreen = (props: any): JSX.Element => {
                 filData.dept = "";
                 filData.status = "";
                 filData.search = "";
-                setSearchTerms({ ...filData });
-                setfilterArray(ListItems);
+                setfilterKeys({ ...filData });
+                setfilteredEmployessResponseDetails(employessResponseDetails);
               }}
             />
           </div>
         </div>
         <DataTable
-          value={filterArray?.slice(
-            PageNationRows.first,
-            PageNationRows.first + PageNationRows.rows
+          value={filteredEmployessResponseDetails?.slice(
+            pageNationRows.first,
+            pageNationRows.first + pageNationRows.rows
           )}
           className={styles.HRPersonDashboard}
         >
@@ -575,22 +610,22 @@ const HrScreen = (props: any): JSX.Element => {
           <Column
             field="QuestionTitle"
             header="To"
-            body={personColumnToPerson}
+            body={handlerEmployeeDetails}
           />
           <Column field="Role" header="Role" style={{ width: "15%" }} />
           <Column field="Department" header="Department" />
-          <Column field="Status" header="Status" body={stsTemplate} />
+          <Column field="Status" header="Status" body={handlerStatusDetails} />
           <Column
             field="Action"
             header="Action"
-            body={(Rowdata: any) => ActionIcons(Rowdata)}
+            body={(Rowdata: any) => handlerActionIcons(Rowdata)}
           />{" "}
           *
         </DataTable>
         <Paginator
-          first={PageNationRows.first}
-          rows={PageNationRows.rows}
-          totalRecords={ListItems.length}
+          first={pageNationRows.first}
+          rows={pageNationRows.rows}
+          totalRecords={employessResponseDetails.length}
           // rowsPerPageOptions={[10, 20, 30]}
           onPageChange={onPageChange}
         />
