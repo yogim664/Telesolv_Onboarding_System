@@ -218,9 +218,7 @@ const HrPersons = (props: any) => {
           }
         : question
     );
-    // await setcheckPointDetails([...updatedQuestions]);
 
-    // setfilteredcheckPoints([...updatedQuestions]);
     await handlerQuestionsFilter(updatedQuestions, "", _fkeys);
     await console.log(updatedQuestions, "updatedQuestions");
   };
