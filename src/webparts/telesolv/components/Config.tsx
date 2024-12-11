@@ -634,6 +634,7 @@ const Config = (props: any) => {
         setfilteredForm(_tempFilterkeys);
         setfilteredQuestions([...filteredData]);
         setisVisible(false);
+        setisFormEdit(false);
       })
       .catch((err) => {
         console.log(err);
