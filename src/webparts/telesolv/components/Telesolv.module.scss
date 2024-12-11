@@ -1,6 +1,5 @@
 .navBar {
     width: 99%;
-    background-color: #ffffff;
     display: flex;
     box-shadow: 0px 5px 0px #f9f9f9;
     justify-content: space-between;
@@ -13,6 +12,32 @@
     // }
     h2 {
         color: #233b83
+    }
+}
+
+.configContainer {
+    height: 83vh;
+    overflow: hidden;
+    padding: 16px;
+    background: url("../assets//Images//EmployeeFormBG.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    .formSelectionSection {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+        .formFilterDD {
+            width: 242px;
+        }
+    }
+    .questionConfigContaier {
+        padding: 8px;
+        .questionInputSection {
+            height: 52vh;
+            overflow: auto !important;
+        }
     }
 }
 
@@ -93,20 +118,22 @@
     display: flex;
     justify-content: end;
     gap: 10px;
-    .saveBtn {
-        color: ffff;
-        background-color: #233b83;
-        border: none;
-        font-weight: 600;
-        padding: 8px 24px;
-    }
-    .cancelBtn {
-        background-color: #cfcfcf;
-        color: #000;
-        border: none;
-        font-weight: 600;
-        padding: 8px 24px;
-    }
+}
+
+.saveBtn {
+    color: ffff;
+    background-color: #233b83;
+    border: none;
+    font-weight: 600;
+    padding: 8px 24px;
+}
+
+.cancelBtn {
+    background-color: #cfcfcf;
+    color: #000;
+    border: none;
+    font-weight: 600;
+    padding: 8px 24px;
 }
 
 .CheckpointConfigHeader {
@@ -123,7 +150,6 @@
 }
 
 .addDialog {
-    background-color: white;
     display: flex !important;
     align-items: center;
     justify-content: center !important;
@@ -301,7 +327,7 @@
 
 .QuestionSection {
     padding: 12px;
-    background-color: #fff;
+    background-color: #ffffff7a;
     width: 60%;
     .questionInput {
         width: 100%;

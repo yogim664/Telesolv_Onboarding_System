@@ -19,7 +19,7 @@ import "../assets/style/CheckPoints.css";
 import { useState } from "react";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./AddForm";
+// import "./AddForm";
 import { Dialog } from "primereact/dialog";
 import "./HrPersons";
 import HrPersons from "./HrPersons";
@@ -30,7 +30,7 @@ import { _Item } from "@pnp/sp/items/types";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
 import { Dropdown } from "primereact/dropdown";
-import AddForm from "./AddForm";
+// import AddForm from "./AddForm";
 //import * as strings from "TelesolvWebPartStrings";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 
@@ -750,16 +750,13 @@ const Config = (props: any) => {
       <ConfirmDialog group="templating" />
 
       <TabView className="CongifTab">
-        <TabPanel header="Checkpoints" className="MainTab">
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "15px",
-            }}
-          >
+        <TabPanel
+          header="Checkpoints"
+          className={`${styles.questionConfigContaier} MainTab`}
+        >
+          <div className={styles.formSelectionSection}>
             <Dropdown
+              className={styles.formFilterDD}
               value={
                 formsDetails
                   ? formsDetails?.find(
@@ -775,283 +772,297 @@ const Config = (props: any) => {
               optionLabel="name"
               placeholder="Select a Department"
             />
-            <Button
-              label="Add new form"
-              className={styles.saveBtn}
+            <i
+              className="pi  pi-file-plus"
+              style={{
+                fontSize: "1.25rem",
+                padding: 10,
+                color: "#fff",
+                borderRadius: 4,
+                backgroundColor: "#233b83",
+              }}
               onClick={() => {
                 setnewformDetails(null);
                 setisVisible(true);
               }}
             />
-            <AddForm />
+            {/* <AddForm /> */}
           </div>
-          {filteredQuestions.length > 0 ? (
-            filteredQuestions
-              .filter((value: any) => value.QuestionNo !== 10000)
+          <div className={styles.questionInputSection}>
+            {filteredQuestions.length > 0 ? (
+              filteredQuestions
+                .filter((value: any) => value.QuestionNo !== 10000)
+                .map((question: any, qIndex: any) => (
+                  <div key={question.QuestionNo} className="question-block">
+                    <div className={styles.CheckPointSection}>
+                      <div className={styles.leftSection}>
+                        {/* <i className="pi pi-comment" /> */}
+                        <img src={cmtImg} alt="logo" />
 
-              .map((question: any, qIndex: any) => (
-                <div key={question.QuestionNo} className="question-block">
-                  <div className={styles.CheckPointSection}>
-                    <div className={styles.leftSection}>
-                      {/* <i className="pi pi-comment" /> */}
-                      <img src={cmtImg} alt="logo" />
-
-                      <span
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: "16px",
-                          fontFamily: "interSemibold",
-                        }}
-                      >
-                        Question {question.QuestionNo}
-                      </span>
+                        <span
+                          style={{
+                            fontWeight: "bold",
+                            fontSize: "16px",
+                            fontFamily: "interSemibold",
+                          }}
+                        >
+                          Question {question.QuestionNo}
+                        </span>
+                      </div>
+                      <div className={styles.RightSection}>
+                        <i
+                          className="pi  pi-pencil"
+                          style={{ fontSize: "1rem" }}
+                          onClick={() => handlerEditQuestions(question.Id)}
+                        />
+                        <i
+                          className="pi pi-trash"
+                          onClick={() => {
+                            showConfirmationPopup(question.Id, qIndex);
+                          }}
+                          style={{ cursor: "pointer", color: "red" }}
+                        />
+                        <i
+                          className="pi pi-arrow-up"
+                          onClick={() =>
+                            handlermoveQuestionUp(
+                              qIndex,
+                              false,
+                              filteredQuestions
+                            )
+                          }
+                          style={{
+                            cursor: "pointer",
+                            color: "#233b83",
+                          }}
+                        />
+                        <i
+                          className="pi pi-arrow-down"
+                          style={{
+                            cursor: "pointer",
+                            color: "#233b83",
+                          }}
+                          onClick={() => handlermoveQuestionDownn(qIndex)}
+                        />
+                      </div>
                     </div>
-                    <div className={styles.RightSection}>
-                      <i
-                        className="pi  pi-pencil"
-                        style={{ fontSize: "1rem" }}
-                        onClick={() => handlerEditQuestions(question.Id)}
-                      />
-                      <i
-                        className="pi pi-trash"
-                        onClick={() => {
-                          showConfirmationPopup(question.Id, qIndex);
-                        }}
-                        style={{ cursor: "pointer", color: "red" }}
-                      />
-                      <i
-                        className="pi pi-arrow-up"
-                        onClick={() =>
-                          handlermoveQuestionUp(
+
+                    <div className={styles.QuestionSection}>
+                      <InputText
+                        className={styles.questionInput}
+                        value={question?.QuestionTitle}
+                        placeholder="Enter here"
+                        onChange={(e) => {
+                          handlerQuestionChange(
+                            //   question?.Id,
                             qIndex,
-                            false,
-                            filteredQuestions
-                          )
-                        }
-                        style={{
-                          cursor: "pointer",
-                          color: "#233b83",
+                            e.target.value,
+                            "Question"
+                          );
+                          console.log(qIndex);
                         }}
+                        disabled={!question.isEdit}
                       />
-                      <i
-                        className="pi pi-arrow-down"
-                        style={{
-                          cursor: "pointer",
-                          color: "#233b83",
-                        }}
-                        onClick={() => handlermoveQuestionDownn(qIndex)}
-                      />
-                    </div>
-                  </div>
+                      <div className={styles.QuestionTag}>
+                        {/* Note: Choose any one option that triggers the workflow */}
+                        Note: Choose one option that requires attention from the
+                        HR personnel
+                      </div>
+                      {question.Options.length > 0 && (
+                        <div className="flex flex-column gap-3">
+                          {question?.Options?.map(
+                            (category: any, aIndex: any) => (
+                              <div
+                                key={category.key}
+                                className="flex align-items-center"
+                              >
+                                <div className={styles.optionSection}>
+                                  <div className={styles.optionChoice}>
+                                    {!(
+                                      selectedOption.qIndex === qIndex &&
+                                      selectedOption.aIndex === aIndex
+                                    ) && (
+                                      <div className={styles.radioOption}>
+                                        <>
+                                          <RadioButton
+                                            className={styles.radioBtn}
+                                            inputId={`${question.QuestionNo}-${category.key}`}
+                                            name={`category-${question.QuestionNo}`}
+                                            value={category.name}
+                                            onChange={(e) => {
+                                              console.log(e, "radio");
 
-                  <div className={styles.QuestionSection}>
-                    <InputText
-                      className={styles.questionInput}
-                      value={question?.QuestionTitle}
-                      placeholder="Enter here"
-                      onChange={(e) => {
-                        handlerQuestionChange(
-                          //   question?.Id,
-                          qIndex,
-                          e.target.value,
-                          "Question"
-                        );
-                        console.log(qIndex);
-                      }}
-                      disabled={!question.isEdit}
-                    />
-                    <div className={styles.QuestionTag}>
-                      {/* Note: Choose any one option that triggers the workflow */}
-                      Note: Choose one option that requires attention from the
-                      HR personnel
-                    </div>
-                    {question.Options.length > 0 && (
-                      <div className="flex flex-column gap-3">
-                        {question?.Options?.map(
-                          (category: any, aIndex: any) => (
-                            <div
-                              key={category.key}
-                              className="flex align-items-center"
-                            >
-                              <div className={styles.optionSection}>
-                                <div className={styles.optionChoice}>
-                                  {!(
-                                    selectedOption.qIndex === qIndex &&
-                                    selectedOption.aIndex === aIndex
-                                  ) && (
-                                    <div className={styles.radioOption}>
-                                      <>
-                                        <RadioButton
-                                          className={styles.radioBtn}
-                                          inputId={`${question.QuestionNo}-${category.key}`}
-                                          name={`category-${question.QuestionNo}`}
-                                          value={category.name}
-                                          onChange={(e) => {
-                                            console.log(e, "radio");
-
-                                            handlerQuestionChange(
-                                              qIndex,
-                                              e.target.value,
-                                              "Radio",
-                                              aIndex
-                                            );
-                                            //handleOptionChange(question.Answer, e.value)
-                                          }}
-                                          checked={
-                                            question.Answer.key ===
-                                            category.name
-                                          }
-                                          disabled={!question.isEdit}
-                                        />
-
-                                        <label
-                                          className={`${styles.optionLabel} ml-2`}
-                                          htmlFor={`${question.Answer.name}-${category.key}`}
-                                        >
-                                          {category.name}
-                                        </label>
-                                      </>
-                                    </div>
-                                  )}
-                                  {!(
-                                    selectedOption.qIndex === qIndex &&
-                                    selectedOption.aIndex === aIndex
-                                  ) && (
-                                    <>
-                                      <i
-                                        className={`${styles.optionEditIcon} pi  pi-pencil`}
-                                        style={{ fontSize: "1rem" }}
-                                        onClick={() =>
-                                          setselectedOption({
-                                            qIndex: qIndex,
-                                            aIndex: aIndex,
-                                          })
-                                        }
-                                      />
-                                      <i
-                                        className="pi pi-trash"
-                                        onClick={() => {
-                                          handlerDeleteOptionConfirmationPopup(
-                                            aIndex,
-                                            qIndex
-                                          );
-                                        }}
-                                        // deleteQuestion(question.Id)}}
-                                        style={{
-                                          cursor: "pointer",
-                                          color: "red",
-                                          fontSize: "1rem",
-                                        }}
-                                      />
-                                    </>
-                                  )}
-                                </div>
-
-                                {selectedOption.aIndex === aIndex &&
-                                  selectedOption.qIndex === qIndex && (
-                                    <div
-                                      className={styles.ChangeOptionContainer}
-                                    >
-                                      <InputText
-                                        className={styles.questionInput}
-                                        placeholder="Enter here"
-                                        onChange={(e) =>
-                                          handleOptionChange(
-                                            qIndex,
-                                            aIndex,
-                                            e.target.value
-                                          )
-                                        }
-                                      />
-                                      <div
-                                        className={styles.optionActionContainer}
-                                      >
-                                        <div
-                                          className={styles.actionBtn}
-                                          onClick={() =>
-                                            handlerOptionChange(qIndex, aIndex)
-                                          }
-                                        >
-                                          <i
-                                            className="pi pi-check"
-                                            style={{ color: "Green" }}
+                                              handlerQuestionChange(
+                                                qIndex,
+                                                e.target.value,
+                                                "Radio",
+                                                aIndex
+                                              );
+                                              //handleOptionChange(question.Answer, e.value)
+                                            }}
+                                            checked={
+                                              question.Answer.key ===
+                                              category.name
+                                            }
+                                            disabled={!question.isEdit}
                                           />
-                                        </div>
-                                        <div
-                                          className={styles.actionBtn}
+
+                                          <label
+                                            className={`${styles.optionLabel} ml-2`}
+                                            htmlFor={`${question.Answer.name}-${category.key}`}
+                                          >
+                                            {category.name}
+                                          </label>
+                                        </>
+                                      </div>
+                                    )}
+                                    {!(
+                                      selectedOption.qIndex === qIndex &&
+                                      selectedOption.aIndex === aIndex
+                                    ) && (
+                                      <>
+                                        <i
+                                          className={`${styles.optionEditIcon} pi  pi-pencil`}
+                                          style={{ fontSize: "1rem" }}
                                           onClick={() =>
                                             setselectedOption({
-                                              qIndex: null,
-                                              aIndex: null,
+                                              qIndex: qIndex,
+                                              aIndex: aIndex,
                                             })
                                           }
+                                        />
+                                        <i
+                                          className="pi pi-trash"
+                                          onClick={() => {
+                                            handlerDeleteOptionConfirmationPopup(
+                                              aIndex,
+                                              qIndex
+                                            );
+                                          }}
+                                          // deleteQuestion(question.Id)}}
+                                          style={{
+                                            cursor: "pointer",
+                                            color: "red",
+                                            fontSize: "1rem",
+                                          }}
+                                        />
+                                      </>
+                                    )}
+                                  </div>
+
+                                  {selectedOption.aIndex === aIndex &&
+                                    selectedOption.qIndex === qIndex && (
+                                      <div
+                                        className={styles.ChangeOptionContainer}
+                                      >
+                                        <InputText
+                                          className={styles.questionInput}
+                                          placeholder="Enter here"
+                                          onChange={(e) =>
+                                            handleOptionChange(
+                                              qIndex,
+                                              aIndex,
+                                              e.target.value
+                                            )
+                                          }
+                                        />
+                                        <div
+                                          className={
+                                            styles.optionActionContainer
+                                          }
                                         >
-                                          <i
-                                            className="pi pi-times"
-                                            style={{ color: "red" }}
-                                          />
+                                          <div
+                                            className={styles.actionBtn}
+                                            onClick={() =>
+                                              handlerOptionChange(
+                                                qIndex,
+                                                aIndex
+                                              )
+                                            }
+                                          >
+                                            <i
+                                              className="pi pi-check"
+                                              style={{ color: "Green" }}
+                                            />
+                                          </div>
+                                          <div
+                                            className={styles.actionBtn}
+                                            onClick={() =>
+                                              setselectedOption({
+                                                qIndex: null,
+                                                aIndex: null,
+                                              })
+                                            }
+                                          >
+                                            <i
+                                              className="pi pi-times"
+                                              style={{ color: "red" }}
+                                            />
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
+                                    )}
+                                  {question.Answer.key === category.name && (
+                                    <span
+                                      className={styles.flowTriggerIndicator}
+                                    >
+                                      Notifies HR personnel to take action.
+                                    </span>
                                   )}
-                                {question.Answer.key === category.name && (
-                                  <span className={styles.flowTriggerIndicator}>
-                                    Notifies HR personnel to take action.
-                                  </span>
-                                )}
+                                </div>
                               </div>
-                            </div>
-                          )
-                        )}
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Conditionally render the NewOptionContainer */}
+                    {selectedQuestionId === qIndex && (
+                      <div className={styles.NewOptionContainer}>
+                        <InputText
+                          placeholder="Enter your new option"
+                          value={newOptionValue}
+                          style={{ marginLeft: "2.5rem", marginTop: 10 }}
+                          onChange={(e) => setnewOptionValue(e.target.value)}
+                        />
+                        <i
+                          className="pi pi-check"
+                          style={{ color: "Green" }}
+                          onClick={() => handlerAddNewOption(qIndex)}
+                        />
+
+                        <i
+                          className="pi pi-times"
+                          style={{ color: "red" }}
+                          onClick={() => setSelectedQuestionId(null)}
+                        />
                       </div>
                     )}
-                  </div>
-
-                  {/* Conditionally render the NewOptionContainer */}
-                  {selectedQuestionId === qIndex && (
-                    <div className={styles.NewOptionContainer}>
-                      <InputText
-                        placeholder="Enter your new option"
-                        value={newOptionValue}
-                        style={{ marginLeft: "2.5rem", marginTop: 10 }}
-                        onChange={(e) => setnewOptionValue(e.target.value)}
-                      />
-                      <i
-                        className="pi pi-check"
-                        style={{ color: "Green" }}
-                        onClick={() => handlerAddNewOption(qIndex)}
-                      />
-
-                      <i
-                        className="pi pi-times"
-                        style={{ color: "red" }}
-                        onClick={() => setSelectedQuestionId(null)}
-                      />
+                    <div
+                      className={styles.AddOptionContainer}
+                      onClick={() => {
+                        handlerAddOptionClick(qIndex);
+                        console.log(qIndex);
+                      }}
+                      style={{
+                        cursor: question.isEdit ? "pointer" : "not-allowed",
+                        pointerEvents: question.isEdit ? "auto" : "none",
+                        opacity: question.isEdit ? 1 : 0.5,
+                      }}
+                    >
+                      <i className="pi pi-plus" style={{ color: "#233b83" }} />
+                      <span style={{ color: "#233b83" }}> Add Option</span>
                     </div>
-                  )}
-                  <div
-                    className={styles.AddOptionContainer}
-                    onClick={() => {
-                      handlerAddOptionClick(qIndex);
-                      console.log(qIndex);
-                    }}
-                    style={{
-                      cursor: question.isEdit ? "pointer" : "not-allowed",
-                      pointerEvents: question.isEdit ? "auto" : "none",
-                      opacity: question.isEdit ? 1 : 0.5,
-                    }}
-                  >
-                    <i className="pi pi-plus" style={{ color: "#233b83" }} />
-                    <span style={{ color: "#233b83" }}> Add Option</span>
                   </div>
-                </div>
-              ))
-          ) : (
-            <div className={styles.noQuestionFound}>
-              No questions have been added yet. Please click the{" "}
-              <b>&nbsp;Add New Question&nbsp;</b> button to add one!
-            </div>
-          )}
+                ))
+            ) : (
+              <div className={styles.noQuestionFound}>
+                No questions have been added yet. Please click the{" "}
+                <b>&nbsp;Add New Question&nbsp;</b> button to add one!
+              </div>
+            )}
+          </div>
 
           <div
             className={styles.addNewQuestionSection}

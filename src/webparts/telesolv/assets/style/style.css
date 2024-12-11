@@ -134,6 +134,10 @@ td {
     padding: 8px 24px;
 }
 
+.p-dialog {
+    border: none !important;
+}
+
 .p-dialog .p-dialog-header,
 .p-dialog .p-dialog-footer {
     border: none !important;
@@ -143,8 +147,17 @@ td {
     position: relative;
 }
 
+.p-dialog .p-dialog-header,
+.p-dialog-content {
+    background: unset !important;
+}
+
 .p-dialog-title {
     color: #233b83 !important;
+}
+
+.p-dialog {
+    background: #ffffffe0 !important;
 }
 
 @keyframes depth-animation {
@@ -249,6 +262,7 @@ i {
 
 .p-confirm-dialog .p-dialog-content {
     justify-content: center !important;
+    background-color: unset !important;
 }
 
 .commandBarWrapper {
@@ -257,4 +271,56 @@ i {
 
 [class^="navBar"] h2 {
     color: #233b83;
+}
+
+.p-paginator {
+    background-color: unset !important;
+    gap: 6px;
+}
+
+.p-paginator-element {
+    margin: 0 3px;
+}
+
+.p-datatable .p-datatable-thead>tr>th {
+    background-color: #f0f8ff71 !important;
+    color: #233b83 !important;
+    border: none !important;
+    font-size: 14px;
+}
+
+.p-datatable-wrapper {
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.p-datatable .p-column-header-content {
+    padding-left: 50px;
+}
+
+.p-datatable .p-datatable-tbody>tr>td {
+    text-align: left;
+    border: none;
+    /* border-width: 1px 0 0 0; */
+    padding-top: 10px;
+    padding-left: 65px;
+    padding-bottom: 10px;
+}
+
+.p-datatable .p-datatable-tbody>tr {
+    background: #ffffff61 !important;
+}
+
+.p-tabview .p-tabview-panels {
+    background: unset !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    background: #ffffff61;
+}
+
+.p-dropdown,
+.p-inputtext,
+.ms-BasePicker-text {
+    background: #ffffff85 !important;
 }
