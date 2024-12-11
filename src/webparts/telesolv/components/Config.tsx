@@ -49,6 +49,7 @@ const Config = (props: any) => {
   const [isVisible, setisVisible] = useState(false);
   const [newformDetails, setnewformDetails] = useState<any>([]);
   const [currentFormID, setcurrentFormID] = useState(null);
+  const [isFormEdit, setisFormEdit] = useState(false);
   const [formsDetails, setformsDetails] = useState<any>([]);
   const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
   const [filteredQuestions, setfilteredQuestions] = React.useState<any>([]);
@@ -657,18 +658,35 @@ const Config = (props: any) => {
         transition: Bounce,
       });
     } else {
-      await sp.web.lists
-        .getByTitle(GCongfig.ListName.Forms)
-        .items.add({
-          Title: newformDetails,
-        })
-        .then(async (li) => {
-          await setnewformDetails("");
-          await hanlderForms();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      if (isFormEdit) {
+        const id: any = currentFormID;
+        await sp.web.lists
+          .getByTitle(GCongfig.ListName.Forms)
+          .items.getById(id)
+          .update({
+            Title: newformDetails,
+          })
+          .then(async (li) => {
+            await setnewformDetails("");
+            await hanlderForms();
+          })
+          .catch((err) => {
+            console.error("Error updating the item:", err);
+          });
+      } else {
+        await sp.web.lists
+          .getByTitle(GCongfig.ListName.Forms)
+          .items.add({
+            Title: newformDetails,
+          })
+          .then(async (li) => {
+            await setnewformDetails("");
+            await hanlderForms();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     }
   };
 
@@ -697,7 +715,7 @@ const Config = (props: any) => {
 
       <div className="card flex justify-content-center">
         <Dialog
-          header="Add new form"
+          header={isFormEdit ? "Edit Form" : "Add New Form"}
           visible={isVisible}
           style={{ width: "30vw" }}
           onHide={() => {
@@ -733,6 +751,7 @@ const Config = (props: any) => {
               className={styles.cancelBtn}
               onClick={() => {
                 setisVisible(false);
+                setisFormEdit(false);
               }}
             />
             <Button
@@ -771,6 +790,29 @@ const Config = (props: any) => {
               options={formsDetails || []}
               optionLabel="name"
               placeholder="Select a Department"
+            />
+            <i
+              className="pi pi-pencil"
+              style={{
+                backgroundColor: "#223b83",
+                padding: 10,
+                borderRadius: 4,
+                color: "#fff",
+              }}
+              onClick={(e) => {
+                setisVisible(true);
+                setisFormEdit(true);
+                const tempNewformDetails = formsDetails.find(
+                  (item: any) => item.ID === filteredForm.Forms
+                );
+                if (tempNewformDetails) {
+                  setnewformDetails(tempNewformDetails.name);
+                } else {
+                  console.error("No matching form found!");
+                  setnewformDetails(null);
+                  console.log(isFormEdit);
+                }
+              }}
             />
             <i
               className="pi  pi-file-plus"

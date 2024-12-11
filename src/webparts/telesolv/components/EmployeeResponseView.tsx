@@ -391,7 +391,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     <div className={styles.employeeResponseSection}>
       <div className="card flex justify-content-center">
         <Dialog
-          header="Re assigen HR Persons"
+          header="Re Assign HR Persons"
           visible={isvisible}
           style={{ width: "30vw" }}
           onHide={() => {
@@ -590,7 +590,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             />
             <Column
               field="CompletedDateAndTime"
-              header="Completed Date and Time"
+              header="Completed On"
               body={(rowData) => {
                 if (!rowData.CompletedDateAndTime) {
                   return "-"; // Return "N/A" if null or empty
@@ -604,7 +604,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
             <Column
               field="Re Assigen"
-              header="Re Assigen"
+              header="Re Assign"
               body={(Rowdata: any, index: any) =>
                 handlerActionIcons(Rowdata, index)
               }
