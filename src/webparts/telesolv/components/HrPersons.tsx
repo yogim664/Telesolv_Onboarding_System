@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-floating-promises */
@@ -22,6 +23,7 @@ import { InputText } from "primereact/inputtext";
 import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
 import { Dropdown } from "primereact/dropdown";
+import { Avatar } from "primereact/avatar";
 
 interface IFilterKeys {
   people: string[];
@@ -37,12 +39,14 @@ const HrPersons = (props: any) => {
     Forms: "",
   };
 
-  const [hrperson, setHRperon] = useState<any>([]);
+  const [checkPointDetails, setcheckPointDetails] = useState<any>([]);
   const [isEdit, setisEdit] = useState(true);
   const [filterkeys, setfilterkeys] = useState<IFilterKeys>(_fkeys);
-  const [filterData, setfilterData] = useState<any>([]);
-  const [CurFormID, setCurFormID] = useState(null);
-  const [FormsChoice, setFormsChoice] = useState<any>([]);
+  const [filteredcheckPoints, setfilteredcheckPoints] = useState<any>([]);
+  const [currentFormID, setcurrentFormID] = useState(null);
+  const [formsValues, setformsValues] = useState<any>([]);
+  console.log(currentFormID);
+
   // style variables
   const peoplePickerStyles = {
     root: {
@@ -56,56 +60,58 @@ const HrPersons = (props: any) => {
   };
 
   // Get items to SP
-  const questionConfig = async () => {
-    try {
-      // Fetch items from the SharePoint list
-      const items = await sp.web.lists
-        .getByTitle(GCongfig.ListName.CheckpointConfig)
-        .items.select("*,Assigned/ID,Assigned/EMail, Forms/ID, Forms/Title")
-        .expand("Assigned,Forms")
-        .filter("isDelete ne 1")
-        .get();
-      console.log(items, "items");
-
-      // Map the items to create an array of values
-      const formattedItems: IQuestionDatas[] = items.map((item: any) => ({
-        Id: item.Id,
-        isEdit: false,
-        QuestionNo: item.Sno,
-        QuestionTitle: item.Title,
-        isDelete: item.isDelete,
-        TaskName: item.TaskName,
-        FormID: item.Forms?.ID,
-        FormTitle: item.Forms?.Title,
-        Answer: item.Answer
-          ? {
-              key: item.Answer,
-              name: item.Answer,
-            }
-          : null,
-        Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
-        Assigned: item.Assigned?.map((Assigned: any) => {
-          return {
-            id: Assigned.ID,
-            Email: Assigned.EMail,
-          };
-        }),
-      }));
-      formattedItems.sort(
-        (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
-      );
-      console.log("Fetched Items:", formattedItems);
-
-      // Return the formatted array
-      return formattedItems;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      return [];
-    }
+  const handlerGetQUestionConfig = async () => {
+    let formattedItems: IQuestionDatas[] = [];
+    await sp.web.lists
+      .getByTitle(GCongfig.ListName.CheckpointConfig)
+      .items.select(
+        "*,Assigned/ID,Assigned/EMail, Assigned/Title, Forms/ID, Forms/Title"
+      )
+      .expand("Assigned,Forms")
+      .filter("isDelete ne 1")
+      .get()
+      .then((items) => {
+        // Map the items to create an array of values
+        formattedItems = items.map((item: any) => ({
+          Id: item.Id,
+          isEdit: false,
+          QuestionNo: item.Sno,
+          QuestionTitle: item.Title,
+          isDelete: item.isDelete,
+          TaskName: item.TaskName,
+          FormID: item.Forms?.ID,
+          FormTitle: item.Forms?.Title,
+          Answer: item.Answer
+            ? {
+                key: item.Answer,
+                name: item.Answer,
+              }
+            : null,
+          Options: item.Options ? JSON.parse(item.Options) : [], // Parse JSON string
+          Assigned: item.Assigned
+            ? item.Assigned.map((Assigned: any) => {
+                return {
+                  id: Assigned.ID,
+                  Email: Assigned.EMail,
+                  Name: Assigned.Title,
+                };
+              })
+            : [],
+        }));
+        formattedItems.sort(
+          (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
+        );
+        console.log("Fetched Items:", formattedItems);
+        setcheckPointDetails([...formattedItems]); // Store in state
+        setfilteredcheckPoints([...formattedItems]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  const filterFunc = (key: string, val: any): void => {
-    let _masterData = [...hrperson];
+  const handlerQuestionsFilter = (array: any, key: string, val: any): void => {
+    let _masterData = [...array];
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
 
@@ -137,17 +143,11 @@ const HrPersons = (props: any) => {
     }
 
     setfilterkeys({ ..._tempFilterkeys });
-    setfilterData([..._masterData]);
-  };
-
-  const fetchQuestions = async () => {
-    const fetchedItems = await questionConfig();
-    setHRperon(fetchedItems); // Store in state
-    setfilterData([...fetchedItems]);
+    setfilteredcheckPoints([..._masterData]);
   };
 
   // Function to fetch Title values
-  const getForms = async () => {
+  const handlerGetForms = async () => {
     try {
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.Forms)
@@ -160,22 +160,16 @@ const HrPersons = (props: any) => {
         ID: item.ID,
       }));
 
-      setFormsChoice(FormValues);
+      setformsValues(FormValues);
       const firstFormID = FormValues?.[0]?.ID;
-      setCurFormID(firstFormID);
+      setcurrentFormID(firstFormID);
       // filterFunc("Forms", firstFormID);
     } catch (error) {
       console.error("Error fetching titles:", error);
     }
   };
 
-  useEffect(() => {
-    fetchQuestions();
-    getForms();
-    // }, [isEdit]);
-  }, []);
-
-  const showError = (string: any) => {
+  const handlershowError = (string: any) => {
     toast.error("Please enter value", {
       position: "top-right",
       autoClose: 5000,
@@ -189,7 +183,7 @@ const HrPersons = (props: any) => {
     });
   };
 
-  const showSuccess = (string: any) => {
+  const handlershowSuccess = (string: any) => {
     toast.success("Successfully updated", {
       position: "top-right",
       autoClose: 5000,
@@ -205,8 +199,12 @@ const HrPersons = (props: any) => {
     setisEdit(true);
   };
 
-  const handleChange = (value: any, rowData: any, field: string) => {
-    const updatedQuestions: any = hrperson.map((question: any) =>
+  const handlerQuestionConfigChange = async (
+    value: any,
+    rowData: any,
+    field: string
+  ) => {
+    let updatedQuestions: any = await checkPointDetails.map((question: any) =>
       question.Id === rowData.Id
         ? {
             ...question,
@@ -220,18 +218,19 @@ const HrPersons = (props: any) => {
           }
         : question
     );
+    // await setcheckPointDetails([...updatedQuestions]);
 
-    setHRperon(updatedQuestions);
-    setfilterData([...updatedQuestions]);
-    console.log(updatedQuestions, "updatedQuestions");
+    // setfilteredcheckPoints([...updatedQuestions]);
+    await handlerQuestionsFilter(updatedQuestions, "", _fkeys);
+    await console.log(updatedQuestions, "updatedQuestions");
   };
 
-  const AddAssigene = async () => {
+  const handlerValidation = async () => {
     let err = false;
     let errmsg = "";
     try {
       if (
-        filterData.some(
+        checkPointDetails.some(
           (_item: any) =>
             Array.isArray(_item.Assigned) && _item.Assigned.length === 0
         )
@@ -241,75 +240,127 @@ const HrPersons = (props: any) => {
       }
       console.log(err, errmsg);
       debugger;
-      for (let i = 0; i < filterData.length; i++) {
+      for (let i = 0; i < checkPointDetails.length; i++) {
         console.log("I value", i);
 
-        const assignedValues = filterData[i]?.Assigned;
+        const assignedValues = checkPointDetails[i]?.Assigned;
 
         if (!assignedValues || assignedValues.length === 0) {
-          showError(
+          handlershowError(
             `Assigned field is empty for task: ${
-              filterData[i]?.TaskName || "Unknown Task"
+              checkPointDetails[i]?.TaskName || "Unknown Task"
             }`
           );
           return;
         }
 
-        if (hrperson[i]?.Id) {
+        if (checkPointDetails[i]?.Id) {
           await sp.web.lists
             .getByTitle(GCongfig.ListName.CheckpointConfig)
-            .items.getById(hrperson[i].Id)
+            .items.getById(checkPointDetails[i].Id)
             .update({
               AssignedId: {
                 results: assignedValues.map((val: any) => val.id),
               },
-              TaskName: filterData[i].TaskName,
+              TaskName: checkPointDetails[i].TaskName,
             })
             .then((res) => {
               console.log(res);
             });
         }
       }
-      showSuccess("Submitted successfully");
+      handlershowSuccess("Submitted successfully");
+
       console.log("Questions saved or updated successfully to SharePoint!");
+      filterkeys.people = [];
+      filterkeys.Forms = null;
+      filterkeys.search = "";
     } catch (error) {
       console.error("Error saving or updating questions:", error);
     }
   };
 
-  const peopletemplate = (rowData: any) => {
-    return (
-      <PeoplePicker
-        context={props.context}
-        webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-        personSelectionLimit={100}
-        showtooltip={false}
-        ensureUser={true}
-        placeholder={""}
-        onChange={(selectedPeople: any[]) => {
-          handleChange(selectedPeople, rowData, "Assigned"); // Pass selectedPeople and rowData
-        }}
-        styles={peoplePickerStyles}
-        principalTypes={[PrincipalType.User]}
-        defaultSelectedUsers={rowData?.Assigned?.map((val: any) => val.Email)}
-        resolveDelay={1000}
-        disabled={isEdit}
-      />
-    );
+  const handlerAssigneeDetails = (rowData: any) => {
+    if (isEdit) {
+      return (
+        <div style={{ display: "flex", gap: "10px" }}>
+          {rowData?.Assigned?.map((val: any, index: number) => {
+            return (
+              <div
+                key={index}
+                style={{ display: "flex", gap: "5px", alignItems: "center" }}
+              >
+                <Avatar
+                  key={index}
+                  image={`/_layouts/15/userphoto.aspx?size=S&username=${
+                    val?.Email || val.Email
+                  }`}
+                  shape="circle"
+                  size="normal"
+                  // style={{
+                  //   margin: "0 !important",
+                  //   border: "3px solid #fff",
+                  //   width: "25px",
+                  //   height: "25px",
+                  //   marginLeft: rowData?.length > 1 ? "-10px" : "0",
+                  //   // position: "absolute",
+                  //   // left: `${positionLeft ? positionLeft * index : 0}px`,
+                  //   // top: `${positionTop ? positionTop : 0}px`,
+                  //   // zIndex: index,
+                  // }}
+                  label={val?.Name}
+                />
+                <p>{val?.Name}</p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else {
+      return (
+        <PeoplePicker
+          context={props.context}
+          webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+          personSelectionLimit={100}
+          showtooltip={false}
+          ensureUser={true}
+          placeholder={""}
+          onChange={(selectedPeople: any[]) => {
+            handlerQuestionConfigChange(selectedPeople, rowData, "Assigned"); // Pass selectedPeople and rowData
+          }}
+          styles={peoplePickerStyles}
+          principalTypes={[PrincipalType.User]}
+          defaultSelectedUsers={rowData?.Assigned?.map((val: any) => val.Email)}
+          resolveDelay={1000}
+          disabled={isEdit}
+        />
+      );
+    }
   };
 
-  const peopleTask = (rowData: any) => {
-    return (
-      <InputText
-        value={rowData?.TaskName || ""}
-        disabled={isEdit}
-        onChange={(e) => handleChange(e.target.value, rowData, "TaskName")}
-        style={{
-          border: isEdit ? "none" : "",
-        }}
-      />
-    );
+  const handlerTaskDetails = (rowData: any) => {
+    if (isEdit) {
+      return <div>{rowData?.TaskName || ""}</div>;
+    } else {
+      return (
+        <InputText
+          value={rowData?.TaskName || ""}
+          disabled={isEdit}
+          onChange={(e) =>
+            handlerQuestionConfigChange(e.target.value, rowData, "TaskName")
+          }
+          style={{
+            border: isEdit ? "none" : "",
+          }}
+        />
+      );
+    }
   };
+
+  useEffect(() => {
+    handlerGetQUestionConfig();
+    handlerGetForms();
+  }, []);
 
   return (
     <div>
@@ -333,18 +384,17 @@ const HrPersons = (props: any) => {
         <div className={styles.HrEditContainer}>
           <Dropdown
             value={
-              FormsChoice
-                ? FormsChoice?.find(
+              formsValues
+                ? formsValues?.find(
                     (choice: any) => choice.ID === filterkeys.Forms
                   ) || ""
                 : ""
             }
             onChange={(e) => {
-              filterFunc("Forms", e.value.ID);
-              setCurFormID(e.value.ID);
-              console.log(CurFormID);
+              handlerQuestionsFilter(checkPointDetails, "Forms", e.value.ID);
+              setcurrentFormID(e.value.ID);
             }}
-            options={FormsChoice || []}
+            options={formsValues || []}
             optionLabel="name"
             placeholder="Select a Form"
           />
@@ -354,7 +404,11 @@ const HrPersons = (props: any) => {
             value={filterkeys.search || ""}
             onChange={(e) => {
               console.log(e.target.value);
-              filterFunc("search", e.target.value);
+              handlerQuestionsFilter(
+                checkPointDetails,
+                "search",
+                e.target.value
+              );
             }}
           />
           <div className="HRPersonPeopleSearch">
@@ -366,7 +420,11 @@ const HrPersons = (props: any) => {
               ensureUser={true}
               placeholder={"Search HR Persons"}
               onChange={(selectedPeople: any[]) => {
-                filterFunc("people", selectedPeople); // Pass selectedPeople and rowData
+                handlerQuestionsFilter(
+                  checkPointDetails,
+                  "people",
+                  selectedPeople
+                ); // Pass selectedPeople and rowData
               }}
               principalTypes={[PrincipalType.User]}
               defaultSelectedUsers={filterkeys.people}
@@ -397,14 +455,16 @@ const HrPersons = (props: any) => {
             }}
             onClick={() => {
               filterkeys.people = [];
-              filterkeys.Forms = "";
+              filterkeys.Forms = null;
               filterkeys.search = "";
-
-              setfilterData(hrperson);
+              setfilteredcheckPoints([...checkPointDetails]);
             }}
           />
         </div>
-        <DataTable className={styles.HRConfigDataTable} value={[...filterData]}>
+        <DataTable
+          className={styles.HRConfigDataTable}
+          value={[...filteredcheckPoints]}
+        >
           <Column
             field="QuestionTitle"
             header="CheckPoints"
@@ -414,14 +474,14 @@ const HrPersons = (props: any) => {
             className={styles.taskName}
             field="TaskName"
             header="Task Name"
-            body={peopleTask}
+            body={handlerTaskDetails}
           ></Column>
           <Column field="FormTitle" header="Form"></Column>
           <Column
             className={styles.HRPersonsList}
             field="Assigenee"
             header="HR Persons"
-            body={peopletemplate}
+            body={handlerAssigneeDetails}
           ></Column>
         </DataTable>
       </div>
@@ -444,7 +504,7 @@ const HrPersons = (props: any) => {
               backgroundColor: "#233b83",
               border: "none",
             }}
-            onClick={() => AddAssigene()}
+            onClick={() => handlerValidation()}
           />
         </div>
       )}
