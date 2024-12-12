@@ -23,6 +23,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Paginator } from "primereact/paginator";
 import { GCongfig } from "../../../Config/Config";
 import { Checkbox } from "primereact/checkbox";
+import Loader from "./Loader";
 
 interface IPageSync {
   first: number;
@@ -80,7 +81,7 @@ const HrScreen = (props: any): JSX.Element => {
     filteredEmployessResponseDetails,
     setfilteredEmployessResponseDetails,
   ] = useState<any[]>([]);
-
+  const [isLoading, setIsLoading] = useState(false);
   const handlerChangeEmployessResponseDetails = (key: string, value: any) => {
     const curObj: any = { ...tempEmployeeDetails };
     curObj[key] = value;
@@ -330,6 +331,7 @@ const HrScreen = (props: any): JSX.Element => {
 
   // update sp
   const handlerUpdateResponsesToSp: any = async (tempEmployeeDetails: any) => {
+    setIsLoading(true);
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.getById(tempEmployeeDetails.Id)
@@ -340,6 +342,7 @@ const HrScreen = (props: any): JSX.Element => {
       .then(() => {
         setRerender(true);
         setisVisible(false);
+        setIsLoading(false);
         toast.success("Update Successfully", {
           position: "top-right",
           autoClose: 5000,
@@ -381,273 +384,301 @@ const HrScreen = (props: any): JSX.Element => {
 
   return (
     <>
-      <Dialog
-        header="Employee Details"
-        visible={isVisible}
-        style={{ width: "34vw", borderRadius: "4px" }}
-        onHide={() => {
-          if (!isVisible) return;
-          setisVisible(false);
-        }}
-      >
-        <div className={styles.employeeStatusSection}>
-          {employessResponseDetails.some(
-            (e: any) =>
-              (e.Status.key === "Pending" ||
-                e.Status.key === "To be resolved") &&
-              tempEmployeeDetails.Id === e.Id
-          ) ? (
-            <div className="flex align-items-center">
-              <Checkbox
-                inputId="ingredient1"
-                name="status"
-                value={{ key: "Resolved" }}
-                onChange={(e) => {
-                  console.log("Status", e.value.key);
-                  handlerChangeEmployessResponseDetails("Status", e.value.key);
-                }}
-                checked={tempEmployeeDetails?.Status === "Resolved"}
-              />
-              <label htmlFor="ingredient1" className="ml-2">
-                Resolved
-              </label>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div>
+          <Dialog
+            header="Employee Details"
+            visible={isVisible}
+            style={{ width: "34vw", borderRadius: "4px" }}
+            onHide={() => {
+              if (!isVisible) return;
+              setisVisible(false);
+            }}
+          >
+            <div className={styles.employeeStatusSection}>
+              {employessResponseDetails.some(
+                (e: any) =>
+                  (e.Status.key === "Pending" ||
+                    e.Status.key === "To be resolved") &&
+                  tempEmployeeDetails.Id === e.Id
+              ) ? (
+                <div className="flex align-items-center">
+                  <Checkbox
+                    inputId="ingredient1"
+                    name="status"
+                    value={{ key: "Resolved" }}
+                    onChange={(e) => {
+                      const newStatus = e.checked ? "Resolved" : "";
+                      console.log("Status", newStatus);
+                      handlerChangeEmployessResponseDetails(
+                        "Status",
+                        newStatus
+                      );
+                    }}
+                    checked={tempEmployeeDetails?.Status === "Resolved"}
+                  />
+                  <label htmlFor="ingredient1" className="ml-2">
+                    Resolved
+                  </label>
+                </div>
+              ) : (
+                <div>{"Resolved"}</div>
+              )}
             </div>
-          ) : (
-            <div>{"Resolved"}</div>
-          )}
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Employee name</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.Employee.Name}
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Role</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.Role}
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Department</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.Department}
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Email</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.Employee.Email}
-          </div>
-        </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Employee name</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.Employee.Name}
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Role</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.Role}
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Department</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.Department}
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Email</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.Employee.Email}
+              </div>
+            </div>
 
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>SecondaryEmail</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.SecondaryEmail}
-          </div>
-        </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>SecondaryEmail</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.SecondaryEmail}
+              </div>
+            </div>
 
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Task</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.Task}
-          </div>
-        </div>
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Employee Comments</div>
-          <div className={styles.addDialogInput}>
-            {tempEmployeeDetails?.ResponseComments}
-          </div>
-        </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Task</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.Task}
+              </div>
+            </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Employee Comments</div>
+              <div className={styles.addDialogInput}>
+                {tempEmployeeDetails?.ResponseComments}
+              </div>
+            </div>
 
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogHeader}>Comments</div>
-          <div className={styles.addDialogInput}>
-            <InputTextarea
-              placeholder="Enter comments"
-              value={
-                tempEmployeeDetails.Comments ? tempEmployeeDetails.Comments : ""
-              }
-              style={{ resize: "none", width: "100%", height: "100px" }}
-              autoResize={false}
-              onChange={(e) =>
-                handlerChangeEmployessResponseDetails(
-                  "Comments",
-                  e.target.value
-                )
-              }
-            />
-          </div>
-        </div>
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogHeader}>Comments</div>
+              <div className={styles.addDialogInput}>
+                <InputTextarea
+                  placeholder="Enter comments"
+                  value={
+                    tempEmployeeDetails.Comments
+                      ? tempEmployeeDetails.Comments
+                      : ""
+                  }
+                  style={{ resize: "none", width: "100%", height: "100px" }}
+                  disabled={
+                    !employessResponseDetails.some(
+                      (e: any) =>
+                        (e.Status.key === "Pending" ||
+                          e.Status.key === "To be resolved") &&
+                        tempEmployeeDetails.Id === e.Id
+                    )
+                  }
+                  autoResize={false}
+                  onChange={(e) =>
+                    handlerChangeEmployessResponseDetails(
+                      "Comments",
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+            </div>
 
-        <div className={styles.addDialog}>
-          <div className={styles.addDialogBtnContainer}>
-            <Button
-              label="Cancel"
-              style={{
-                height: "36px",
-                backgroundColor: "#cfcfcf",
-                color: "#000",
-                border: "none",
-                width: "100px",
-              }}
-              onClick={() => setisVisible(false)}
-            />
-            {employessResponseDetails.some(
-              (e: any) =>
-                (e.Status.key === "Pending" ||
-                  e.Status.key === "To be resolved") &&
-                tempEmployeeDetails.Id === e.Id
-            ) ? (
-              <Button
-                label="Save"
-                style={{
-                  height: "36px",
-                  color: "#ffff",
-                  backgroundColor: "#233b83",
-                  border: "none",
-                  width: "100px",
-                }}
-                onClick={() => handlerUpdateResponsesToSp(tempEmployeeDetails)}
+            <div className={styles.addDialog}>
+              <div className={styles.addDialogBtnContainer}>
+                <Button
+                  label="Cancel"
+                  style={{
+                    height: "36px",
+                    backgroundColor: "#cfcfcf",
+                    color: "#000",
+                    border: "none",
+                    width: "100px",
+                  }}
+                  onClick={() => setisVisible(false)}
+                />
+                {employessResponseDetails.some(
+                  (e: any) =>
+                    (e.Status.key === "Pending" ||
+                      e.Status.key === "To be resolved") &&
+                    tempEmployeeDetails.Id === e.Id
+                ) && tempEmployeeDetails.Status === "Resolved" ? (
+                  <Button
+                    label="Save"
+                    style={{
+                      height: "36px",
+                      color: "#ffff",
+                      backgroundColor: "#233b83",
+                      border: "none",
+                      width: "100px",
+                    }}
+                    onClick={() =>
+                      handlerUpdateResponsesToSp(tempEmployeeDetails)
+                    }
+                  />
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+          </Dialog>
+
+          <div className={styles.HrPersonContainer}>
+            <div className={styles.navBar}>
+              <h2>Onboarding App</h2>
+            </div>
+            <div className={styles.HRPersonHeaderFilters}>
+              <h2 className={styles.pageTitle}>Task details</h2>
+              <div className={styles.HRPersonFilters}>
+                <Dropdown
+                  className={`w-full md:w-14rem ${styles.filterDepartment}`}
+                  value={
+                    filterKeys.dept
+                      ? departmentsDetails?.find(
+                          (choice: any) => choice.key === filterKeys.dept
+                        ) || null
+                      : null
+                  }
+                  onChange={(e) => {
+                    //   const updatedFilDep = { ...filDrp, dropDown: e.value.key };
+                    handlerFilterDetails(
+                      [...employessResponseDetails],
+                      "dept",
+                      e.value.key
+                    ); // Call filter function with the updated ListItems
+                  }}
+                  style={{ width: "100%" }}
+                  options={departmentsDetails || []}
+                  optionLabel="name"
+                  placeholder="Select a Department"
+                />
+
+                <Dropdown
+                  className={`${styles.filterStatus} w-full md:w-14rem`}
+                  value={
+                    filterKeys.status
+                      ? statusDetails?.filter(
+                          (choice: any) => choice.key === filterKeys.status
+                        )?.[0]
+                      : null
+                  } // Use `find` instead of `filter`
+                  onChange={(e) => {
+                    handlerFilterDetails(
+                      [...employessResponseDetails],
+                      "status",
+                      e.value.key
+                    );
+                  }}
+                  options={statusDetails || []}
+                  optionLabel="name"
+                  placeholder="Select a Status"
+                />
+
+                <InputText
+                  className={styles.filterOverAll}
+                  placeholder="Search"
+                  value={filterKeys.search}
+                  onChange={(e) => {
+                    handlerFilterDetails(
+                      [...employessResponseDetails],
+                      "search",
+                      e.target.value
+                    );
+                  }}
+                />
+
+                <i
+                  className="pi pi-refresh"
+                  style={{
+                    backgroundColor: "#223b83",
+                    padding: 10,
+                    borderRadius: 4,
+                    color: "#fff",
+                  }}
+                  onClick={() => {
+                    filData.dept = "";
+                    filData.status = "";
+                    filData.search = "";
+                    setfilterKeys({ ...filData });
+                    setfilteredEmployessResponseDetails(
+                      employessResponseDetails
+                    );
+                  }}
+                />
+              </div>
+            </div>
+            <DataTable
+              value={filteredEmployessResponseDetails?.slice(
+                pageNationRows.first,
+                pageNationRows.first + pageNationRows.rows
+              )}
+              className={styles.HRPersonDashboard}
+            >
+              <Column field="Task" header="Task" />
+              <Column
+                field="QuestionTitle"
+                header="To"
+                body={handlerEmployeeDetails}
               />
-            ) : (
-              ""
-            )}
-          </div>
-        </div>
-      </Dialog>
-
-      <div className={styles.HrPersonContainer}>
-        <div className={styles.navBar}>
-          <h2>Onboarding App</h2>
-        </div>
-        <div className={styles.HRPersonHeaderFilters}>
-          <h2 className={styles.pageTitle}>Task details</h2>
-          <div className={styles.HRPersonFilters}>
-            <Dropdown
-              className={`w-full md:w-14rem ${styles.filterDepartment}`}
-              value={
-                filterKeys.dept
-                  ? departmentsDetails?.find(
-                      (choice: any) => choice.key === filterKeys.dept
-                    ) || null
-                  : null
-              }
-              onChange={(e) => {
-                //   const updatedFilDep = { ...filDrp, dropDown: e.value.key };
-                handlerFilterDetails(
-                  [...employessResponseDetails],
-                  "dept",
-                  e.value.key
-                ); // Call filter function with the updated ListItems
-              }}
-              style={{ width: "100%" }}
-              options={departmentsDetails || []}
-              optionLabel="name"
-              placeholder="Select a Department"
-            />
-
-            <Dropdown
-              className={`${styles.filterStatus} w-full md:w-14rem`}
-              value={
-                filterKeys.status
-                  ? statusDetails?.filter(
-                      (choice: any) => choice.key === filterKeys.status
-                    )?.[0]
-                  : null
-              } // Use `find` instead of `filter`
-              onChange={(e) => {
-                handlerFilterDetails(
-                  [...employessResponseDetails],
-                  "status",
-                  e.value.key
-                );
-              }}
-              options={statusDetails || []}
-              optionLabel="name"
-              placeholder="Select a Status"
-            />
-
-            <InputText
-              className={styles.filterOverAll}
-              placeholder="Search"
-              value={filterKeys.search}
-              onChange={(e) => {
-                handlerFilterDetails(
-                  [...employessResponseDetails],
-                  "search",
-                  e.target.value
-                );
-              }}
-            />
-
-            <i
-              className="pi pi-refresh"
-              style={{
-                backgroundColor: "#223b83",
-                padding: 10,
-                borderRadius: 4,
-                color: "#fff",
-              }}
-              onClick={() => {
-                filData.dept = "";
-                filData.status = "";
-                filData.search = "";
-                setfilterKeys({ ...filData });
-                setfilteredEmployessResponseDetails(employessResponseDetails);
-              }}
+              <Column field="Role" header="Role" style={{ width: "15%" }} />
+              <Column field="Department" header="Department" />
+              <Column
+                field="Status"
+                header="Status"
+                body={handlerStatusDetails}
+              />
+              <Column
+                field="Action"
+                header="Action"
+                body={(Rowdata: any) => handlerActionIcons(Rowdata)}
+              />{" "}
+              *
+            </DataTable>
+            <Paginator
+              first={pageNationRows.first}
+              rows={pageNationRows.rows}
+              totalRecords={employessResponseDetails.length}
+              // rowsPerPageOptions={[10, 20, 30]}
+              onPageChange={onPageChange}
             />
           </div>
-        </div>
-        <DataTable
-          value={filteredEmployessResponseDetails?.slice(
-            pageNationRows.first,
-            pageNationRows.first + pageNationRows.rows
-          )}
-          className={styles.HRPersonDashboard}
-        >
-          <Column field="Task" header="Task" />
-          <Column
-            field="QuestionTitle"
-            header="To"
-            body={handlerEmployeeDetails}
+
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
           />
-          <Column field="Role" header="Role" style={{ width: "15%" }} />
-          <Column field="Department" header="Department" />
-          <Column field="Status" header="Status" body={handlerStatusDetails} />
-          <Column
-            field="Action"
-            header="Action"
-            body={(Rowdata: any) => handlerActionIcons(Rowdata)}
-          />{" "}
-          *
-        </DataTable>
-        <Paginator
-          first={pageNationRows.first}
-          rows={pageNationRows.rows}
-          totalRecords={employessResponseDetails.length}
-          // rowsPerPageOptions={[10, 20, 30]}
-          onPageChange={onPageChange}
-        />
-      </div>
 
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
-
-      {/* Same as */}
-      <ToastContainer />
+          {/* Same as */}
+          <ToastContainer />
+        </div>
+      )}
     </>
   );
 };

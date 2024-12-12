@@ -24,7 +24,7 @@ import { GCongfig } from "../../../Config/Config";
 import { IQuestionDatas } from "../../../Interface/Interface";
 import { Dropdown } from "primereact/dropdown";
 import { Avatar } from "primereact/avatar";
-
+import Loader from "./Loader";
 interface IFilterKeys {
   people: string[];
   search: string;
@@ -38,7 +38,7 @@ const HrPersons = (props: any) => {
     search: "",
     Forms: "",
   };
-
+  const [isLoading, setIsLoading] = useState(false);
   const [checkPointDetails, setcheckPointDetails] = useState<any>([]);
   const [isEdit, setisEdit] = useState(true);
   const [filterkeys, setfilterkeys] = useState<IFilterKeys>(_fkeys);
@@ -204,7 +204,7 @@ const HrPersons = (props: any) => {
     rowData: any,
     field: string
   ) => {
-    let updatedQuestions: any = await checkPointDetails.map((question: any) =>
+    let updatedQuestions: any = await filteredcheckPoints.map((question: any) =>
       question.Id === rowData.Id
         ? {
             ...question,
@@ -226,55 +226,53 @@ const HrPersons = (props: any) => {
   const handlerValidation = async () => {
     let err = false;
     let errmsg = "";
-    try {
-      if (
-        checkPointDetails.some(
-          (_item: any) =>
-            Array.isArray(_item.Assigned) && _item.Assigned.length === 0
-        )
-      ) {
-        err = true;
-        errmsg = "Select Answer";
-      }
-      console.log(err, errmsg);
-      debugger;
-      for (let i = 0; i < checkPointDetails.length; i++) {
-        console.log("I value", i);
 
-        const assignedValues = checkPointDetails[i]?.Assigned;
+    // Validation
+    if (
+      filteredcheckPoints.some(
+        (_item: any) =>
+          (Array.isArray(_item.Assigned) && _item.Assigned.length === 0) ||
+          !_item.TaskName
+      )
+    ) {
+      err = true;
+      errmsg = "Select Answer";
+      handlershowError(errmsg);
+      return;
+    }
 
-        if (!assignedValues || assignedValues.length === 0) {
-          handlershowError(
-            `Assigned field is empty for task: ${
-              checkPointDetails[i]?.TaskName || "Unknown Task"
-            }`
-          );
-          return;
+    if (!err) {
+      setIsLoading(true);
+      // Create an array of promises using map
+      const updatePromises = filteredcheckPoints.map(
+        async (checkpoint: any) => {
+          const assignedValues = checkpoint?.Assigned;
+
+          if (checkpoint?.Id) {
+            return sp.web.lists
+              .getByTitle(GCongfig.ListName.CheckpointConfig)
+              .items.getById(checkpoint.Id)
+              .update({
+                AssignedId: {
+                  results: assignedValues.map((val: any) => val.id),
+                },
+                TaskName: checkpoint.TaskName,
+              })
+              .catch((e: any) => {
+                console.log("Error updating checkpoint:", checkpoint.Id, e);
+              });
+          }
         }
+      );
 
-        if (checkPointDetails[i]?.Id) {
-          await sp.web.lists
-            .getByTitle(GCongfig.ListName.CheckpointConfig)
-            .items.getById(checkPointDetails[i].Id)
-            .update({
-              AssignedId: {
-                results: assignedValues.map((val: any) => val.id),
-              },
-              TaskName: checkPointDetails[i].TaskName,
-            })
-            .then((res) => {
-              console.log(res);
-            });
-        }
-      }
-      handlershowSuccess("Submitted successfully");
+      await Promise.all(updatePromises);
 
-      console.log("Questions saved or updated successfully to SharePoint!");
+      await handlershowSuccess("Submitted successfully");
       filterkeys.people = [];
       filterkeys.Forms = null;
       filterkeys.search = "";
-    } catch (error) {
-      console.error("Error saving or updating questions:", error);
+      await handlerGetQUestionConfig();
+      await setIsLoading(false);
     }
   };
 
@@ -295,17 +293,6 @@ const HrPersons = (props: any) => {
                   }`}
                   shape="circle"
                   size="normal"
-                  // style={{
-                  //   margin: "0 !important",
-                  //   border: "3px solid #fff",
-                  //   width: "25px",
-                  //   height: "25px",
-                  //   marginLeft: rowData?.length > 1 ? "-10px" : "0",
-                  //   // position: "absolute",
-                  //   // left: `${positionLeft ? positionLeft * index : 0}px`,
-                  //   // top: `${positionTop ? positionTop : 0}px`,
-                  //   // zIndex: index,
-                  // }}
                   label={val?.Name}
                 />
                 <p>{val?.Name}</p>
@@ -361,152 +348,162 @@ const HrPersons = (props: any) => {
   }, []);
 
   return (
-    <div>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
-
-      {/* Same as */}
-      <ToastContainer />
-      <div className={styles.card}>
-        <div className={styles.HrEditContainer}>
-          <Dropdown
-            value={
-              formsValues
-                ? formsValues?.find(
-                    (choice: any) => choice.ID === filterkeys.Forms
-                  ) || ""
-                : ""
-            }
-            onChange={(e) => {
-              handlerQuestionsFilter(checkPointDetails, "Forms", e.value.ID);
-              setcurrentFormID(e.value.ID);
-            }}
-            options={formsValues || []}
-            optionLabel="name"
-            placeholder="Select a Form"
+    <>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
           />
 
-          <InputText
-            placeholder={"Search"}
-            value={filterkeys.search || ""}
-            onChange={(e) => {
-              console.log(e.target.value);
-              handlerQuestionsFilter(
-                checkPointDetails,
-                "search",
-                e.target.value
-              );
-            }}
-          />
-          <div className="HRPersonPeopleSearch">
-            <PeoplePicker
-              context={props.context}
-              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-              personSelectionLimit={100}
-              showtooltip={false}
-              ensureUser={true}
-              placeholder={"Search HR Persons"}
-              onChange={(selectedPeople: any[]) => {
-                handlerQuestionsFilter(
-                  checkPointDetails,
-                  "people",
-                  selectedPeople
-                ); // Pass selectedPeople and rowData
-              }}
-              principalTypes={[PrincipalType.User]}
-              defaultSelectedUsers={filterkeys.people}
-              resolveDelay={1000}
-            />
+          {/* Same as */}
+          <ToastContainer />
+          <div className={styles.card}>
+            <div className={styles.HrEditContainer}>
+              <Dropdown
+                value={
+                  formsValues
+                    ? formsValues?.find(
+                        (choice: any) => choice.ID === filterkeys.Forms
+                      ) || ""
+                    : ""
+                }
+                onChange={(e) => {
+                  handlerQuestionsFilter(
+                    checkPointDetails,
+                    "Forms",
+                    e.value.ID
+                  );
+                  setcurrentFormID(e.value.ID);
+                }}
+                options={formsValues || []}
+                optionLabel="name"
+                placeholder="Select a Form"
+              />
+
+              <InputText
+                placeholder={"Search"}
+                value={filterkeys.search || ""}
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  handlerQuestionsFilter(
+                    checkPointDetails,
+                    "search",
+                    e.target.value
+                  );
+                }}
+              />
+              <div className="HRPersonPeopleSearch">
+                <PeoplePicker
+                  context={props.context}
+                  webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                  personSelectionLimit={100}
+                  showtooltip={false}
+                  ensureUser={true}
+                  placeholder={"Search HR Persons"}
+                  onChange={(selectedPeople: any[]) => {
+                    handlerQuestionsFilter(
+                      checkPointDetails,
+                      "people",
+                      selectedPeople
+                    ); // Pass selectedPeople and rowData
+                  }}
+                  principalTypes={[PrincipalType.User]}
+                  defaultSelectedUsers={filterkeys.people}
+                  resolveDelay={1000}
+                />
+              </div>
+
+              <Button
+                label={isEdit ? "Edit" : "Cancel"}
+                outlined
+                icon="pi pi-pencil"
+                style={{
+                  color: "#ffff",
+                  backgroundColor: "#233b83",
+                  border: "none",
+                }}
+                onClick={() => {
+                  setisEdit(!isEdit);
+                }}
+              />
+              <i
+                className="pi pi-refresh"
+                style={{
+                  backgroundColor: "#223b83",
+                  padding: 10,
+                  borderRadius: 4,
+                  color: "#fff",
+                }}
+                onClick={() => {
+                  filterkeys.people = [];
+                  filterkeys.Forms = null;
+                  filterkeys.search = "";
+                  setfilteredcheckPoints([...checkPointDetails]);
+                }}
+              />
+            </div>
+            <DataTable
+              className={styles.HRConfigDataTable}
+              value={[...filteredcheckPoints]}
+            >
+              <Column
+                field="QuestionTitle"
+                header="CheckPoints"
+                className={styles.questionsTD}
+              ></Column>
+              <Column
+                className={styles.taskName}
+                field="TaskName"
+                header="Task Name"
+                body={handlerTaskDetails}
+              ></Column>
+              <Column field="FormTitle" header="Form"></Column>
+              <Column
+                className={styles.HRPersonsList}
+                field="Assigenee"
+                header="HR Persons"
+                body={handlerAssigneeDetails}
+              ></Column>
+            </DataTable>
           </div>
-
-          <Button
-            label={isEdit ? "Edit" : "Cancel"}
-            outlined
-            icon="pi pi-pencil"
-            style={{
-              color: "#ffff",
-              backgroundColor: "#233b83",
-              border: "none",
-            }}
-            onClick={() => {
-              setisEdit(!isEdit);
-            }}
-          />
-          <i
-            className="pi pi-refresh"
-            style={{
-              backgroundColor: "#223b83",
-              padding: 10,
-              borderRadius: 4,
-              color: "#fff",
-            }}
-            onClick={() => {
-              filterkeys.people = [];
-              filterkeys.Forms = null;
-              filterkeys.search = "";
-              setfilteredcheckPoints([...checkPointDetails]);
-            }}
-          />
-        </div>
-        <DataTable
-          className={styles.HRConfigDataTable}
-          value={[...filteredcheckPoints]}
-        >
-          <Column
-            field="QuestionTitle"
-            header="CheckPoints"
-            className={styles.questionsTD}
-          ></Column>
-          <Column
-            className={styles.taskName}
-            field="TaskName"
-            header="Task Name"
-            body={handlerTaskDetails}
-          ></Column>
-          <Column field="FormTitle" header="Form"></Column>
-          <Column
-            className={styles.HRPersonsList}
-            field="Assigenee"
-            header="HR Persons"
-            body={handlerAssigneeDetails}
-          ></Column>
-        </DataTable>
-      </div>
-      {HrPersons.length > 0 && (
-        <div className={styles.ConfigBtns}>
-          <Button
-            label="Cancel"
-            style={{
-              backgroundColor: "#cfcfcf",
-              color: "#000",
-              border: "none",
-            }}
-            disabled={isEdit}
-          />
-          <Button
-            label="Save"
-            disabled={isEdit}
-            style={{
-              color: "#ffff",
-              backgroundColor: "#233b83",
-              border: "none",
-            }}
-            onClick={() => handlerValidation()}
-          />
+          {HrPersons.length > 0 && (
+            <div className={styles.ConfigBtns}>
+              <Button
+                label="Cancel"
+                style={{
+                  backgroundColor: "#cfcfcf",
+                  color: "#000",
+                  border: "none",
+                }}
+                disabled={isEdit}
+              />
+              <Button
+                label="Save"
+                disabled={isEdit}
+                style={{
+                  color: "#ffff",
+                  backgroundColor: "#233b83",
+                  border: "none",
+                }}
+                onClick={() => handlerValidation()}
+              />
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 export default HrPersons;
