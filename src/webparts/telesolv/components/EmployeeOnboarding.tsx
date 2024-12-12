@@ -112,7 +112,7 @@ const Onboarding = (props: any) => {
       })
       .catch((err) => console.error("Error fetching choices:", err));
   };
-
+  //new code
   const handlerEmployeeOnboardingDetails = async (formattedQuestions: any) => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeOnboarding)
