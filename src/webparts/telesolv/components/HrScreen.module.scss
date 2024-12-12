@@ -7,7 +7,8 @@
 .HrPersonContainer {
     padding: 20px;
     min-height: 76vh;
-    background-image: url("../assets//Images//EmployeeFormBG.jpg");
+    // background-image: url("../assets//Images//EmployeeFormBG.jpg");
+    background: radial-gradient(circle, rgba(226, 215, 251, 1) 0%, rgba(218, 235, 254, 1) 100%);
     .HRPersonHeaderFilters {
         display: flex;
         gap: 8px;

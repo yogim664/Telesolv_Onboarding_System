@@ -19,7 +19,8 @@
     height: 83vh;
     overflow: hidden;
     padding: 16px;
-    background: url("../assets//Images//EmployeeFormBG.jpg");
+    // background: url("../assets//Images//EmployeeFormBG.jpg");
+    background: radial-gradient(circle, rgba(226, 215, 251, 1) 0%, rgba(218, 235, 254, 1) 100%);
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -37,6 +38,7 @@
         .questionInputSection {
             height: 52vh;
             overflow: auto !important;
+            margin: 12px 0;
         }
     }
 }

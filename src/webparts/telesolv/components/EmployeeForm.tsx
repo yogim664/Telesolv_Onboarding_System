@@ -273,6 +273,13 @@ const EmployeeForm = (props: any): JSX.Element => {
         <div className={styles.Bgstyle}>
           <div className={styles.EmployeeAnsContainer}>
             <div className={styles.EmployeeAnsContainerheader}>
+              <div className={styles.formGuide}>
+                <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
+                <h4>
+                  Fill in the check points below to get started with your
+                  onboarding process
+                </h4>
+              </div>
               <div className={styles.userGreetingSection}>
                 <div className={styles.userGreeting}>
                   <Avatar
@@ -284,13 +291,6 @@ const EmployeeForm = (props: any): JSX.Element => {
                   />
                   {`Welcome on board ${curUserName.Name} !`}
                 </div>
-              </div>
-              <div className={styles.formGuide}>
-                <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
-                <h4>
-                  Fill in the check points below to get started with your
-                  onboarding process
-                </h4>
               </div>
             </div>
             <div className={styles.AnswerPlayground}>
