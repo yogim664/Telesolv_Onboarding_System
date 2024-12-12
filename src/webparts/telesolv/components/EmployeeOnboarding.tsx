@@ -32,6 +32,7 @@ import {
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Dropdown } from "primereact/dropdown";
 import { GCongfig } from "../../../Config/Config";
+import Loader from "./Loader";
 
 interface IPageSync {
   first: number;
@@ -55,7 +56,7 @@ const Onboarding = (props: any) => {
     search: "",
     dept: "",
   };
-
+  const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setisVisible] = useState(false);
   const [isUpdate, setisUpdate] = useState(false);
   const [EmployeeOnboardingDetails, setEmployeeOnboardingDetails] =
@@ -482,7 +483,7 @@ const Onboarding = (props: any) => {
   // Post into list SP
   const handlerSaveEmployeeDetailsToSP = async (): Promise<void> => {
     //EmployeeOnboarding
-
+    setIsLoading(true);
     try {
       if (isUpdate) {
         debugger;
@@ -611,23 +612,28 @@ const Onboarding = (props: any) => {
                     });
                 })
               );
-
-              console.log("Employee responses saved successfully.");
-              await handlerGetQuestionDetails();
-              toast.success("Employee add Successfully", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Bounce,
-              });
             } catch (err) {
               console.error("Error saving employee responses:", err);
             }
+          })
+          .then(async (eve) => {
+            console.log("Employee responses saved successfully.");
+            await handlerGetQuestionDetails();
+            await setisVisible(false);
+            await setIsLoading(false);
+          })
+          .then(async (eve) => {
+            await toast.success("Employee add Successfully", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+              transition: Bounce,
+            });
           })
           .catch((err: any) => {
             console.error("Error during the initial promise:", err);
@@ -635,7 +641,7 @@ const Onboarding = (props: any) => {
       }
 
       // fetchQuestions();
-      setisVisible(false);
+
       console.log("Questions saved successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving questions:", error);
@@ -678,7 +684,9 @@ const Onboarding = (props: any) => {
 
   return (
     <>
-      {showResponseView ? (
+      {isLoading ? (
+        <Loader />
+      ) : showResponseView ? (
         <EmployeeResponseView
           setShowResponseView={setShowResponseView}
           setselectedEmployeeDetails={selectedEmployeeDetails}
