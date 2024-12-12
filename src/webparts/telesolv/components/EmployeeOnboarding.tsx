@@ -88,6 +88,7 @@ const Onboarding = (props: any) => {
         EmployeeTitle: "",
       },
       Forms: "",
+      index: null,
       Role: "",
       Department: { key: "", name: "" },
       Email: "",
@@ -154,11 +155,6 @@ const Onboarding = (props: any) => {
               ).length
                 ? "Pending"
                 : "Completed",
-            //  isResponsed:/* formattedQuestions.some((fQues: any) => {
-            // return (
-            //   fQues.Status !== "Pending" &&
-            //   fQues.Employee.EmployeeId === item.Employee.ID
-            // );*/
 
             isResponsed:
               formattedQuestions.filter(
@@ -374,7 +370,6 @@ const Onboarding = (props: any) => {
       .items.getById(id)
       .delete()
       .then(() => {
-        debugger;
         const afterDelete = filteredEmployeeOnboardingDetails.filter(
           (e: any) => e.Id !== id
         );
@@ -421,12 +416,17 @@ const Onboarding = (props: any) => {
         {!Rowdata.isResponsed ? (
           <i
             className="pi pi-pencil"
-            style={{ fontSize: "1.25rem", color: "#233b83" }}
+            style={{
+              fontSize: "1.25rem",
+              color: "#233b83",
+              display: Rowdata.Status === "Completed" ? "none" : "flex",
+            }}
             onClick={() => {
               setisUpdate(true);
               setisVisible(true);
               handleFormQuestions(Rowdata.Forms);
               settempEmployeeOnboardingDetails({ ...Rowdata });
+              console.log(Rowdata);
             }}
           />
         ) : null}
@@ -434,7 +434,11 @@ const Onboarding = (props: any) => {
         {!Rowdata.isResponsed ? (
           <i
             className="pi pi-trash"
-            style={{ fontSize: "1.25rem", color: "red" }}
+            style={{
+              fontSize: "1.25rem",
+              color: "red",
+              display: Rowdata.Status === "Completed" ? "none" : "flex",
+            }}
             onClick={() => {
               console.log("Worked", index);
               showConfirmationPopup(Rowdata.Id, index);
@@ -521,13 +525,17 @@ const Onboarding = (props: any) => {
             Status: tempEmployeeOnboardingDetails.Status,
           })
           .then(async () => {
-            const updatedEmployeeOnboarding = [...EmployeeOnboardingDetails];
+            const updatedEmployeeOnboarding = [
+              ...filteredEmployeeOnboardingDetails,
+            ];
             updatedEmployeeOnboarding[tempEmployeeOnboardingDetails.index] = {
               ...tempEmployeeOnboardingDetails,
             };
-            setfilteredEmployeeOnboardingDetails(updatedEmployeeOnboarding);
-            setEmployeeOnboardingDetails(updatedEmployeeOnboarding);
-            debugger;
+            setfilteredEmployeeOnboardingDetails([
+              ...updatedEmployeeOnboarding,
+            ]);
+
+            //setEmployeeOnboardingDetails([...updatedEmployeeOnboarding]);
             console.log(
               "Updated Employee Onboarding:",
               updatedEmployeeOnboarding
@@ -539,18 +547,16 @@ const Onboarding = (props: any) => {
               .expand("Employee")
               .get()
               .then(async (_items: any) => {
-                const filteredItems = _items.filter(
-                  (item: any) =>
-                    (item?.Employee?.EMail?.toLowerCase() ===
-                      tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase() &&
-                      item?.Status === "To be resolved") ||
-                    item?.Status === "Pending"
-                );
-
                 if (tempEmployeeOnboardingDetails.Status === "Completed") {
-                  console.log(filteredItems, "Filtered Items");
+                  debugger;
+                  const filteredItems = _items.filter(
+                    (item: any) =>
+                      item?.Employee?.EMail?.toLowerCase() ===
+                        tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase() &&
+                      (item?.Status === "To be resolved" ||
+                        item?.Status === "Pending")
+                  );
 
-                  // Create an array of promises for updates
                   const updatePromises = filteredItems.map((_Empitem: any) =>
                     sp.web.lists
                       .getByTitle(GCongfig.ListName.EmployeeResponse)
@@ -564,9 +570,13 @@ const Onboarding = (props: any) => {
 
                   // Wait for all promises to complete
                   Promise.all(updatePromises)
-                    .then(() => {
+                    .then(async () => {
                       console.log("All updates completed successfully!");
-                      setisVisible(false);
+                      // await handlerGetQuestionDetails();
+
+                      await setisVisible(false);
+                      await setIsLoading(false);
+
                       setIsLoading(false);
                       toast.success("Employee Updated Successfully", {
                         position: "top-right",
@@ -1004,7 +1014,6 @@ const Onboarding = (props: any) => {
                       onChange={(e) => {
                         setcurrentFormID(e.value.ID);
                         handleFormQuestions(e.value.ID);
-                        debugger;
                       }}
                       disabled={isUpdate}
                       options={formsDetails || []}
@@ -1013,11 +1022,23 @@ const Onboarding = (props: any) => {
                       optionLabel="name"
                       placeholder="Select a Form"
                     />
-                    {formQuestionsDetails.length === 0 && (
+                    {/* {formQuestionsDetails.length === 0 && (
                       <div className={styles.addEmpInfo}>
                         This form have no questions
                       </div>
-                    )}
+                    )} */}
+                    {formQuestionsDetails.length === 0 ? (
+                      <div className={styles.addEmpInfo}>
+                        This form has no questions.
+                      </div>
+                    ) : formQuestionsDetails.some(
+                        (item: any) =>
+                          !item.Assigned || item.Assigned.length === 0
+                      ) ? (
+                      <div className={styles.addEmpInfo}>
+                        No HR response has been assigned to this form.
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
