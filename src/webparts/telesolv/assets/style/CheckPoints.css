@@ -14,10 +14,10 @@
 }
 
 .question-block {
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-    padding: 10px;
-    border-radius: 4px;
-    margin: 10px 0px;
+    box-shadow: -1px -2px 18px -1px #c6d4ff;
+    padding: 8px;
+    border-radius: 6px;
+    margin: 12px;
 }
 
 .p-tabview .p-tabview-panels {

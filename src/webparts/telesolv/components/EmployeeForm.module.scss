@@ -58,42 +58,71 @@
     }
 }
 
-.EmployeeAnsContainerheader {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px 10px;
+.EmployeeAnsContainerheaderConatiner {
     width: 90%;
     backdrop-filter: blur(15px);
     box-shadow: 0px 0px 20px rgba(227, 228, 237, 0.35);
     border: 2px solid rgba(255, 255, 255, 0.18);
     border-radius: 8px;
     margin: 12px auto;
-    background: #268fff26;
-    p {
+    background: #ffffff61;
+    .EmployeeAnsContainerheader {
         display: flex;
-        font-size: 20px;
-        font-weight: 600;
-        font-family: interRegular;
-    }
-    span {
-        font-size: 16px;
-        font-family: interRegular;
-    }
-    padding: 10px;
-    border-radius: 6px 6px 0px 0px;
-    .formGuide {
-        color: #233b83;
-        h2,
-        h4 {
-            margin: 12px 0;
+        justify-content: space-between;
+        p {
+            display: flex;
+            font-size: 20px;
+            font-weight: 600;
+            font-family: interRegular;
+        }
+        span {
+            font-size: 16px;
+            font-family: interRegular;
+        }
+        padding: 8px;
+        border-radius: 6px 6px 0px 0px;
+        .formGuide {
+            color: #233b83;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            h2,
+            h4 {
+                margin: 12px 0;
+            }
         }
     }
 }
 
 .ProgressBar {
-    margin: 16px auto 0;
-    width: 70%;
-    // background: #233b83;
+    margin: 8px;
+    display: flex;
+    width: 50%;
+    gap: 12px;
+    .completedProgress {
+        height: 44px;
+        background-color: #c6d4ff;
+        border-radius: 10px;
+        min-width: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #233b83;
+        font-weight: 600;
+        box-shadow: -1px -2px 18px -1px #233b8327;
+    }
+    .pendingProgress {
+        height: 44px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #233b83;
+        font-weight: 600;
+        min-width: 32px;
+        box-shadow: -1px -2px 18px -1px #233b8327;
+    }
 }
 
 .EmployeeQuestionContainer {
@@ -202,12 +231,12 @@
     .userGreeting {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 8px;
         border-radius: 6px;
         padding: 12px;
         font-weight: 300;
-        font-size: 24px;
-        color: #4a4a4a;
+        font-size: 20px;
+        color: #233b83;
     }
     .userAvatar {
         width: 46px;
