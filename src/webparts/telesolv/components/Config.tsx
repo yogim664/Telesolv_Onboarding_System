@@ -123,7 +123,7 @@ const Config = (props: any) => {
 
   const handlerOptionChange = (qIndex: number, aIndex: number) => {
     if (!changeOption.length) {
-      toast.warn("Please enter value", {
+      toast.error("Please enter value", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -136,24 +136,52 @@ const Config = (props: any) => {
       });
       return;
     }
-    // const tempQuestions = questions.map(
-    //   (question: any, index: number) => index === qIndex
-    // );
 
-    const updatedQuestions = questions.map((question: any, index: number) =>
-      index === qIndex
-        ? {
-            ...question,
-            Options: question.Options.map((option: any, oIndex: number) =>
-              oIndex === aIndex
-                ? { ...option, key: changeOption, name: changeOption }
-                : option
-            ),
-          }
-        : question
+    const tempQuestions = filteredQuestions.filter(
+      (question: any, index: number) => index === qIndex
     );
 
-    setfilteredQuestions(updatedQuestions);
+    if (tempQuestions.length === 0) {
+      return false;
+    }
+
+    const result = tempQuestions[0].Options.some(
+      (option: any, oIndex: number) =>
+        oIndex === aIndex &&
+        option.key.toLowerCase() === changeOption.toLowerCase()
+    );
+    console.log(result);
+
+    if (!result) {
+      toast.error("Please enter valid option", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+      return;
+    }
+
+    const updatedQuestions = filteredQuestions.map(
+      (question: any, index: number) =>
+        index === qIndex
+          ? {
+              ...question,
+              Options: question.Options.map((option: any, oIndex: number) =>
+                oIndex === aIndex
+                  ? { ...option, key: changeOption, name: changeOption }
+                  : option
+              ),
+            }
+          : question
+    );
+
+    setfilteredQuestions([...updatedQuestions]);
     setselectedOption({
       qIndex: null,
       aIndex: null,
@@ -166,7 +194,7 @@ const Config = (props: any) => {
     const TempQues = filteredQuestions.filter(
       (_item: any) =>
         !_item.isDelete &&
-        _item.Form === currentFormID &&
+        //  _item.Form === currentFormID &&
         _item.QuestionNo !== 10000
     );
     const isEmpty = TempQues.length === 0;
@@ -294,7 +322,31 @@ const Config = (props: any) => {
   };
 
   const handlerAddNewOption = (questionId: any) => {
-    const updatedQuestions: any = questions.map(
+    //   const tempQuestions = filteredQuestions.filter(
+    //     (question: any, index: number) => index === questionId
+    //   );
+
+    // const result = tempQuestions[0].Options.some(
+    //   (option: any, oIndex: number) =>
+    //     option.key.toLowerCase() === changeOption.toLowerCase()
+    // );
+
+    // if (!result && tempQuestions[0].Options > 0) {
+    //   toast.error("Please enter valid option", {
+    //     position: "top-right",
+    //     autoClose: 5000,
+    //     hideProgressBar: false,
+    //     closeOnClick: true,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //     progress: undefined,
+    //     theme: "light",
+    //     transition: Bounce,
+    //   });
+    //   return;
+    // }
+
+    const updatedQuestions: any = filteredQuestions.map(
       (question: any, index: number) =>
         index === questionId
           ? {
@@ -306,8 +358,8 @@ const Config = (props: any) => {
             }
           : question
     );
-    setquestions(updatedQuestions);
-    setfilteredQuestions(updatedQuestions);
+    //setquestions([...updatedQuestions]);
+    setfilteredQuestions([...updatedQuestions]);
     setnewOptionValue("");
     setSelectedQuestionId(null); // Hide the input container
   };
