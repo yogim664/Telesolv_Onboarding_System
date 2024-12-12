@@ -154,11 +154,31 @@ const Onboarding = (props: any) => {
               ).length
                 ? "Pending"
                 : "Completed",
+            //  isResponsed:/* formattedQuestions.some((fQues: any) => {
+            // return (
+            //   fQues.Status !== "Pending" &&
+            //   fQues.Employee.EmployeeId === item.Employee.ID
+            // );*/
+
+            isResponsed:
+              formattedQuestions.filter(
+                (Qitem: any) => Qitem.Employee.EmployeeId === item.Employee.ID
+              ).length !==
+              formattedQuestions.filter(
+                (Qitem: any) =>
+                  (Qitem.Status === "Satisfactory" ||
+                    Qitem.Status === "Resolved") &&
+                  Qitem.Employee.EmployeeId === item.Employee.ID
+              ).length
+                ? false
+                : true,
             SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
           })) || [];
 
         setEmployeeOnboardingDetails(formattedItems);
         setfilteredEmployeeOnboardingDetails(formattedItems);
+        console.log(formattedItems, "formattedItems");
+
         await handlerGetStatusValues();
       })
       .catch((error: any) => {
@@ -398,28 +418,31 @@ const Onboarding = (props: any) => {
             setselectedEmployeeDetails(Rowdata);
           }}
         />
-        <i
-          className="pi pi-pencil"
-          style={{ fontSize: "1.25rem", color: "#233b83" }}
-          onClick={() => {
-            setisUpdate(true);
-            setisVisible(true);
+        {!Rowdata.isResponsed ? (
+          <i
+            className="pi pi-pencil"
+            style={{ fontSize: "1.25rem", color: "#233b83" }}
+            onClick={() => {
+              setisUpdate(true);
+              setisVisible(true);
+              handleFormQuestions(Rowdata.Forms);
+              settempEmployeeOnboardingDetails({ ...Rowdata });
+            }}
+          />
+        ) : null}
 
-            handleFormQuestions(Rowdata.Forms);
-
-            settempEmployeeOnboardingDetails({ ...Rowdata });
-          }}
-        />
-        <i
-          className="pi pi-trash"
-          style={{ fontSize: "1.25rem", color: "red" }}
-          onClick={() => {
-            console.log("Worked", index);
-            showConfirmationPopup(Rowdata.Id, index);
-            console.log("TRashData ID:", Rowdata.Id);
-            settempEmployeeOnboardingDetails({ ...Rowdata });
-          }}
-        />
+        {!Rowdata.isResponsed ? (
+          <i
+            className="pi pi-trash"
+            style={{ fontSize: "1.25rem", color: "red" }}
+            onClick={() => {
+              console.log("Worked", index);
+              showConfirmationPopup(Rowdata.Id, index);
+              console.log("TRashData ID:", Rowdata.Id);
+              settempEmployeeOnboardingDetails({ ...Rowdata });
+            }}
+          />
+        ) : null}
       </div>
     );
   };
@@ -482,11 +505,9 @@ const Onboarding = (props: any) => {
 
   // Post into list SP
   const handlerSaveEmployeeDetailsToSP = async (): Promise<void> => {
-    //EmployeeOnboarding
     setIsLoading(true);
     try {
       if (isUpdate) {
-        debugger;
         await sp.web.lists
           .getByTitle(GCongfig.ListName.EmployeeOnboarding)
           .items.getById(tempEmployeeOnboardingDetails.Id)
@@ -545,7 +566,8 @@ const Onboarding = (props: any) => {
                   Promise.all(updatePromises)
                     .then(() => {
                       console.log("All updates completed successfully!");
-
+                      setisVisible(false);
+                      setIsLoading(false);
                       toast.success("Employee Updated Successfully", {
                         position: "top-right",
                         autoClose: 5000,
@@ -623,6 +645,8 @@ const Onboarding = (props: any) => {
             await setIsLoading(false);
           })
           .then(async (eve) => {
+            await setisVisible(false);
+            await setIsLoading(false);
             await toast.success("Employee add Successfully", {
               position: "top-right",
               autoClose: 5000,
