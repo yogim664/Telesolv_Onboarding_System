@@ -21,12 +21,11 @@ import { sp } from "@pnp/sp/presets/all";
 import { ProgressBar } from "primereact/progressbar";
 import { GCongfig } from "../../../Config/Config";
 //import styles from "./EmployeeOnboarding.module.scss";
-
+import Loader from "./Loader";
 const cmtImg: string = require("../assets/Images/Comment.png");
 
 const EmployeeForm = (props: any): JSX.Element => {
-  console.log(props);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [questions, setquestions] = useState<any[]>([]);
   const [ProgressPercent, setProgressPercent] = useState<number>(0);
 
@@ -54,6 +53,7 @@ const EmployeeForm = (props: any): JSX.Element => {
     console.log(progressPercentage, "%");
 
     setProgressPercent(Math.round(progressPercentage));
+    setIsLoading(false);
   };
 
   const CurUser = {
@@ -185,6 +185,7 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   // update sp
   const updateQuestionsToSP: any = async (ListItems: any) => {
+    setIsLoading(true);
     for (let i: number = 0; questions?.length > i; i++) {
       await sp.web.lists
         .getByTitle(GCongfig.ListName.EmployeeResponse)
@@ -272,173 +273,196 @@ const EmployeeForm = (props: any): JSX.Element => {
       <div>
         <div className={styles.Bgstyle}>
           <div className={styles.EmployeeAnsContainer}>
-            <div className={styles.EmployeeAnsContainerheader}>
-              <div className={styles.formGuide}>
-                <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
-                <h4>
-                  Fill in the check points below to get started with your
-                  onboarding process
-                </h4>
-              </div>
-              <div className={styles.userGreetingSection}>
-                <div className={styles.userGreeting}>
-                  <Avatar
-                    className={styles.userAvatar}
-                    image={`/_layouts/15/userphoto.aspx?size=S&username=${curUserName.Email}`}
-                    shape="circle"
-                    size="normal"
-                    label={curUserName.Name}
-                  />
-                  {`Welcome on board ${curUserName.Name} !`}
+            <div className={styles.EmployeeAnsContainerheaderConatiner}>
+              <div className={styles.EmployeeAnsContainerheader}>
+                <div className={styles.formGuide}>
+                  <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
+                  {questions.filter((item: any) => item.isAnswered === true)
+                    .length === 0 && (
+                    <h4>
+                      Fill in the check points below to get started with your
+                      onboarding process
+                    </h4>
+                  )}
+                </div>
+                <div className={styles.userGreetingSection}>
+                  <div className={styles.userGreeting}>
+                    {`Welcome on board ${curUserName.Name}!`}
+                    <Avatar
+                      className={styles.userAvatar}
+                      image={`/_layouts/15/userphoto.aspx?size=S&username=${curUserName.Email}`}
+                      shape="circle"
+                      size="normal"
+                      label={curUserName.Name}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className={styles.AnswerPlayground}>
               {questions.length ===
               questions.filter((item: any) => item.isAnswered === true)
                 .length ? (
                 <div className={styles.ProgressBar}>
-                  <ProgressBar value={ProgressPercent} />
+                  <ProgressBar
+                    value={ProgressPercent}
+                    style={{ display: "none" }}
+                  />
+                  <div
+                    className={styles.completedProgress}
+                    style={{ width: `${ProgressPercent}%` }}
+                  >
+                    {ProgressPercent}%
+                  </div>
+                  <div
+                    className={styles.pendingProgress}
+                    style={{ width: `${100 - ProgressPercent}%` }}
+                  >
+                    {100 - ProgressPercent}%
+                  </div>
                 </div>
               ) : null}
+            </div>
+            {isLoading ? (
+              <Loader />
+            ) : (
+              <div className={styles.AnswerPlayground}>
+                <div className="QuestionSection">
+                  <div className={styles.EmployeeQuestionContainer}>
+                    <div style={{ width: "100%" }}>
+                      {questions.length &&
+                        questions
+                          .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
 
-              <div className="QuestionSection">
-                <div className={styles.EmployeeQuestionContainer}>
-                  <div style={{ width: "100%" }}>
-                    {questions.length &&
-                      questions
-                        .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
+                          .map((_item: any, qIndex: any) => (
+                            <div className={styles.question}>
+                              <div
+                                className={styles.questionTitle}
+                              >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</div>
 
-                        .map((_item: any, qIndex: any) => (
-                          <div className={styles.question}>
-                            <div
-                              className={styles.questionTitle}
-                            >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</div>
-
-                            <div className={styles.employeeResponse}>
-                              {_item.isAnswered === true ? (
-                                <div className={styles.responseAnswer}>
-                                  {_item.Response.key}
-                                </div>
-                              ) : (
-                                <div>
-                                  {_item.Options.length &&
-                                    _item.Options?.map(
-                                      (category: any, aIndex: number) => (
-                                        <div
-                                          key={category.key}
-                                          className="flex align-items-center"
-                                        >
+                              <div className={styles.employeeResponse}>
+                                {_item.isAnswered === true ? (
+                                  <div className={styles.responseAnswer}>
+                                    {_item.Response.key}
+                                  </div>
+                                ) : (
+                                  <div>
+                                    {_item.Options.length &&
+                                      _item.Options?.map(
+                                        (category: any, aIndex: number) => (
                                           <div
-                                            style={{
-                                              margin: "10px",
-                                              display: "flex",
-                                              alignItems: "center",
-                                            }}
+                                            key={category.key}
+                                            className="flex align-items-center"
                                           >
-                                            <RadioButton
-                                              inputId={`${_item.QuestionNo}-${category.key}`}
-                                              name={`category-${_item.QuestionNo}`}
-                                              value={category.name}
-                                              style={{ margin: "2px" }}
-                                              onChange={(e) => {
-                                                handleQuestionChange(
-                                                  qIndex,
-                                                  // _item.QuestionNo,
-                                                  e.target.value,
-                                                  "Radio",
-                                                  aIndex
-                                                );
+                                            <div
+                                              style={{
+                                                margin: "10px",
+                                                display: "flex",
+                                                alignItems: "center",
                                               }}
-                                              checked={
-                                                _item.Response.name ===
-                                                category.name
-                                              }
-                                            />
-
-                                            <label
-                                              htmlFor={`${_item.QuestionNo}-${category.key}`}
-                                              style={{ paddingLeft: "10px" }}
-                                              className="ml-2"
                                             >
-                                              {category.name}
-                                            </label>
-                                          </div>
-                                        </div>
-                                      )
-                                    )}
-                                </div>
-                              )}
+                                              <RadioButton
+                                                inputId={`${_item.QuestionNo}-${category.key}`}
+                                                name={`category-${_item.QuestionNo}`}
+                                                value={category.name}
+                                                style={{ margin: "2px" }}
+                                                onChange={(e) => {
+                                                  handleQuestionChange(
+                                                    qIndex,
+                                                    // _item.QuestionNo,
+                                                    e.target.value,
+                                                    "Radio",
+                                                    aIndex
+                                                  );
+                                                }}
+                                                checked={
+                                                  _item.Response.name ===
+                                                  category.name
+                                                }
+                                              />
 
-                              {_item.isAnswered === true && (
-                                <div
-                                  className={styles.responseStatus}
-                                  style={{
-                                    backgroundColor:
-                                      _item.Status === "Satisfactory"
-                                        ? " #caf0cc"
-                                        : "#ffebc0",
-                                  }}
-                                >
-                                  <span
+                                              <label
+                                                htmlFor={`${_item.QuestionNo}-${category.key}`}
+                                                style={{ paddingLeft: "10px" }}
+                                                className="ml-2"
+                                              >
+                                                {category.name}
+                                              </label>
+                                            </div>
+                                          </div>
+                                        )
+                                      )}
+                                  </div>
+                                )}
+
+                                {_item.isAnswered === true && (
+                                  <div
+                                    className={styles.responseStatus}
                                     style={{
-                                      color:
+                                      backgroundColor:
                                         _item.Status === "Satisfactory"
-                                          ? "#437426"
-                                          : "#8f621f",
+                                          ? " #caf0cc"
+                                          : "#ffebc0",
                                     }}
                                   >
-                                    {_item.Status}
-                                  </span>
-                                </div>
-                              )}
+                                    <span
+                                      style={{
+                                        color:
+                                          _item.Status === "Satisfactory"
+                                            ? "#437426"
+                                            : "#8f621f",
+                                      }}
+                                    >
+                                      {_item.Status}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                    </div>
                   </div>
-                </div>
-                <div className={styles.commentsContainer}>
-                  <div className={styles.commentsContainerHeader}>
-                    <img src={cmtImg} alt="logo" />
-                    <span style={{ fontWeight: "bolder", fontSize: "large" }}>
-                      Additional Comments
-                    </span>
-                  </div>
+                  <div className={styles.commentsContainer}>
+                    <div className={styles.commentsContainerHeader}>
+                      <img src={cmtImg} alt="logo" />
+                      <span style={{ fontWeight: "bolder", fontSize: "large" }}>
+                        Additional Comments
+                      </span>
+                    </div>
 
-                  {questions.length !==
-                  questions.filter((item) => item.isAnswered === true)
-                    .length ? (
-                    <InputTextarea
-                      placeholder="Enter comments"
-                      onChange={handleCommentChange} // Handle the onChange event
-                      value={comment}
-                    />
-                  ) : (
-                    <div className={styles.showComments}>{comment}</div>
-                  )}
+                    {questions.length !==
+                    questions.filter((item) => item.isAnswered === true)
+                      .length ? (
+                      <InputTextarea
+                        placeholder="Enter comments"
+                        onChange={handleCommentChange} // Handle the onChange event
+                        value={comment}
+                      />
+                    ) : (
+                      <div className={styles.showComments}>{comment}</div>
+                    )}
+                  </div>
                 </div>
+
+                {questions.length !==
+                questions.filter((item) => item.isAnswered === true).length ? (
+                  <div className={styles.employeeFormFooter}>
+                    <Button className={styles.cancelBtn}>Cancel</Button>
+                    <Button
+                      className={styles.primaryBtn}
+                      onClick={() => {
+                        validation();
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                ) : (
+                  <div className={styles.reponseCompletedInfo}>
+                    Your form has been submitted. Please contact the IT admin in
+                    case of any issues.
+                  </div>
+                )}
               </div>
-
-              {questions.length !==
-              questions.filter((item) => item.isAnswered === true).length ? (
-                <div className={styles.employeeFormFooter}>
-                  <Button className={styles.cancelBtn}>Cancel</Button>
-                  <Button
-                    className={styles.primaryBtn}
-                    onClick={() => {
-                      validation();
-                    }}
-                  >
-                    Save
-                  </Button>
-                </div>
-              ) : (
-                <div className={styles.reponseCompletedInfo}>
-                  Your form has been submitted. Please contact the IT admin in
-                  case of any issues.
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
