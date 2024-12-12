@@ -223,12 +223,12 @@ const Config = (props: any) => {
   };
 
   const handlerEditQuestions = (questionId: number) => {
-    setquestions((prevQuestions: any) =>
-      prevQuestions.map((question: any) => ({
-        ...question,
-        isEdit: question.Id === questionId ? !question.isEdit : false,
-      }))
-    );
+    // setquestions((prevQuestions: any) =>
+    //   prevQuestions.map((question: any) => ({
+    //     ...question,
+    //     isEdit: question.Id === questionId ? !question.isEdit : false,
+    //   }))
+    // );
     setfilteredQuestions((prevQuestions: any) =>
       prevQuestions.map((question: any) => ({
         ...question,
@@ -249,7 +249,7 @@ const Config = (props: any) => {
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
     sortQuestion[qIndex].isDelete = true;
-    setquestions(sortQuestion);
+    // setquestions(sortQuestion);
     setfilteredQuestions(sortQuestion);
 
     handlerQuestionsReArrange(qIndex);
@@ -288,7 +288,7 @@ const Config = (props: any) => {
       theme: "light",
       transition: Bounce,
     });
-    setquestions([...updatedQuestion]);
+    // setquestions([...updatedQuestion]);
     setfilteredQuestions([...updatedQuestion]);
   };
 
@@ -298,9 +298,9 @@ const Config = (props: any) => {
     type: any,
     aIndex?: number
   ) => {
-    let _masterData: any = filteredQuestions.filter(
-      (val: any) => val.Form !== currentFormID
-    );
+    // let _masterData: any = filteredQuestions.filter(
+    //   (val: any) => val.Form !== currentFormID
+    // );
     let _questions: any = filteredQuestions
       .filter((val: any) => val.Form === currentFormID)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
@@ -313,9 +313,9 @@ const Config = (props: any) => {
       };
     }
 
-    const updatedQuestions = [..._masterData, ..._questions];
+    //const updatedQuestions = [..._masterData, ..._questions];
 
-    setquestions(updatedQuestions);
+    // setquestions(updatedQuestions);
     setfilteredQuestions([..._questions]);
   };
 
@@ -403,19 +403,17 @@ const Config = (props: any) => {
         isChanged: true,
       };
     }
-    setquestions([...updatedQuestions]); // New
+    // setquestions([...updatedQuestions]); // New
     setfilteredQuestions([...updatedQuestions]);
   };
 
   // MoveDown
   // !BackUp
   const handlermoveQuestionDownn = (index: any) => {
-    // !Maasi
-    // Check if the index is valid and not the last question
-    if (index < 0 || index >= questions.length - 1) return;
-    // Create a copy of the questions array to avoid direct mutation
-    const updatedQuestions = [...questions];
-    // Get the current and next questions
+    if (index < 0 || index >= filteredQuestions.length - 1) return;
+
+    const updatedQuestions = [...filteredQuestions];
+
     const currentQuestion = updatedQuestions[index];
     const nextQuestion = updatedQuestions[index + 1];
     // Swap the properties between the current and next question
@@ -438,7 +436,7 @@ const Config = (props: any) => {
       isChanged: true,
     };
     // Update the state with the new order of questions
-    setquestions(updatedQuestions);
+    //setquestions(updatedQuestions);
     setfilteredQuestions(updatedQuestions);
     // !Maasi
   };
@@ -699,6 +697,7 @@ const Config = (props: any) => {
         filteredData?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
         setfilteredForm(_tempFilterkeys);
         setfilteredQuestions([...filteredData]);
+        setquestions([...filteredData]);
         setisVisible(false);
         setisFormEdit(false);
       })
@@ -708,9 +707,23 @@ const Config = (props: any) => {
   };
 
   const handlerSaveForm = async () => {
+    if (!newformDetails.trim()) {
+      toast.error("Please enter value.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+      return;
+    }
     if (
       formsDetails.some(
-        (e: any) => e.key.toLowerCase() === newformDetails.toLowerCase()
+        (e: any) => e.key?.toLowerCase() === newformDetails?.toLowerCase()
       )
     ) {
       toast.error("Form already exists.", {
@@ -1082,7 +1095,7 @@ const Config = (props: any) => {
                                                 handleOptionChange(
                                                   qIndex,
                                                   aIndex,
-                                                  e.target.value
+                                                  e.target.value.trimStart()
                                                 )
                                               }
                                             />
@@ -1148,7 +1161,7 @@ const Config = (props: any) => {
                               value={newOptionValue}
                               style={{ marginLeft: "2.5rem", marginTop: 10 }}
                               onChange={(e) =>
-                                setnewOptionValue(e.target.value)
+                                setnewOptionValue(e.target.value.trimStart())
                               }
                             />
                             <i
@@ -1212,7 +1225,12 @@ const Config = (props: any) => {
                   <Button
                     className={styles.cancelBtn}
                     label="Cancel"
-                    onClick={() => setSelectedQuestionId(null)}
+                    onClick={() => {
+                      setSelectedQuestionId(null);
+                      console.log(questions);
+
+                      setfilteredQuestions(questions);
+                    }}
                   />
                   <Button
                     label="Save"
