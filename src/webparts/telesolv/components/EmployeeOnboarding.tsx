@@ -1116,7 +1116,11 @@ const Onboarding = (props: any) => {
                       formQuestionsDetails.length === 0 ||
                       filteredEmployeeOnboardingDetails[
                         tempEmployeeOnboardingDetails?.index
-                      ]?.Status === "Completed"
+                      ]?.Status === "Completed" ||
+                      formQuestionsDetails.some(
+                        (item: any) =>
+                          !item.Assigned || item.Assigned.length === 0
+                      )
                     }
                     onClick={() => handlerVaildation()}
                   />
