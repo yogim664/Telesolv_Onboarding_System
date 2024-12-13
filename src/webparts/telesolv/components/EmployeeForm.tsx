@@ -70,6 +70,7 @@ const EmployeeForm = (props: any): JSX.Element => {
         "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options, Employee/ID, Employee/EMail"
       )
       .expand("QuestionID, Employee")
+      .top(5000)
       .get()
       .then((_items: any) => {
         console.log(_items, "REsponse");
@@ -204,6 +205,7 @@ const EmployeeForm = (props: any): JSX.Element => {
               .getByTitle(GCongfig.ListName.EmployeeOnboarding)
               .items.select("*,Employee/ID,Employee/EMail")
               .expand("Employee")
+              .top(5000)
               .get()
               .then(async (_items: any) => {
                 const temp: any = _items?.filter(

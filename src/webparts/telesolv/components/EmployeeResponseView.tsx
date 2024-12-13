@@ -110,6 +110,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .fields.getByInternalNameOrTitle("Status")
       .select("Choices,ID") // Ensure 'Choices' is available
+
       .get()
       .then((data: any) => {
         if (data.Choices && Array.isArray(data.Choices)) {
@@ -133,11 +134,14 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       selectedEmployeeDetails.Employee.EmployeeId.toString();
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
+
       .items.select(
         "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail, CompletedBy/ID, CompletedBy/Title, CompletedBy/EMail"
       )
+
       .expand("QuestionID,Employee,EmployeeID,Reassigned,CompletedBy")
       .filter(`Employee/ID eq ${employeeIdString}`)
+      .top(5000)
       .get()
       .then(async (items: any) => {
         await sp.web.lists
@@ -145,6 +149,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           .items.select("*,Assigned/ID,Assigned/EMail,Assigned/Title")
           .expand("Assigned")
           .filter("isDelete ne 1")
+          .top(5000)
           .get()
           .then(async (Qitems: any) => {
             const formattedItems =

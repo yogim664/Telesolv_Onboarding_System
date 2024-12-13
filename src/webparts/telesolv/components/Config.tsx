@@ -616,6 +616,7 @@ const Config = (props: any) => {
       .getByTitle(GCongfig.ListName.CheckpointConfig)
       .items.select("*,Assigned/ID, Assigned/EMail ,Forms/ID")
       .expand("Assigned,Forms")
+      .top(5000)
       .filter(`isDelete ne 1 and Forms/Id eq ${key}`)
       .get()
       .then((items) => {
@@ -661,6 +662,7 @@ const Config = (props: any) => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.Forms)
       .items.select("Title, ID")
+      .top(5000)
       .get()
       .then((li) => {
         let FormValuesDups = li.map((item: any) => ({

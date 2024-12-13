@@ -69,6 +69,7 @@ const HrPersons = (props: any) => {
       )
       .expand("Assigned,Forms")
       .filter("isDelete ne 1")
+      .top(5000)
       .get()
       .then((items) => {
         // Map the items to create an array of values
@@ -152,6 +153,7 @@ const HrPersons = (props: any) => {
       const items = await sp.web.lists
         .getByTitle(GCongfig.ListName.Forms)
         .items.select("Title, ID")
+        .top(5000)
         .get();
 
       const FormValues = items.map((item: any) => ({
