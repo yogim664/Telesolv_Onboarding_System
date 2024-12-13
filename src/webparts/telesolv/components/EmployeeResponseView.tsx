@@ -446,6 +446,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               alignItems: "center",
               justifyContent: "center",
               gap: "10px",
+              padding: 16,
               // width: "50%",
             }}
           >

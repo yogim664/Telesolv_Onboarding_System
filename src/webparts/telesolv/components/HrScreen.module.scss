@@ -17,6 +17,7 @@
         margin: auto;
         align-items: center;
         .pageTitle {
+            color: #233b83;
             font-weight: 300;
         }
         .HRPersonFilters {
@@ -119,12 +120,51 @@
 .employeeStatusSection {
     display: flex;
     justify-content: flex-end;
+    color: #1EB949;
     .employeeStatus {
         width: 50%;
+    }
+    .popUpStatusUpdation {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 16px;
+        background: #D8E5F0;
+        color: #1E71B9;
+        border-radius: 8px;
+    }
+    .popUpResolved {
+        background: #D8F0E3;
+        color: #1EB949;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 20px;
+        .statusDot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
     }
 }
 
 .tableEmployeeProfile {
     display: flex;
     align-items: center;
+    gap: 6px;
+}
+
+.tableStatus {
+    padding: 8px 16px;
+    width: max-content;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .statusDot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
 }

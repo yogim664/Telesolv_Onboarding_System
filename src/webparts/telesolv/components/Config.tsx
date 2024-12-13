@@ -823,11 +823,11 @@ const Config = (props: any) => {
             <Dialog
               header={isFormEdit ? "Edit Form" : "Add New Form"}
               visible={isVisible}
-              style={{ width: "30vw" }}
               onHide={() => {
                 if (!isVisible) return;
                 setisVisible(false);
               }}
+              className={styles.addNewForm}
             >
               <div
                 style={{
@@ -843,6 +843,7 @@ const Config = (props: any) => {
                 />
               </div>
               <div
+                className={styles.addFormFooter}
                 style={{
                   marginTop: "10px",
                   display: "flex",
@@ -881,7 +882,7 @@ const Config = (props: any) => {
             >
               <div className={styles.formSelectionSection}>
                 <div className={styles.formDetailsContainer}>
-                  <label>{currentFormName}</label>
+                  <h2>{currentFormName}</h2>
                   <i
                     className="pi pi-pencil"
                     style={{

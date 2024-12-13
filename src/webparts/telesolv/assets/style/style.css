@@ -210,6 +210,7 @@ td {
     display: flex !important;
     justify-content: center !important;
     gap: 12px;
+    background-color: unset !important;
 }
 
 .p-dialog-header {
@@ -339,4 +340,8 @@ i {
 .p-inputtext,
 .ms-BasePicker-text {
     background: #ffffff85 !important;
+}
+
+[class^="addNewForm"] .p-dialog-content {
+    padding: 12px !important;
 }
