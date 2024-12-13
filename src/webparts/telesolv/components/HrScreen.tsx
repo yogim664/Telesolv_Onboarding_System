@@ -20,15 +20,15 @@ import { Dropdown } from "primereact/dropdown";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { InputTextarea } from "primereact/inputtextarea";
-// import { Paginator } from "primereact/paginator";
+import { Paginator } from "primereact/paginator";
 import { GCongfig } from "../../../Config/Config";
 import { Checkbox } from "primereact/checkbox";
 import Loader from "./Loader";
 import { Avatar } from "primereact/avatar";
-// interface IPageSync {
-//   first: number;
-//   rows: number;
-// }
+interface IPageSync {
+  first: number;
+  rows: number;
+}
 
 interface IFilData {
   dept: string;
@@ -36,10 +36,10 @@ interface IFilData {
   status: string;
 }
 
-// const defaultPagination: IPageSync = {
-//   first: 0,
-//   rows: 5,
-// };
+const defaultPagination: IPageSync = {
+  first: 0,
+  rows: 5,
+};
 
 let filData: IFilData = {
   dept: "",
@@ -80,9 +80,9 @@ const HrScreen = (props: any): JSX.Element => {
   });
 
   const [statusDetails, setstatusDetails] = useState<any[]>([]);
-  // const [pageNationRows, setpageNationRows] = useState<IPageSync>({
-  //   ...defaultPagination,
-  // });
+  const [pageNationRows, setpageNationRows] = useState<IPageSync>({
+    ...defaultPagination,
+  });
   const [
     filteredEmployessResponseDetails,
     setfilteredEmployessResponseDetails,
@@ -124,7 +124,41 @@ const HrScreen = (props: any): JSX.Element => {
         ),
         Role: item?.Role || "No Role",
         Department: item?.Department || "No Department",
-        Status: item?.Status ? item?.Status.key : "Sample",
+        Status: (
+          <div
+            className={styles.tableStatus}
+            style={{
+              color:
+                item?.Status?.key === "Pending"
+                  ? "#1E71B9"
+                  : item?.Status?.key === "Satisfactory" ||
+                    item?.Status?.key === "Resolved"
+                  ? "#1EB949"
+                  : "#B97E1E",
+              background:
+                item?.Status?.key === "Pending"
+                  ? "#D8E5F0"
+                  : item?.Status?.key === "Satisfactory" ||
+                    item?.Status?.key === "Resolved"
+                  ? "#D8F0E3"
+                  : "#F0EAD8",
+            }}
+          >
+            <div
+              className={styles.statusDot}
+              style={{
+                background:
+                  item?.Status?.key === "Pending"
+                    ? "#1E71B9"
+                    : item?.Status?.key === "Satisfactory" ||
+                      item?.Status?.key === "Resolved"
+                    ? "#1EB949"
+                    : "#B97E1E",
+              }}
+            />
+            {item?.Status.key}
+          </div>
+        ),
         Action: (
           <i
             className="pi pi-pencil"
@@ -364,16 +398,16 @@ const HrScreen = (props: any): JSX.Element => {
   // const handlerStatusDetails = (rowData: any) => {
   //   let color: string = "";
   //   let bgColor: string = "";
-  //   if (rowData?.Status?.key === "Pending") {
-  //     color = "#1E71B9";
-  //     bgColor = "#D8E5F0";
-  //   } else if (rowData?.Status?.key === "Satisfactory") {
-  //     color = "#1EB949";
-  //     bgColor = "#D8F0E3";
-  //   } else {
-  //     color = "#B97E1E";
-  //     bgColor = "#F0EAD8";
-  //   }
+  // if (rowData?.Status?.key === "Pending") {
+  //   color = "#1E71B9";
+  //   bgColor = "#D8E5F0";
+  // } else if (rowData?.Status?.key === "Satisfactory") {
+  //   color = "#1EB949";
+  //   bgColor = "#D8F0E3";
+  // } else {
+  //   color = "#B97E1E";
+  //   bgColor = "#F0EAD8";
+  // }
 
   //   return (
   //     <div
@@ -462,12 +496,12 @@ const HrScreen = (props: any): JSX.Element => {
       });
   };
 
-  // const onPageChange = (event: any) => {
-  //   setpageNationRows({
-  //     first: event?.first || defaultPagination.first,
-  //     rows: event?.rows || defaultPagination.rows,
-  //   });
-  // };
+  const onPageChange = (event: any) => {
+    setpageNationRows({
+      first: event?.first || defaultPagination.first,
+      rows: event?.rows || defaultPagination.rows,
+    });
+  };
 
   useEffect(() => {
     handlerCurrentUserTasks();
@@ -496,7 +530,7 @@ const HrScreen = (props: any): JSX.Element => {
                     e.Status.key === "To be resolved") &&
                   tempEmployeeDetails.Id === e.Id
               ) ? (
-                <div className="flex align-items-center">
+                <div className={styles.popUpStatusUpdation}>
                   <Checkbox
                     inputId="ingredient1"
                     name="status"
@@ -512,11 +546,20 @@ const HrScreen = (props: any): JSX.Element => {
                     checked={tempEmployeeDetails?.Status === "Resolved"}
                   />
                   <label htmlFor="ingredient1" className="ml-2">
-                    Resolved
+                    Mark as Resolved
                   </label>
                 </div>
               ) : (
-                <div>{"Resolved"}</div>
+                <div className={styles.popUpResolved}>
+                  {" "}
+                  <div
+                    className={styles.statusDot}
+                    style={{
+                      background: "#1EB949",
+                    }}
+                  />
+                  {"Resolved"}
+                </div>
               )}
             </div>
             <div className={styles.addDialog}>
@@ -715,7 +758,13 @@ const HrScreen = (props: any): JSX.Element => {
                 />
               </div>
             </div>
-            <DataTable value={tableContent}>
+            <DataTable
+              value={tableContent?.slice(
+                pageNationRows.first,
+                pageNationRows.first + pageNationRows.rows
+              )}
+              className={styles.HRPersonDashboard}
+            >
               <Column field="Task" header="Task" />
               <Column field="Employee" header="Employee" />
               <Column field="Role" header="Role" />
@@ -723,40 +772,13 @@ const HrScreen = (props: any): JSX.Element => {
               <Column field="Status" header="Status" />
               <Column field="Action" header="Action" />
             </DataTable>
-            {/* <DataTable
-              value={filteredEmployessResponseDetails?.slice(
-                pageNationRows.first,
-                pageNationRows.first + pageNationRows.rows
-              )}
-              className={styles.HRPersonDashboard}
-            >
-              <Column field="Task" header="Task" />
-              <Column
-                field="QuestionTitle"
-                header="To"
-                body={handlerEmployeeDetails}
-              />
-              <Column field="Role" header="Role" style={{ width: "15%" }} />
-              <Column field="Department" header="Department" />
-              <Column
-                field="Status"
-                header="Status"
-                body={handlerStatusDetails}
-              />
-              <Column
-                field="Action"
-                header="Action"
-                body={(Rowdata: any) => handlerActionIcons(Rowdata)}
-              />{" "}
-              *
-            </DataTable> */}
-            {/* <Paginator
+            <Paginator
               first={pageNationRows.first}
               rows={pageNationRows.rows}
-              totalRecords={employessResponseDetails.length}
+              totalRecords={tableContent.length}
               // rowsPerPageOptions={[10, 20, 30]}
               onPageChange={onPageChange}
-            /> */}
+            />
           </div>
 
           <ToastContainer
