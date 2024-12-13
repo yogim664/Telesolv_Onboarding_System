@@ -51,6 +51,7 @@ const Config = (props: any) => {
   const [isVisible, setisVisible] = useState(false);
   const [newformDetails, setnewformDetails] = useState<any>([]);
   const [currentFormID, setcurrentFormID] = useState(null);
+  const [currentFormName, setcurrentFormName] = useState("");
   const [isFormEdit, setisFormEdit] = useState(false);
   const [formsDetails, setformsDetails] = useState<any>([]);
   const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
@@ -670,7 +671,11 @@ const Config = (props: any) => {
 
         setformsDetails([...FormValuesDups]);
         const firstFormID = FormValuesDups?.[0]?.ID;
+        const firstFormName = FormValuesDups?.[0]?.name;
+        debugger;
+        console.log(FormValuesDups?.[0]?.name);
         setcurrentFormID(firstFormID);
+        setcurrentFormName(firstFormName);
         hanlderfilter("Forms", firstFormID);
       })
       .catch((err) => {
@@ -695,15 +700,26 @@ const Config = (props: any) => {
           );
         }
         filteredData?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+
         setfilteredForm(_tempFilterkeys);
         setfilteredQuestions([...filteredData]);
         setquestions([...filteredData]);
+
         setisVisible(false);
         setisFormEdit(false);
       })
       .catch((err) => {
         console.log(err);
       });
+    debugger;
+    const tempCurrentFormDetails = [...formsDetails];
+    if (tempCurrentFormDetails.length > 0) {
+      const currentFormNamevalue =
+        tempCurrentFormDetails?.find((form: any) => form.ID === val)?.name ||
+        null;
+      setcurrentFormName(currentFormNamevalue);
+      console.log(currentFormNamevalue, "currentFormNamevalue");
+    }
   };
 
   const handlerSaveForm = async () => {
@@ -819,8 +835,8 @@ const Config = (props: any) => {
                 }}
               >
                 <InputText
-                  value={newformDetails || ""} // Bind state to input value
-                  onChange={handlenewformChange} // Handle onChange event
+                  value={newformDetails || ""}
+                  onChange={handlenewformChange}
                   placeholder="Enter New form"
                 />
               </div>
@@ -861,13 +877,32 @@ const Config = (props: any) => {
               header="Checkpoints"
               className={`${styles.questionConfigContaier} MainTab`}
             >
-              <div>
-                <div>
-                  <label>
-                    {formsDetails?.find(
-                      (choice: any) => choice.ID === filteredForm.Forms
-                    )?.Name || ""}
-                  </label>
+              <div className={styles.formSelectionSection}>
+                <div className={styles.formDetailsContainer}>
+                  <label>{currentFormName}</label>
+                  <i
+                    className="pi pi-pencil"
+                    style={{
+                      //   backgroundColor: "#223b83",
+                      padding: 10,
+                      borderRadius: 4,
+                      color: "#223b83",
+                    }}
+                    onClick={(e) => {
+                      setisVisible(true);
+                      setisFormEdit(true);
+                      const tempNewformDetails = formsDetails.find(
+                        (item: any) => item.ID === filteredForm.Forms
+                      );
+                      if (tempNewformDetails) {
+                        setnewformDetails(tempNewformDetails.name);
+                      } else {
+                        console.error("No matching form found!");
+                        setnewformDetails(null);
+                        console.log(isFormEdit);
+                      }
+                    }}
+                  />
                 </div>
                 <div className={styles.formSelectionSection}>
                   <Dropdown
@@ -887,29 +922,7 @@ const Config = (props: any) => {
                     optionLabel="name"
                     placeholder="Select a Department"
                   />
-                  <i
-                    className="pi pi-pencil"
-                    style={{
-                      backgroundColor: "#223b83",
-                      padding: 10,
-                      borderRadius: 4,
-                      color: "#fff",
-                    }}
-                    onClick={(e) => {
-                      setisVisible(true);
-                      setisFormEdit(true);
-                      const tempNewformDetails = formsDetails.find(
-                        (item: any) => item.ID === filteredForm.Forms
-                      );
-                      if (tempNewformDetails) {
-                        setnewformDetails(tempNewformDetails.name);
-                      } else {
-                        console.error("No matching form found!");
-                        setnewformDetails(null);
-                        console.log(isFormEdit);
-                      }
-                    }}
-                  />
+
                   <i
                     className="pi  pi-file-plus"
                     style={{
