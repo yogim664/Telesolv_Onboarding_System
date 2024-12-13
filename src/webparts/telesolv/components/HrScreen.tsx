@@ -100,6 +100,42 @@ const HrScreen = (props: any): JSX.Element => {
       ),
     },
   ]);
+  const tableDataBinding = (tblArr: any) => {
+    let tableData = tblArr.map((item: any) => {
+      return {
+        Id: item.Id,
+        Task: item?.Task || "No Title",
+        Employee: (
+          <div className={styles.tableEmployeeProfile}>
+            <Avatar
+              image={`/_layouts/15/userphoto.aspx?size=S&username=${item.Employee.Email}`}
+              shape="circle"
+              size="normal"
+              label={item.Employee.Name}
+            />
+            {item.Employee.Name}
+          </div>
+        ),
+        Role: item?.Role || "No Role",
+        Department: item?.Department || "No Department",
+        Status: item?.Status ? item?.Status.key : "Sample",
+        Action: (
+          <i
+            className="pi pi-pencil"
+            style={{ fontSize: "1rem", color: "#233b83" }}
+            onClick={() => {
+              settempEmployeeDetails(item);
+              setisVisible(true);
+              console.log(item);
+            }}
+          />
+        ),
+      };
+    });
+    console.log(tableData);
+    setTableContent([...tableData]);
+  };
+
   const handlerChangeEmployessResponseDetails = (key: string, value: any) => {
     const curObj: any = { ...tempEmployeeDetails };
     curObj[key] = value;
@@ -141,6 +177,7 @@ const HrScreen = (props: any): JSX.Element => {
 
     setfilterKeys({ ..._tempFilterkey });
     setfilteredEmployessResponseDetails([...temp]);
+    tableDataBinding(temp);
     console.log(filteredEmployessResponseDetails);
   };
 
@@ -250,38 +287,8 @@ const HrScreen = (props: any): JSX.Element => {
               item.Status.key !== "Satisfactory" &&
               item.Status.key !== "Pending"
           )) || [];
-        let tableData = tempAssigenQuestion.map((item: any) => {
-          return {
-            Id: item.Id,
-            Task: item?.Task || "No Title",
-            Employee: (
-              <div className={styles.tableEmployeeProfile}>
-                <Avatar
-                  image={`/_layouts/15/userphoto.aspx?size=S&username=${item.Employee.Email}`}
-                  shape="circle"
-                  size="normal"
-                  label={item.Employee.Name}
-                />
-                {item.Employee.Name}
-              </div>
-            ),
-            Role: item?.Role || "No Role",
-            Department: item?.Department || "No Department",
-            Status: item?.Status ? item?.Status.key : "Sample",
-            Action: (
-              <i
-                className="pi pi-pencil"
-                style={{ fontSize: "1rem", color: "#233b83" }}
-                onClick={() => {
-                  console.log(item);
-                }}
-              />
-            ),
-          };
-        });
-        console.log(tableData);
-        setTableContent([...tableData]);
 
+        tableDataBinding(_tempArr);
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
         setemployessResponseDetails(tempAssigenQuestion);
 
@@ -383,8 +390,9 @@ const HrScreen = (props: any): JSX.Element => {
   // };
 
   // update sp
+
   const handlerUpdateResponsesToSp = async (tempEmployeeDetails: any) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.getById(tempEmployeeDetails.Id)
@@ -394,6 +402,15 @@ const HrScreen = (props: any): JSX.Element => {
       })
       .then(() => {
         // setRerender(true);
+
+        debugger;
+        //New code
+        const updatedEmployeeDetails = [...employessResponseDetails];
+        updatedEmployeeDetails[tempEmployeeDetails.Id] = {
+          ...tempEmployeeDetails,
+        };
+        setemployessResponseDetails([...updatedEmployeeDetails]);
+
         setisVisible(false);
         setIsLoading(false);
         toast.success("Update Successfully", {
@@ -671,9 +688,7 @@ const HrScreen = (props: any): JSX.Element => {
                     filData.status = "";
                     filData.search = "";
                     setfilterKeys({ ...filData });
-                    setfilteredEmployessResponseDetails(
-                      employessResponseDetails
-                    );
+                    tableDataBinding(employessResponseDetails);
                   }}
                 />
               </div>
