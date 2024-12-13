@@ -861,63 +861,73 @@ const Config = (props: any) => {
               header="Checkpoints"
               className={`${styles.questionConfigContaier} MainTab`}
             >
-              <div className={styles.formSelectionSection}>
-                <Dropdown
-                  className={styles.formFilterDD}
-                  value={
-                    formsDetails
-                      ? formsDetails?.find(
-                          (choice: any) => choice.ID === filteredForm.Forms
-                        ) || null
-                      : null
-                  }
-                  onChange={(e) => {
-                    hanlderfilter("Forms", e.value.ID);
-                    setcurrentFormID(e.value.ID);
-                  }}
-                  options={formsDetails || []}
-                  optionLabel="name"
-                  placeholder="Select a Department"
-                />
-                <i
-                  className="pi pi-pencil"
-                  style={{
-                    backgroundColor: "#223b83",
-                    padding: 10,
-                    borderRadius: 4,
-                    color: "#fff",
-                  }}
-                  onClick={(e) => {
-                    setisVisible(true);
-                    setisFormEdit(true);
-                    const tempNewformDetails = formsDetails.find(
-                      (item: any) => item.ID === filteredForm.Forms
-                    );
-                    if (tempNewformDetails) {
-                      setnewformDetails(tempNewformDetails.name);
-                    } else {
-                      console.error("No matching form found!");
-                      setnewformDetails(null);
-                      console.log(isFormEdit);
+              <div>
+                <div>
+                  <label>
+                    {formsDetails?.find(
+                      (choice: any) => choice.ID === filteredForm.Forms
+                    )?.Name || ""}
+                  </label>
+                </div>
+                <div className={styles.formSelectionSection}>
+                  <Dropdown
+                    className={styles.formFilterDD}
+                    value={
+                      formsDetails
+                        ? formsDetails?.find(
+                            (choice: any) => choice.ID === filteredForm.Forms
+                          ) || null
+                        : null
                     }
-                  }}
-                />
-                <i
-                  className="pi  pi-file-plus"
-                  style={{
-                    fontSize: "1.25rem",
-                    padding: 10,
-                    color: "#fff",
-                    borderRadius: 4,
-                    backgroundColor: "#233b83",
-                  }}
-                  onClick={() => {
-                    setnewformDetails(null);
-                    setisVisible(true);
-                  }}
-                />
-                {/* <AddForm /> */}
+                    onChange={(e) => {
+                      hanlderfilter("Forms", e.value.ID);
+                      setcurrentFormID(e.value.ID);
+                    }}
+                    options={formsDetails || []}
+                    optionLabel="name"
+                    placeholder="Select a Department"
+                  />
+                  <i
+                    className="pi pi-pencil"
+                    style={{
+                      backgroundColor: "#223b83",
+                      padding: 10,
+                      borderRadius: 4,
+                      color: "#fff",
+                    }}
+                    onClick={(e) => {
+                      setisVisible(true);
+                      setisFormEdit(true);
+                      const tempNewformDetails = formsDetails.find(
+                        (item: any) => item.ID === filteredForm.Forms
+                      );
+                      if (tempNewformDetails) {
+                        setnewformDetails(tempNewformDetails.name);
+                      } else {
+                        console.error("No matching form found!");
+                        setnewformDetails(null);
+                        console.log(isFormEdit);
+                      }
+                    }}
+                  />
+                  <i
+                    className="pi  pi-file-plus"
+                    style={{
+                      fontSize: "1.25rem",
+                      padding: 10,
+                      color: "#fff",
+                      borderRadius: 4,
+                      backgroundColor: "#233b83",
+                    }}
+                    onClick={() => {
+                      setnewformDetails(null);
+                      setisVisible(true);
+                    }}
+                  />
+                  {/* <AddForm /> */}
+                </div>
               </div>
+
               <div className={styles.questionInputSection}>
                 {filteredQuestions.length > 0 ? (
                   filteredQuestions
