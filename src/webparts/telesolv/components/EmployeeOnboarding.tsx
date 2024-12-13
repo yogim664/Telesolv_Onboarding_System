@@ -103,7 +103,9 @@ const Onboarding = (props: any) => {
       .getByTitle(GCongfig.ListName.EmployeeOnboarding)
       .fields.getByInternalNameOrTitle("Status")
       .select("Choices,ID")
+
       .get()
+
       .then((data: any) => {
         const ChoicesCollection = data.Choices.map((choice: string) => ({
           key: choice,
@@ -119,6 +121,7 @@ const Onboarding = (props: any) => {
       .getByTitle(GCongfig.ListName.EmployeeOnboarding)
       .items.select("*,Employee/ID,Employee/EMail,Employee/Title,Form/ID")
       .expand("Employee,Form")
+      .top(5000)
       .filter("isDelete ne 1")
       .get()
       .then(async (items: any) => {
@@ -188,7 +191,9 @@ const Onboarding = (props: any) => {
       .items.select(
         "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role"
       )
+
       .expand("QuestionID,Employee,EmployeeID")
+      .top(5000)
       .get()
       .then(async (items: any) => {
         const formattedResponseItems =
@@ -224,6 +229,7 @@ const Onboarding = (props: any) => {
       .getByTitle(GCongfig.ListName.CheckpointConfig)
       .items.select("*,Assigned/ID, Assigned/EMail, Forms/ID")
       .expand("Assigned,Forms")
+      .top(5000)
       .filter("isDelete ne 1")
       .get()
       .then(async (items: any) => {
@@ -263,6 +269,7 @@ const Onboarding = (props: any) => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.Forms)
       .items.select("Title, ID")
+      .top(5000)
       .get()
       .then(async (item) => {
         const FormValues = item.map((item: any) => ({
@@ -295,6 +302,7 @@ const Onboarding = (props: any) => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.Department) // Replace 'Departments' with your list name
       .items.select("*, Title") // Fetch only the Title column
+      .top(5000)
       .get()
       .then(async (items) => {
         const titleValues = items.map((item: any) => ({
@@ -545,6 +553,7 @@ const Onboarding = (props: any) => {
               .items.select("*,Employee/EMail,Id,ID") // Fetch only necessary fields
 
               .expand("Employee")
+              .top(5000)
               .get()
               .then(async (_items: any) => {
                 if (tempEmployeeOnboardingDetails.Status === "Completed") {
