@@ -48,11 +48,15 @@ let filData: IFilData = {
 };
 
 const HrScreen = (props: any): JSX.Element => {
+  console.log(props, "props");
+
   const curUserDetails = {
     Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
     ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
   };
+  console.log(curUserDetails, "curUserDetails");
+
   // const [render, setRerender] = useState(true);
   const [employessResponseDetails, setemployessResponseDetails] = useState<
     any[]
@@ -60,6 +64,7 @@ const HrScreen = (props: any): JSX.Element => {
   const [isVisible, setisVisible] = useState(false);
   const [departmentsDetails, setdepartmentsDetails] = useState<any>([]);
   const [filterKeys, setfilterKeys] = useState<IFilData>({ ...filData });
+  const [curtUserID, setcurtUserID] = useState<any>();
   const [tempEmployeeDetails, settempEmployeeDetails] = useState<any>({
     Employee: {
       Name: "",
@@ -73,6 +78,7 @@ const HrScreen = (props: any): JSX.Element => {
     Status: { key: "", name: "" },
     Comments: "",
   });
+
   const [statusDetails, setstatusDetails] = useState<any[]>([]);
   // const [pageNationRows, setpageNationRows] = useState<IPageSync>({
   //   ...defaultPagination,
@@ -144,6 +150,17 @@ const HrScreen = (props: any): JSX.Element => {
     console.log(tempEmployeeDetails);
   };
 
+  const handlerGetCurrentUserId = async () => {
+    await sp.web
+      .currentUser()
+      .then(async (user: any) => {
+        setcurtUserID(user.Id);
+      })
+      .catch((error: any) => {
+        console.error("Error getting current user ID:", error);
+      });
+  };
+
   const handlerFilterDetails = (masData: any[], key: string, val: string) => {
     let temp: any = [...masData];
     let _tempFilterkey: any = { ...filterKeys };
@@ -187,6 +204,7 @@ const HrScreen = (props: any): JSX.Element => {
       .items.select("Title")
       .get()
       .then((items) => {
+        handlerGetCurrentUserId();
         const titleValues = items.map((item: any) => ({
           key: item.Title,
           name: item.Title,
@@ -392,6 +410,8 @@ const HrScreen = (props: any): JSX.Element => {
   // update sp
 
   const handlerUpdateResponsesToSp = async (tempEmployeeDetails: any) => {
+    console.log(curtUserID, "CurrentID");
+
     // setIsLoading(true);
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
@@ -399,6 +419,8 @@ const HrScreen = (props: any): JSX.Element => {
       .update({
         Status: tempEmployeeDetails.Status,
         Comments: tempEmployeeDetails.Comments,
+        CompletedById: curtUserID,
+        CompletedDateAndTime: new Date().toISOString(),
       })
       .then(() => {
         // setRerender(true);
