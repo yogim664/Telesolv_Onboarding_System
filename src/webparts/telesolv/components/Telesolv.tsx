@@ -18,68 +18,54 @@ import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
-// const logoImg: string = require("../assets/Images/Logo.svg");
 
 const Telesolve = (props: any): JSX.Element => {
-  const [isLoader, setIsLoader] = useState(true);
-  console.log(props);
   const CurUser = {
     Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
   };
 
-  console.log(CurUser, "Current User");
-
   // State to manage visibility
+  const [isLoader, setIsLoader] = useState(true);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [ShowHrPerson, setShowHrPerson] = useState<boolean>(false);
-
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
     useState<boolean>(false);
 
   // HR Person
-
-  const hrpersonfun = () => {
-    async function getHRGroupUsers(groupId: string) {
-      try {
-        const members = await graph.groups.getById(groupId).members();
-        console.log("Group Members:", members);
-        return members;
-      } catch (error) {
-        console.error("Error fetching group users:", error);
-        throw error;
-      }
-    }
-
+  const hrpersonfun = async () => {
     const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
-    getHRGroupUsers(HRgroupId).then((users) => {
-      const HrPerson = users.some((user) => user.mail === CurUser.Email);
-      console.log(HrPerson, "HR Director");
-      setShowHrPerson(HrPerson);
-      setIsLoader(false);
-    });
-  };
-  //HR Director
 
-  const getGroups = (): void => {
-    async function getGroupUsers(groupId: string) {
-      try {
-        // Fetch group members
-        const members = await graph.groups.getById(groupId).members();
-        console.log("Group Members:", members);
-        return members;
-      } catch (error) {
-        console.error("Error fetching group users:", error);
-        throw error;
-      }
-    }
+    await graph.groups
+      .getById(HRgroupId)
+      .members()
+      .then((users) => {
+        const HrPerson = users.some(
+          (user: any) =>
+            user?.mail.toLowerCase() === CurUser?.Email.toLowerCase()
+        );
+        console.log(HrPerson, "HR Director");
+        setShowHrPerson(HrPerson);
+        setIsLoader(false);
+      });
+  };
+
+  //HR Director
+  const getGroups = async () => {
     const groupId = "0127711a-e331-4698-8e2e-47617926b1d0";
-    getGroupUsers(groupId).then((users) => {
-      const HrDirector = users.some((user) => user.mail === CurUser.Email);
-      setShowHrDirectorScreen(HrDirector);
-      hrpersonfun();
-      console.log(HrDirector, "HR Director");
-    });
+
+    await graph.groups
+      .getById(groupId)
+      .members()
+      .then(async (users) => {
+        const HrDirector = users?.some(
+          (user: any) =>
+            user?.mail.toLowerCase() === CurUser?.Email.toLowerCase()
+        );
+        setShowHrDirectorScreen(HrDirector);
+        console.log(HrDirector, "HR Director");
+        await hrpersonfun();
+      });
   };
 
   useEffect(() => {
