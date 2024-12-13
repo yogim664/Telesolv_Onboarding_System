@@ -48,11 +48,15 @@ let filData: IFilData = {
 };
 
 const HrScreen = (props: any): JSX.Element => {
+  console.log(props, "props");
+
   const curUserDetails = {
     Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
     ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
   };
+  console.log(curUserDetails, "curUserDetails");
+
   // const [render, setRerender] = useState(true);
   const [employessResponseDetails, setemployessResponseDetails] = useState<
     any[]
@@ -60,6 +64,7 @@ const HrScreen = (props: any): JSX.Element => {
   const [isVisible, setisVisible] = useState(false);
   const [departmentsDetails, setdepartmentsDetails] = useState<any>([]);
   const [filterKeys, setfilterKeys] = useState<IFilData>({ ...filData });
+  const [curtUserID, setcurtUserID] = useState<any>();
   const [tempEmployeeDetails, settempEmployeeDetails] = useState<any>({
     Employee: {
       Name: "",
@@ -73,6 +78,7 @@ const HrScreen = (props: any): JSX.Element => {
     Status: { key: "", name: "" },
     Comments: "",
   });
+
   const [statusDetails, setstatusDetails] = useState<any[]>([]);
   // const [pageNationRows, setpageNationRows] = useState<IPageSync>({
   //   ...defaultPagination,
@@ -100,12 +106,59 @@ const HrScreen = (props: any): JSX.Element => {
       ),
     },
   ]);
+  const tableDataBinding = (tblArr: any) => {
+    let tableData = tblArr.map((item: any) => {
+      return {
+        Id: item.Id,
+        Task: item?.Task || "No Title",
+        Employee: (
+          <div className={styles.tableEmployeeProfile}>
+            <Avatar
+              image={`/_layouts/15/userphoto.aspx?size=S&username=${item.Employee.Email}`}
+              shape="circle"
+              size="normal"
+              label={item.Employee.Name}
+            />
+            {item.Employee.Name}
+          </div>
+        ),
+        Role: item?.Role || "No Role",
+        Department: item?.Department || "No Department",
+        Status: item?.Status ? item?.Status.key : "Sample",
+        Action: (
+          <i
+            className="pi pi-pencil"
+            style={{ fontSize: "1rem", color: "#233b83" }}
+            onClick={() => {
+              settempEmployeeDetails(item);
+              setisVisible(true);
+              console.log(item);
+            }}
+          />
+        ),
+      };
+    });
+    console.log(tableData);
+    setTableContent([...tableData]);
+  };
+
   const handlerChangeEmployessResponseDetails = (key: string, value: any) => {
     const curObj: any = { ...tempEmployeeDetails };
     curObj[key] = value;
     settempEmployeeDetails(curObj);
     console.log(curObj);
     console.log(tempEmployeeDetails);
+  };
+
+  const handlerGetCurrentUserId = async () => {
+    await sp.web
+      .currentUser()
+      .then(async (user: any) => {
+        setcurtUserID(user.Id);
+      })
+      .catch((error: any) => {
+        console.error("Error getting current user ID:", error);
+      });
   };
 
   const handlerFilterDetails = (masData: any[], key: string, val: string) => {
@@ -141,6 +194,7 @@ const HrScreen = (props: any): JSX.Element => {
 
     setfilterKeys({ ..._tempFilterkey });
     setfilteredEmployessResponseDetails([...temp]);
+    tableDataBinding(temp);
     console.log(filteredEmployessResponseDetails);
   };
 
@@ -150,6 +204,7 @@ const HrScreen = (props: any): JSX.Element => {
       .items.select("Title")
       .get()
       .then((items) => {
+        handlerGetCurrentUserId();
         const titleValues = items.map((item: any) => ({
           key: item.Title,
           name: item.Title,
@@ -250,38 +305,8 @@ const HrScreen = (props: any): JSX.Element => {
               item.Status.key !== "Satisfactory" &&
               item.Status.key !== "Pending"
           )) || [];
-        let tableData = tempAssigenQuestion.map((item: any) => {
-          return {
-            Id: item.Id,
-            Task: item?.Task || "No Title",
-            Employee: (
-              <div className={styles.tableEmployeeProfile}>
-                <Avatar
-                  image={`/_layouts/15/userphoto.aspx?size=S&username=${item.Employee.Email}`}
-                  shape="circle"
-                  size="normal"
-                  label={item.Employee.Name}
-                />
-                {item.Employee.Name}
-              </div>
-            ),
-            Role: item?.Role || "No Role",
-            Department: item?.Department || "No Department",
-            Status: item?.Status ? item?.Status.key : "Sample",
-            Action: (
-              <i
-                className="pi pi-pencil"
-                style={{ fontSize: "1rem", color: "#233b83" }}
-                onClick={() => {
-                  console.log(item);
-                }}
-              />
-            ),
-          };
-        });
-        console.log(tableData);
-        setTableContent([...tableData]);
 
+        tableDataBinding(_tempArr);
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
         setemployessResponseDetails(tempAssigenQuestion);
 
@@ -383,17 +408,31 @@ const HrScreen = (props: any): JSX.Element => {
   // };
 
   // update sp
+
   const handlerUpdateResponsesToSp = async (tempEmployeeDetails: any) => {
-    setIsLoading(true);
+    console.log(curtUserID, "CurrentID");
+
+    // setIsLoading(true);
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.getById(tempEmployeeDetails.Id)
       .update({
         Status: tempEmployeeDetails.Status,
         Comments: tempEmployeeDetails.Comments,
+        CompletedById: curtUserID,
+        CompletedDateAndTime: new Date().toISOString(),
       })
       .then(() => {
         // setRerender(true);
+
+        debugger;
+        //New code
+        const updatedEmployeeDetails = [...employessResponseDetails];
+        updatedEmployeeDetails[tempEmployeeDetails.Id] = {
+          ...tempEmployeeDetails,
+        };
+        setemployessResponseDetails([...updatedEmployeeDetails]);
+
         setisVisible(false);
         setIsLoading(false);
         toast.success("Update Successfully", {
@@ -671,9 +710,7 @@ const HrScreen = (props: any): JSX.Element => {
                     filData.status = "";
                     filData.search = "";
                     setfilterKeys({ ...filData });
-                    setfilteredEmployessResponseDetails(
-                      employessResponseDetails
-                    );
+                    tableDataBinding(employessResponseDetails);
                   }}
                 />
               </div>
