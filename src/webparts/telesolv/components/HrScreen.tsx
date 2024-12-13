@@ -20,15 +20,15 @@ import { Dropdown } from "primereact/dropdown";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Paginator } from "primereact/paginator";
+// import { Paginator } from "primereact/paginator";
 import { GCongfig } from "../../../Config/Config";
 import { Checkbox } from "primereact/checkbox";
 import Loader from "./Loader";
-
-interface IPageSync {
-  first: number;
-  rows: number;
-}
+import { Avatar } from "primereact/avatar";
+// interface IPageSync {
+//   first: number;
+//   rows: number;
+// }
 
 interface IFilData {
   dept: string;
@@ -36,10 +36,10 @@ interface IFilData {
   status: string;
 }
 
-const defaultPagination: IPageSync = {
-  first: 0,
-  rows: 5,
-};
+// const defaultPagination: IPageSync = {
+//   first: 0,
+//   rows: 5,
+// };
 
 let filData: IFilData = {
   dept: "",
@@ -53,7 +53,7 @@ const HrScreen = (props: any): JSX.Element => {
     Email: props?.context?._pageContext?._user?.email || "Unknown Email",
     ID: props?.context?._pageContext?._user?.Id || "Unknown ID",
   };
-  const [render, setRerender] = useState(true);
+  // const [render, setRerender] = useState(true);
   const [employessResponseDetails, setemployessResponseDetails] = useState<
     any[]
   >([]);
@@ -74,14 +74,32 @@ const HrScreen = (props: any): JSX.Element => {
     Comments: "",
   });
   const [statusDetails, setstatusDetails] = useState<any[]>([]);
-  const [pageNationRows, setpageNationRows] = useState<IPageSync>({
-    ...defaultPagination,
-  });
+  // const [pageNationRows, setpageNationRows] = useState<IPageSync>({
+  //   ...defaultPagination,
+  // });
   const [
     filteredEmployessResponseDetails,
     setfilteredEmployessResponseDetails,
   ] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [tableContent, setTableContent] = useState([
+    {
+      Id: "",
+      Task: "",
+      Role: "",
+      Department: "",
+      Status: "",
+      Action: (
+        <i
+          className="pi pi-pencil"
+          style={{ fontSize: "1rem", color: "#233b83" }}
+          onClick={() => {
+            console.log(0);
+          }}
+        />
+      ),
+    },
+  ]);
   const handlerChangeEmployessResponseDetails = (key: string, value: any) => {
     const curObj: any = { ...tempEmployeeDetails };
     curObj[key] = value;
@@ -123,6 +141,7 @@ const HrScreen = (props: any): JSX.Element => {
 
     setfilterKeys({ ..._tempFilterkey });
     setfilteredEmployessResponseDetails([...temp]);
+    console.log(filteredEmployessResponseDetails);
   };
 
   const handlerGetDepartments = async () => {
@@ -219,8 +238,8 @@ const HrScreen = (props: any): JSX.Element => {
             },
           };
         });
-        const tempAssigenQuestion = await Promise.all(
-          _tempArr?.filter(
+        const tempAssigenQuestion =
+          (await _tempArr?.filter(
             (item: any) =>
               (assArray?.some((val: any) => val?.ID === item?.QuestionID) ||
                 item.Assigned?.some(
@@ -230,11 +249,45 @@ const HrScreen = (props: any): JSX.Element => {
                 )) &&
               item.Status.key !== "Satisfactory" &&
               item.Status.key !== "Pending"
-          ) || []
-        );
+          )) || [];
+        let tableData = tempAssigenQuestion.map((item: any) => {
+          return {
+            Id: item.Id,
+            Task: item?.Task || "No Title",
+            Employee: (
+              <div className={styles.tableEmployeeProfile}>
+                <Avatar
+                  image={`/_layouts/15/userphoto.aspx?size=S&username=${item.Employee.Email}`}
+                  shape="circle"
+                  size="normal"
+                  label={item.Employee.Name}
+                />
+                {item.Employee.Name}
+              </div>
+            ),
+            Role: item?.Role || "No Role",
+            Department: item?.Department || "No Department",
+            Status: item?.Status ? item?.Status.key : "Sample",
+            Action: (
+              <i
+                className="pi pi-pencil"
+                style={{ fontSize: "1rem", color: "#233b83" }}
+                onClick={() => {
+                  console.log(item);
+                }}
+              />
+            ),
+          };
+        });
+        console.log(tableData);
+        setTableContent([...tableData]);
+
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
         setemployessResponseDetails(tempAssigenQuestion);
-        setfilteredEmployessResponseDetails(tempAssigenQuestion);
+
+        // setfilteredEmployessResponseDetails(tempAssigenQuestion);
+      })
+      .then(() => {
         handlerGetStatusValues();
       })
       .catch((err) => {
@@ -264,73 +317,73 @@ const HrScreen = (props: any): JSX.Element => {
       });
   };
 
-  const handlerEmployeeDetails = (data: any): any => {
-    return (
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <img
-          src={`/_layouts/15/userphoto.aspx?size=M&accountname=${data.Employee.Email}`}
-          alt="wait"
-          style={{
-            marginRight: 10,
-            width: 30,
-            height: 30,
-            borderRadius: "50%",
-            objectFit: "fill",
-          }}
-        />
-        <span>{data.Employee.Name}</span>
-      </div>
-    );
-  };
+  // const handlerEmployeeDetails = (data: any): any => {
+  //   return (
+  //     <div style={{ display: "flex", alignItems: "center" }}>
+  //       <img
+  //         src={`/_layouts/15/userphoto.aspx?size=M&accountname=${data.Employee.Email}`}
+  //         alt="wait"
+  //         style={{
+  //           marginRight: 10,
+  //           width: 30,
+  //           height: 30,
+  //           borderRadius: "50%",
+  //           objectFit: "fill",
+  //         }}
+  //       />
+  //       <span>{data.Employee.Name}</span>
+  //     </div>
+  //   );
+  // };
 
-  const handlerStatusDetails = (rowData: any) => {
-    let color: string = "";
-    let bgColor: string = "";
-    if (rowData?.Status?.key === "Pending") {
-      color = "#1E71B9";
-      bgColor = "#D8E5F0";
-    } else if (rowData?.Status?.key === "Satisfactory") {
-      color = "#1EB949";
-      bgColor = "#D8F0E3";
-    } else {
-      color = "#B97E1E";
-      bgColor = "#F0EAD8";
-    }
+  // const handlerStatusDetails = (rowData: any) => {
+  //   let color: string = "";
+  //   let bgColor: string = "";
+  //   if (rowData?.Status?.key === "Pending") {
+  //     color = "#1E71B9";
+  //     bgColor = "#D8E5F0";
+  //   } else if (rowData?.Status?.key === "Satisfactory") {
+  //     color = "#1EB949";
+  //     bgColor = "#D8F0E3";
+  //   } else {
+  //     color = "#B97E1E";
+  //     bgColor = "#F0EAD8";
+  //   }
 
-    return (
-      <div
-        className={styles.pendingSts}
-        style={{ color: color, backgroundColor: bgColor }}
-      >
-        <div
-          className={styles.statusDot}
-          style={{
-            background: color,
-          }}
-        ></div>
-        <div>{rowData?.Status?.key}</div>
-      </div>
-    );
-  };
+  //   return (
+  //     <div
+  //       className={styles.pendingSts}
+  //       style={{ color: color, backgroundColor: bgColor }}
+  //     >
+  //       <div
+  //         className={styles.statusDot}
+  //         style={{
+  //           background: color,
+  //         }}
+  //       ></div>
+  //       <div>{rowData?.Status?.key}</div>
+  //     </div>
+  //   );
+  // };
 
-  const handlerActionIcons = (Rowdata: any) => {
-    return (
-      <div style={{ display: "flex", gap: 6, width: "100%", paddingLeft: 14 }}>
-        <i
-          className="pi pi-pencil"
-          style={{ fontSize: "1rem", color: "#233b83" }}
-          onClick={() => {
-            setisVisible(true);
-            console.log(Rowdata);
-            settempEmployeeDetails({ ...Rowdata });
-          }}
-        />
-      </div>
-    );
-  };
+  // const handlerActionIcons = (Rowdata: any) => {
+  //   return (
+  //     <div style={{ display: "flex", gap: 6, width: "100%", paddingLeft: 14 }}>
+  //       <i
+  //         className="pi pi-pencil"
+  //         style={{ fontSize: "1rem", color: "#233b83" }}
+  //         onClick={() => {
+  //           setisVisible(true);
+  //           console.log(Rowdata);
+  //           settempEmployeeDetails({ ...Rowdata });
+  //         }}
+  //       />
+  //     </div>
+  //   );
+  // };
 
   // update sp
-  const handlerUpdateResponsesToSp: any = async (tempEmployeeDetails: any) => {
+  const handlerUpdateResponsesToSp = async (tempEmployeeDetails: any) => {
     setIsLoading(true);
     sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
@@ -340,7 +393,7 @@ const HrScreen = (props: any): JSX.Element => {
         Comments: tempEmployeeDetails.Comments,
       })
       .then(() => {
-        setRerender(true);
+        // setRerender(true);
         setisVisible(false);
         setIsLoading(false);
         toast.success("Update Successfully", {
@@ -370,17 +423,17 @@ const HrScreen = (props: any): JSX.Element => {
       });
   };
 
-  const onPageChange = (event: any) => {
-    setpageNationRows({
-      first: event?.first || defaultPagination.first,
-      rows: event?.rows || defaultPagination.rows,
-    });
-  };
+  // const onPageChange = (event: any) => {
+  //   setpageNationRows({
+  //     first: event?.first || defaultPagination.first,
+  //     rows: event?.rows || defaultPagination.rows,
+  //   });
+  // };
 
   useEffect(() => {
     handlerCurrentUserTasks();
-    setRerender(false);
-  }, [render]);
+    // setRerender(false);
+  }, []);
 
   return (
     <>
@@ -625,7 +678,15 @@ const HrScreen = (props: any): JSX.Element => {
                 />
               </div>
             </div>
-            <DataTable
+            <DataTable value={tableContent}>
+              <Column field="Task" header="Task" />
+              <Column field="Employee" header="Employee" />
+              <Column field="Role" header="Role" />
+              <Column field="Department" header="Department" />
+              <Column field="Status" header="Status" />
+              <Column field="Action" header="Action" />
+            </DataTable>
+            {/* <DataTable
               value={filteredEmployessResponseDetails?.slice(
                 pageNationRows.first,
                 pageNationRows.first + pageNationRows.rows
@@ -651,14 +712,14 @@ const HrScreen = (props: any): JSX.Element => {
                 body={(Rowdata: any) => handlerActionIcons(Rowdata)}
               />{" "}
               *
-            </DataTable>
-            <Paginator
+            </DataTable> */}
+            {/* <Paginator
               first={pageNationRows.first}
               rows={pageNationRows.rows}
               totalRecords={employessResponseDetails.length}
               // rowsPerPageOptions={[10, 20, 30]}
               onPageChange={onPageChange}
-            />
+            /> */}
           </div>
 
           <ToastContainer
