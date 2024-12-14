@@ -877,7 +877,7 @@ const Config = (props: any) => {
 
           <TabView className="CongifTab">
             <TabPanel
-              header="Checkpoints"
+              header="Questions"
               className={`${styles.questionConfigContaier} MainTab`}
             >
               <div className={styles.formSelectionSection}>

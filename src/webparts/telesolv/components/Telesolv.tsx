@@ -27,7 +27,7 @@ const Telesolve = (props: any): JSX.Element => {
 
   // State to manage visibility
   const [isLoader, setIsLoader] = useState(true);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<number>(1);
   const [ShowHrPerson, setShowHrPerson] = useState<boolean>(false);
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
     useState<boolean>(false);
@@ -85,9 +85,6 @@ const Telesolve = (props: any): JSX.Element => {
           </button>
 
           <div className={styles.navBar}>
-            {/* <div className={styles.navRightContainers}>
-              <img src={logoImg} alt="logo" />
-            </div> */}
             <h2>Onboarding App</h2>
             <div className={styles.navLeftContainers}>
               <TabView
@@ -95,10 +92,7 @@ const Telesolve = (props: any): JSX.Element => {
                 onTabChange={(e) => setActiveIndex(e.index)}
                 className="MainTab"
               >
-                <TabPanel
-                  header="Configuration"
-                  style={{ fontFamily: "interRegular" }}
-                >
+                <TabPanel header="Forms" style={{ fontFamily: "interRegular" }}>
                   {}
                 </TabPanel>
                 <TabPanel

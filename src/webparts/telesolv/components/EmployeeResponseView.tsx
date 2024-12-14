@@ -15,28 +15,48 @@ import { GCongfig } from "../../../Config/Config";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
-// import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+// import {
+//   ILabelStyles,
+//   IPersonaProps,
+//   Label,
+//   NormalPeoplePicker,
+//   Icon,
+// } from "@fluentui/react";
+//import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import {
   PeoplePicker,
   PrincipalType,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { format } from "date-fns";
 import { Button } from "primereact/button";
+import { graph } from "@pnp/graph";
+import { IPersonaProps, NormalPeoplePicker } from "@fluentui/react";
 
 interface IFilData {
   Employee: any;
   search: string;
   Status: string;
 }
+
+interface IUserDetail {
+  ID: number;
+  imageUrl: any;
+  text: string;
+  secondaryText: string;
+}
+
 interface IDrop {
   key: string;
   name: string;
 }
+
 const _fkeys: IFilData = {
   Employee: [],
   search: "",
   Status: "",
 };
+let _userDetail: IUserDetail[] = [];
+let userArray: any[] = [];
 
 const EmployeeResponseView = (props: any): JSX.Element => {
   let curFilterItem: IFilData = _fkeys;
@@ -49,6 +69,8 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   );
   const [responseComments, setresponseComments] = useState<any>([]);
   const [isvisible, setisVisible] = useState(false);
+  const [userDatas, setUserDatas] = useState<IPersonaProps[]>([]);
+
   const selectedEmployeeDetails = props.setselectedEmployeeDetails;
 
   const handlerAssignedPersonDetails = (rowData: any) => {
@@ -67,8 +89,8 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             }}
           >
             <img
-              src={`/_layouts/15/userphoto.aspx?size=S&username=${assignee.Email}`}
-              alt={assignee.Email}
+              src={`/_layouts/15/userphoto.aspx?size=S&username=${assignee.secondaryText}`}
+              alt={assignee.secondaryText}
               style={{
                 width: 26,
                 height: 26,
@@ -76,7 +98,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 marginRight: "10px",
               }}
             />
-            <span>{assignee.Title}</span>
+            <span>{assignee.text}</span>
           </div>
         ))}
       </div>
@@ -158,7 +180,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                   (qItem: any) => qItem.Id === item.QuestionID?.ID
                 );
                 console.log(relatedQitems, "relatedQitems");
-                debugger;
+
                 console.log(item, "Checktems");
                 console.log(Qitems, "Qitems");
                 return {
@@ -184,22 +206,29 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                   Department: item.EmployeeID?.Department || "No Department",
                   Assigned: item?.Reassigned
                     ? item.Reassigned.map((Reassigned: any) => ({
-                        Id: Reassigned.ID,
-                        Email: Reassigned.EMail,
-                        Title: Reassigned.Title,
+                        ID: Reassigned.ID,
+                        imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
+                        text: Reassigned.Title,
+                        secondaryText: Reassigned.EMail,
+
+                        // Id: Reassigned.ID,
+                        // Email: Reassigned.EMail,
+                        // Title: Reassigned.Title,
                       }))
                     : relatedQitems[0]?.Assigned
                     ? relatedQitems[0].Assigned.map((assignee: any) => ({
-                        Id: assignee.ID,
-                        Email: assignee.EMail,
-                        Title: assignee.Title,
+                        ID: assignee.ID,
+                        imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${assignee.EMail}`,
+                        text: assignee.Title,
+                        secondaryText: assignee.EMail,
                       }))
                     : [],
                   Reassigned: item?.Reassigned
                     ? item.Reassigned.map((Reassigned: any) => ({
-                        Id: Reassigned.ID,
-                        Email: Reassigned.EMail,
-                        Title: Reassigned.Title,
+                        ID: Reassigned.ID,
+                        imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
+                        text: Reassigned.Title,
+                        secondaryText: Reassigned.EMail,
                       }))
                     : [],
                 };
@@ -234,7 +263,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     }
     const filteredItem = filteredItems[0];
     const assignedIds =
-      filteredItem.Reassigned?.map((val: any) => val.id) || [];
+      filteredItem.Reassigned?.map((val: any) => val.ID) || [];
 
     try {
       await sp.web.lists
@@ -286,6 +315,17 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           style={{ fontSize: "1.25rem", color: "#233b83" }}
           onClick={() => {
             setselectedQuestionDetails(Rowdata);
+            let slctedUsers: any[] = [];
+            Rowdata.Assigned?.forEach((value: IUserDetail) => {
+              let authendication: boolean = [...slctedUsers].some(
+                (val: IUserDetail) => val.secondaryText === value.secondaryText
+              );
+              if (!authendication) {
+                slctedUsers.push(value);
+              }
+            });
+            setUserDatas([...slctedUsers]);
+
             setisVisible(true);
           }}
         />
@@ -338,12 +378,12 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         )
       );
     }
-    debugger;
+
     if (curFilterItem.Employee?.length > 0) {
       tempArray = tempArray.filter((_item: any) =>
         _item.Assigned?.some((assignedPerson: any) => {
           // Log to check the data
-          console.log("Assigned Person Email: ", assignedPerson.Email);
+          console.log("Assigned Person Email: ", assignedPerson.secondaryText);
           return curFilterItem.Employee.some((selectedPerson: any) => {
             // Log to check the selected person's data
             console.log(
@@ -351,7 +391,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               selectedPerson.secondaryText
             );
 
-            return assignedPerson.Email === selectedPerson.secondaryText;
+            return (
+              assignedPerson.secondaryText === selectedPerson.secondaryText
+            );
           });
         })
       );
@@ -367,7 +409,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   };
 
   const handlerReassignedChange = (value: any, rowData: any, field: string) => {
-    debugger;
     const updatedQuestions: any = filteredQuestions.map((question: any) =>
       question.Id === rowData.Id
         ? {
@@ -375,7 +416,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             [field]:
               field === "Reassigned"
                 ? value.map((val: any) => ({
-                    id: val.id,
+                    ID: val.ID,
                     Email: val.secondaryText,
                     Title: val.text,
                   }))
@@ -387,8 +428,74 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     console.log(updatedQuestions, "updatedQuestions");
   };
 
+  // HR Person
+  const hrpersonfun = async (Spusers: any) => {
+    console.log(Spusers, "HRDinction");
+
+    const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
+    await graph.groups
+      .getById(HRgroupId)
+      .members()
+      .then((members) => {
+        console.log(members, "members");
+        _userDetail = [];
+
+        members.forEach((user: any) => {
+          const TempSpUser = Spusers.filter(
+            (e: any) =>
+              e.Email.toLowerCase() ===
+              (user?.userPrincipalName || "").toLowerCase()
+          );
+
+          // if (TempSpUser > 0) {
+          _userDetail.push({
+            ID: TempSpUser[0].ID || null,
+            imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${
+              user?.userPrincipalName || ""
+            }`,
+            text: user?.displayName || "",
+            secondaryText: user?.userPrincipalName || "",
+          });
+          //   }
+          console.log(_userDetail, "_userDetail");
+        });
+      });
+  };
+
+  const doesTextStartWith = (text: string, filterText: string): boolean => {
+    return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
+  };
+
+  /* NormalPeoplePicker Function */
+  const GetUserDetails = (filterText: any): any[] => {
+    debugger;
+    let result: IUserDetail[] = _userDetail?.filter(
+      (value, index, self) => index === self.findIndex((t) => t.ID === value.ID)
+    );
+    console.log(_userDetail);
+    return result.filter((item: IUserDetail) =>
+      doesTextStartWith(item.text as string, filterText)
+    );
+  };
+
+  const handlerSiteUsers = () => {
+    userArray = [];
+    sp.web.siteUsers.get().then((users: any) => {
+      console.log(users, "Users");
+
+      userArray = users.map((user: any) => ({
+        Email: user.Email,
+        ID: user.Id,
+      }));
+
+      hrpersonfun([...userArray]);
+    });
+    console.log(userArray, "userArrayuserArrayuserArray");
+  };
+
   useEffect(() => {
     handlerEmployeeDetails();
+    handlerSiteUsers();
   }, []);
 
   console.log(questions, "questions object");
@@ -425,6 +532,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                   "Reassigned"
                 ); // Pass selectedPeople and rowData
               }}
+              groupId="HRPersons"
               principalTypes={[PrincipalType.User]}
               defaultSelectedUsers={
                 selectedQuestionDetails.Reassigned &&
@@ -436,7 +544,40 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                       (assignee: any) => assignee?.Email
                     ) || []
               }
-              resolveDelay={1000}
+              // resolveDelay={1000}
+            />
+            {/* People picker section */}
+            <NormalPeoplePicker
+              inputProps={{ placeholder: "Insert person" }}
+              onResolveSuggestions={GetUserDetails}
+              itemLimit={10}
+              // styles={peoplePickerStyle}
+              selectedItems={userDatas}
+              onChange={(selectedUser: any): void => {
+                handlerReassignedChange(
+                  selectedUser,
+                  selectedQuestionDetails,
+                  "Reassigned"
+                );
+                console.log(selectedUser);
+                debugger;
+
+                if (selectedUser.length) {
+                  let slctedUsers: any[] = [];
+                  selectedUser.forEach((value: IUserDetail) => {
+                    let authendication: boolean = [...slctedUsers].some(
+                      (val: IUserDetail) =>
+                        val.secondaryText === value.secondaryText
+                    );
+                    if (!authendication) {
+                      slctedUsers.push(value);
+                    }
+                  });
+                  setUserDatas([...slctedUsers]);
+                } else {
+                  setUserDatas([]);
+                }
+              }}
             />
           </div>
           <div
@@ -446,7 +587,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               alignItems: "center",
               justifyContent: "center",
               gap: "10px",
-              padding: 16,
               // width: "50%",
             }}
           >
