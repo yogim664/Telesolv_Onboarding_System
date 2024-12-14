@@ -240,6 +240,17 @@ const Config = (props: any) => {
 
   const handlerQuestionDeletion = (id: number, qIndex: number) => {
     debugger;
+
+    if (id) {
+      sp.web.lists
+        .getByTitle(GCongfig.ListName.CheckpointConfig)
+        .items.getById(id)
+        .delete()
+        .catch((error: any) => {
+          console.error(`Error deleting question with ID ${id}:`, error);
+        });
+    }
+
     const sortQuestion = filteredQuestions
       .filter(
         (val: any) =>
@@ -481,17 +492,17 @@ const Config = (props: any) => {
             (_item: any) => !_item.Id && !_item.isDelete && _item.isEdit
           ) || [];
 
-        const deleteQuestions: any[] =
-          filteredQuestions?.filter(
-            (_Item: any) => _Item.Id && _Item.isDelete
-          ) || [];
+        // const deleteQuestions: any[] =
+        //   filteredQuestions?.filter(
+        //     (_Item: any) => _Item.Id && _Item.isDelete
+        //   ) || [];
 
         // Execute all operations in parallel
         setIsLoading(true);
         await Promise.all([
-          deleteQuestions?.length
-            ? handlerDeleteQuestionTOSP(deleteQuestions)
-            : Promise.resolve(),
+          // deleteQuestions?.length
+          //   ? handlerDeleteQuestionTOSP(deleteQuestions)
+          //   : Promise.resolve(),
           postQuestions?.length
             ? handlerUpdateQuestionsToSP(postQuestions)
             : Promise.resolve(),
@@ -499,6 +510,8 @@ const Config = (props: any) => {
             ? handlerSaveQuestionsToSP(saveQuestions)
             : Promise.resolve(),
         ]);
+        setIsLoading(false);
+
         toast.success("Questions saved successfully!", {
           position: "top-right",
           autoClose: 5000,
@@ -510,7 +523,6 @@ const Config = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
-        setIsLoading(false);
         setisSubmitted(!isSubmitted);
       } catch (error) {
         toast.error("Failed to process questions.", {
@@ -586,28 +598,28 @@ const Config = (props: any) => {
     }
   };
 
-  const handlerDeleteQuestionTOSP = async (questions: any) => {
-    try {
-      // Create an array of promises to delete questions
-      const promises = questions?.map((question: any) =>
-        sp.web.lists
-          .getByTitle(GCongfig.ListName.CheckpointConfig)
-          .items.getById(question.Id)
-          .delete()
-          .catch((error: any) => {
-            console.error(
-              `Error deleting question with ID ${question.Id}:`,
-              error
-            );
-          })
-      );
+  // const handlerDeleteQuestionTOSP = async (questions: any) => {
+  //   try {
+  //     // Create an array of promises to delete questions
+  //     const promises = questions?.map((question: any) =>
+  //       sp.web.lists
+  //         .getByTitle(GCongfig.ListName.CheckpointConfig)
+  //         .items.getById(question.Id)
+  //         .delete()
+  //         .catch((error: any) => {
+  //           console.error(
+  //             `Error deleting question with ID ${question.Id}:`,
+  //             error
+  //           );
+  //         })
+  //     );
 
-      // Wait for all delete operations to complete
-      await Promise.all(promises);
-    } catch (error) {
-      console.error("Error in deleteQuestionsToSP function:", error);
-    }
-  };
+  //     // Wait for all delete operations to complete
+  //     await Promise.all(promises);
+  //   } catch (error) {
+  //     console.error("Error in deleteQuestionsToSP function:", error);
+  //   }
+  // };
 
   // Get items to SP
   const handlerQuestionConfig = async (key: any) => {
@@ -671,14 +683,25 @@ const Config = (props: any) => {
           ID: item.ID,
         }));
 
-        setformsDetails([...FormValuesDups]);
-        const firstFormID = FormValuesDups?.[0]?.ID;
-        const firstFormName = FormValuesDups?.[0]?.name;
-        debugger;
-        console.log(FormValuesDups?.[0]?.name);
-        setcurrentFormID(firstFormID);
-        setcurrentFormName(firstFormName);
-        hanlderfilter("Forms", firstFormID);
+        if (!currentFormID) {
+          setformsDetails([...FormValuesDups]);
+          const firstFormID = FormValuesDups?.[0]?.ID;
+          const firstFormName = FormValuesDups?.[0]?.name;
+          debugger;
+          console.log(FormValuesDups?.[0]?.name);
+          setcurrentFormID(firstFormID);
+          setcurrentFormName(firstFormName);
+          hanlderfilter("Forms", firstFormID);
+        } else {
+          debugger;
+          const tempCurrentFormDetails = [...FormValuesDups];
+          const currentFormNamevalue =
+            tempCurrentFormDetails?.find(
+              (form: any) => form.ID === currentFormID
+            )?.name || null;
+          setcurrentFormName(currentFormNamevalue);
+          hanlderfilter("Forms", currentFormID);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -768,6 +791,7 @@ const Config = (props: any) => {
           .then(async (li) => {
             await setnewformDetails("");
             await hanlderForms();
+            // setcurrentFormName(newformDetails);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -882,31 +906,35 @@ const Config = (props: any) => {
             >
               <div className={styles.formSelectionSection}>
                 <div className={styles.formDetailsContainer}>
-                  <h2>{currentFormName}</h2>
-                  <i
-                    className="pi pi-pencil"
-                    style={{
-                      //   backgroundColor: "#223b83",
-                      padding: 10,
-                      borderRadius: 4,
-                      color: "#223b83",
-                    }}
-                    onClick={(e) => {
-                      setisVisible(true);
-                      setisFormEdit(true);
-                      const tempNewformDetails = formsDetails.find(
-                        (item: any) => item.ID === filteredForm.Forms
-                      );
-                      if (tempNewformDetails) {
-                        setnewformDetails(tempNewformDetails.name);
-                      } else {
-                        console.error("No matching form found!");
-                        setnewformDetails(null);
-                        console.log(isFormEdit);
-                      }
-                    }}
-                  />
+                  {currentFormName ? (
+                    <>
+                      <h2>{currentFormName}</h2>
+                      <i
+                        className="pi pi-pencil"
+                        style={{
+                          padding: 10,
+                          borderRadius: 4,
+                          color: "#223b83",
+                        }}
+                        onClick={(e) => {
+                          setisVisible(true);
+                          setisFormEdit(true);
+                          const tempNewformDetails = formsDetails.find(
+                            (item: any) => item.ID === filteredForm.Forms
+                          );
+                          if (tempNewformDetails) {
+                            setnewformDetails(tempNewformDetails.name);
+                          } else {
+                            console.error("No matching form found!");
+                            setnewformDetails(null);
+                            console.log(isFormEdit);
+                          }
+                        }}
+                      />
+                    </>
+                  ) : null}
                 </div>
+
                 <div className={styles.formSelectionSection}>
                   <Dropdown
                     className={styles.formFilterDD}
