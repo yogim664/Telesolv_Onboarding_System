@@ -335,7 +335,12 @@ const EmployeeForm = (props: any): JSX.Element => {
                           .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo) // Direct number comparison
 
                           .map((_item: any, qIndex: any) => (
-                            <div className={styles.question}>
+                            <div
+                              className={styles.question}
+                              style={{
+                                animationDelay: `${(qIndex + 1) * 0.2}s`,
+                              }}
+                            >
                               <div
                                 className={styles.questionTitle}
                               >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</div>
@@ -422,7 +427,12 @@ const EmployeeForm = (props: any): JSX.Element => {
                           ))}
                     </div>
                   </div>
-                  <div className={styles.commentsContainer}>
+                  <div
+                    className={styles.commentsContainer}
+                    style={{
+                      animationDelay: `${(questions.length + 1) * 0.2}s`,
+                    }}
+                  >
                     <div className={styles.commentsContainerHeader}>
                       <img src={cmtImg} alt="logo" />
                       <span style={{ fontWeight: "bolder", fontSize: "large" }}>
