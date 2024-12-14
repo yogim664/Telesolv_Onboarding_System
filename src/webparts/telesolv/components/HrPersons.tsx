@@ -25,12 +25,24 @@ import { IQuestionDatas } from "../../../Interface/Interface";
 import { Dropdown } from "primereact/dropdown";
 import { Avatar } from "primereact/avatar";
 import Loader from "./Loader";
+import { IPersonaProps, NormalPeoplePicker } from "@fluentui/react";
+import { graph } from "@pnp/graph";
+
 interface IFilterKeys {
   people: string[];
   search: string;
   Forms: any;
 }
 
+interface IUserDetail {
+  ID: number;
+  imageUrl: any;
+  text: string;
+  secondaryText: string;
+}
+
+let _userDetail: IUserDetail[] = [];
+let userArray: any[] = [];
 const HrPersons = (props: any) => {
   // variables
   let _fkeys: IFilterKeys = {
@@ -45,19 +57,21 @@ const HrPersons = (props: any) => {
   const [filteredcheckPoints, setfilteredcheckPoints] = useState<any>([]);
   const [currentFormID, setcurrentFormID] = useState(null);
   const [formsValues, setformsValues] = useState<any>([]);
+  const [userDatas, setUserDatas] = useState<IPersonaProps[]>([]);
+
   console.log(currentFormID);
 
   // style variables
-  const peoplePickerStyles = {
-    root: {
-      ".ms-BasePicker-text": {
-        border: isEdit && "none",
-        "::after": {
-          backgroundColor: "transparent !important",
-        },
-      },
-    },
-  };
+  // const peoplePickerStyles = {
+  //   root: {
+  //     ".ms-BasePicker-text": {
+  //       border: isEdit && "none",
+  //       "::after": {
+  //         backgroundColor: "transparent !important",
+  //       },
+  //     },
+  //   },
+  // };
 
   // Get items to SP
   const handlerGetQUestionConfig = async () => {
@@ -256,7 +270,7 @@ const HrPersons = (props: any) => {
               .items.getById(checkpoint.Id)
               .update({
                 AssignedId: {
-                  results: assignedValues.map((val: any) => val.id),
+                  results: assignedValues.map((val: any) => val.ID),
                 },
                 TaskName: checkpoint.TaskName,
               })
@@ -276,6 +290,21 @@ const HrPersons = (props: any) => {
       await handlerGetQUestionConfig();
       await setIsLoading(false);
     }
+  };
+  const doesTextStartWith = (text: string, filterText: string): boolean => {
+    return text.toLowerCase().indexOf(filterText.toLowerCase()) === 0;
+  };
+
+  /* NormalPeoplePicker Function */
+  const GetUserDetails: any = (filterText: any): any[] => {
+    debugger;
+    let result: IUserDetail[] = _userDetail?.filter(
+      (value, index, self) => index === self.findIndex((t) => t.ID === value.ID)
+    );
+    console.log(_userDetail);
+    return result.filter((item: IUserDetail) =>
+      doesTextStartWith(item.text as string, filterText)
+    );
   };
 
   const handlerAssigneeDetails = (rowData: any) => {
@@ -305,21 +334,49 @@ const HrPersons = (props: any) => {
       );
     } else {
       return (
-        <PeoplePicker
-          context={props.context}
-          webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-          personSelectionLimit={100}
-          showtooltip={false}
-          ensureUser={true}
-          placeholder={""}
-          onChange={(selectedPeople: any[]) => {
-            handlerQuestionConfigChange(selectedPeople, rowData, "Assigned"); // Pass selectedPeople and rowData
+        // <PeoplePicker
+        //   context={props.context}
+        //   webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+        //   personSelectionLimit={100}
+        //   showtooltip={false}
+        //   ensureUser={true}
+        //   placeholder={""}
+        //   onChange={(selectedPeople: any[]) => {
+        //     handlerQuestionConfigChange(selectedPeople, rowData, "Assigned"); // Pass selectedPeople and rowData
+        //   }}
+        //   styles={peoplePickerStyles}
+        //   principalTypes={[PrincipalType.User]}
+        //   defaultSelectedUsers={rowData?.Assigned?.map((val: any) => val.Email)}
+        //   resolveDelay={1000}
+        //   disabled={isEdit}
+        // />
+        <NormalPeoplePicker
+          inputProps={{ placeholder: "Insert person" }}
+          onResolveSuggestions={GetUserDetails}
+          itemLimit={10}
+          // styles={peoplePickerStyle}
+          selectedItems={userDatas}
+          onChange={(selectedUser: any): void => {
+            handlerQuestionConfigChange(selectedUser, rowData, "Assigned");
+            console.log(selectedUser);
+            debugger;
+
+            if (selectedUser.length) {
+              let slctedUsers: any[] = [];
+              selectedUser.forEach((value: IUserDetail) => {
+                let authendication: boolean = [...slctedUsers].some(
+                  (val: IUserDetail) =>
+                    val.secondaryText === value.secondaryText
+                );
+                if (!authendication) {
+                  slctedUsers.push(value);
+                }
+              });
+              setUserDatas([...slctedUsers]);
+            } else {
+              setUserDatas([]);
+            }
           }}
-          styles={peoplePickerStyles}
-          principalTypes={[PrincipalType.User]}
-          defaultSelectedUsers={rowData?.Assigned?.map((val: any) => val.Email)}
-          resolveDelay={1000}
-          disabled={isEdit}
         />
       );
     }
@@ -344,8 +401,58 @@ const HrPersons = (props: any) => {
     }
   };
 
+  // HR Person
+  const hrpersonfun = async (Spusers: any) => {
+    console.log(Spusers, "HRDinction");
+
+    const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
+    await graph.groups
+      .getById(HRgroupId)
+      .members()
+      .then((members) => {
+        console.log(members, "members");
+        _userDetail = [];
+
+        members.forEach((user: any) => {
+          const TempSpUser = Spusers.filter(
+            (e: any) =>
+              e.Email.toLowerCase() ===
+              (user?.userPrincipalName || "").toLowerCase()
+          );
+
+          // if (TempSpUser > 0) {
+          _userDetail.push({
+            ID: TempSpUser[0].ID || null,
+            imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${
+              user?.userPrincipalName || ""
+            }`,
+            text: user?.displayName || "",
+            secondaryText: user?.userPrincipalName || "",
+          });
+          //   }
+          console.log(_userDetail, "_userDetail");
+        });
+      });
+  };
+
+  const handlerSiteUsers = () => {
+    userArray = [];
+    sp.web.siteUsers.get().then((users: any) => {
+      console.log(users, "Users");
+
+      userArray = users.map((user: any) => ({
+        Email: user.Email,
+        ID: user.Id,
+      }));
+
+      hrpersonfun([...userArray]);
+    });
+    console.log(userArray, "userArrayuserArrayuserArray");
+  };
+
   useEffect(() => {
     handlerGetQUestionConfig();
+    handlerSiteUsers();
     handlerGetForms();
   }, []);
 
