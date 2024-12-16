@@ -212,7 +212,7 @@
 .HrEditContainer {
     display: flex;
     justify-content: end;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     margin: 12px 0;
 }
@@ -470,4 +470,12 @@
     .addFormFooter {
         padding: 20px;
     }
+}
+
+.filterForm {
+    width: 220px;
+}
+
+.filterSearch {
+    width: 220px;
 }

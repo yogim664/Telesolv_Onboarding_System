@@ -257,12 +257,16 @@ td {
     color: #000 !important;
 }
 
+.HRPersonPeopleSearch {
+    width: 220px;
+}
+
 .HRPersonPeopleSearch .ms-BasePicker-text {
-    height: 38px;
+    min-height: 38px;
 }
 
 [class^="OnboardingRightContainer"] .ms-BasePicker-text {
-    height: 38px;
+    min-height: 38px;
 }
 
 i {
