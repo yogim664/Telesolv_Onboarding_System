@@ -344,15 +344,15 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         className={styles.pendingSts}
         style={{
           background:
-            rowData.Status === "Satisfactory"
+            rowData.Status === "Satisfactory" || rowData.Status === "Resolved"
               ? " #caf0cc"
-              : rowData.Status === "Resolved"
+              : rowData.Status === "To be resolved"
               ? "#ffebc0"
               : "#d8e5f0",
           color:
-            rowData.Status === "Satisfactory"
+            rowData.Status === "Satisfactory" || rowData.Status === "Resolved"
               ? "#437426"
-              : rowData.Status === "Resolved"
+              : rowData.Status === "To be resolved"
               ? "#8f621f"
               : "#1e71b9",
         }}
@@ -361,9 +361,9 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           className={styles.statusDot}
           style={{
             background:
-              rowData.Status === "Satisfactory"
+              rowData.Status === "Satisfactory" || rowData.Status === "Resolved"
                 ? "#437426"
-                : rowData.Status === "Resolved"
+                : rowData.Status === "To be resolved"
                 ? "#8f621f"
                 : "#1e71b9",
           }}

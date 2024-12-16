@@ -151,7 +151,7 @@ const Config = (props: any) => {
     const result = tempQuestions[0].Options.some(
       (option: any, oIndex: number) =>
         oIndex === aIndex &&
-        option.key.toLowerCase() === changeOption.toLowerCase()
+        option.key.toLowerCase().trim() === changeOption.toLowerCase().trim()
     );
     console.log(result);
 
@@ -343,7 +343,8 @@ const Config = (props: any) => {
     if (tempQuestions[0].Options.length > 0) {
       result = tempQuestions[0].Options.some(
         (option: any) =>
-          option.key.toLowerCase() === newOptionValue.toLowerCase()
+          option.key.toLowerCase().trim() ===
+          newOptionValue.toLowerCase().trim()
       );
     }
 
