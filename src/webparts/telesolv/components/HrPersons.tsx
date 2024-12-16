@@ -490,6 +490,7 @@ const HrPersons = (props: any) => {
           <div className={styles.card}>
             <div className={styles.HrEditContainer}>
               <Dropdown
+                className={styles.filterForm}
                 value={
                   formsValues
                     ? formsValues?.find(
@@ -511,6 +512,7 @@ const HrPersons = (props: any) => {
               />
 
               <InputText
+                className={styles.filterSearch}
                 placeholder={"Search"}
                 value={filterkeys.search || ""}
                 onChange={(e) => {
