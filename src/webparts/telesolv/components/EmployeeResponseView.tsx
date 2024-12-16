@@ -158,7 +158,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       .getByTitle(GCongfig.ListName.EmployeeResponse)
 
       .items.select(
-        "*,QuestionID/ID,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail, CompletedBy/ID, CompletedBy/Title, CompletedBy/EMail"
+        "*,QuestionID/ID,QuestionID/Sno,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail, CompletedBy/ID, CompletedBy/Title, CompletedBy/EMail"
       )
 
       .expand("QuestionID,Employee,EmployeeID,Reassigned,CompletedBy")
@@ -187,6 +187,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                   Id: item.ID,
                   QuestionID: item.QuestionID?.ID,
                   QuestionTitle: item.QuestionID?.Title,
+                  QuestionSno: item.QuestionID?.Sno,
                   Answer: item.QuestionID?.Answer,
                   Status: item.Status,
                   Comments: item.Comments,
@@ -239,8 +240,12 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 ? formattedItems?.[0].ResponseComments
                 : ""
             );
-            setQuestions(formattedItems);
-            setfilteredQuestions(formattedItems);
+            const sortedFormattedItems = formattedItems.sort(
+              (a: any, b: any) => a.QuestionSno - b.QuestionSno
+            );
+            debugger;
+            setQuestions(sortedFormattedItems);
+            setfilteredQuestions(sortedFormattedItems);
             await handlerGetStatusValues();
           })
           .catch((error: any) => {
@@ -369,7 +374,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   };
 
   const handlerFilter = (): void => {
-    let tempArray: any[] = [...filteredQuestions];
+    let tempArray: any[] = [...questions];
 
     if (curFilterItem.search) {
       tempArray = tempArray?.filter((val: any) =>
