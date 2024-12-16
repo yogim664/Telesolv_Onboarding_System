@@ -369,7 +369,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   };
 
   const handlerFilter = (): void => {
-    let tempArray: any[] = [...questions];
+    let tempArray: any[] = [...filteredQuestions];
 
     if (curFilterItem.search) {
       tempArray = tempArray?.filter((val: any) =>
