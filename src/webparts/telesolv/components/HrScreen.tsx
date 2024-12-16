@@ -283,6 +283,7 @@ const HrScreen = (props: any): JSX.Element => {
         "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/TaskName,  Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role, EmployeeID/SecondaryEmail , Reassigned/ID, Reassigned/EMail, Reassigned/Title"
       )
       .expand("QuestionID,Employee,EmployeeID,Reassigned")
+      .top(5000)
       .get()
       .then(async (_items: any) => {
         console.log("Fetched items:", _items); // Log fetched items
@@ -311,15 +312,16 @@ const HrScreen = (props: any): JSX.Element => {
                 }
               : "",
             Assigned:
-              item.Reassigned && item.Reassigned.length > 0
-                ? item.Reassigned.map((Reassigned: any) => ({
-                    id: Reassigned.ID,
-                    Email: Reassigned.EMail,
-                  }))
-                : item.Assigned?.map((Assigned: any) => ({
-                    id: Assigned.ID,
-                    Email: Assigned.EMail,
-                  })) || [],
+              item.Assigned?.map((Assigned: any) => ({
+                id: Assigned.ID,
+                Email: Assigned.EMail,
+              })) || [],
+
+            Reassigned:
+              item.Reassigned?.map((Reassigned: any) => ({
+                id: Reassigned.ID,
+                Email: Reassigned.EMail,
+              })) || [],
 
             Employee: {
               Name: item.Employee ? item.Employee.Title : "",
@@ -330,17 +332,26 @@ const HrScreen = (props: any): JSX.Element => {
         const tempAssigenQuestion =
           (await _tempArr?.filter(
             (item: any) =>
-              (assArray?.some((val: any) => val?.ID === item?.QuestionID) ||
-                item.Assigned?.some(
-                  (assigned: any) =>
-                    assigned?.Email?.toLowerCase() ===
-                    curUserDetails?.Email.toLowerCase()
-                )) &&
-              item.Status.key !== "Satisfactory" &&
-              item.Status.key !== "Pending"
+              assArray?.some(
+                (val: any) =>
+                  val?.ID === item?.QuestionID &&
+                  val.Assigned?.some(
+                    (assigned: any) =>
+                      assigned?.EMail?.toLowerCase() ===
+                      curUserDetails?.Email.toLowerCase()
+                  ) &&
+                  item.Reassigned.length === 0
+              ) ||
+              (item.Reassigned?.some(
+                (Reassigned: any) =>
+                  Reassigned?.Email?.toLowerCase() ===
+                  curUserDetails?.Email.toLowerCase()
+              ) &&
+                (item.Status.key !== "Satisfactory" ||
+                  item.Status.key !== "Pending"))
           )) || [];
 
-        tableDataBinding(_tempArr);
+        tableDataBinding(tempAssigenQuestion);
         console.log("tempAssigenQuestion: ", tempAssigenQuestion);
         setemployessResponseDetails(tempAssigenQuestion);
 
@@ -361,6 +372,7 @@ const HrScreen = (props: any): JSX.Element => {
       .expand("Assigned")
       .get()
       .then(async (_items: any) => {
+        debugger;
         const _filteredQuestions: any =
           _items?.filter((val: any) =>
             val?.Assigned?.some(
@@ -369,79 +381,13 @@ const HrScreen = (props: any): JSX.Element => {
                 curUserDetails?.Email.toLowerCase()
             )
           ) || [];
+        debugger;
         await handlerGetEmployeeResponseDetails(_filteredQuestions);
       })
       .catch((error: any) => {
         console.error("Error fetching items:", error);
       });
   };
-
-  // const handlerEmployeeDetails = (data: any): any => {
-  //   return (
-  //     <div style={{ display: "flex", alignItems: "center" }}>
-  //       <img
-  //         src={`/_layouts/15/userphoto.aspx?size=M&accountname=${data.Employee.Email}`}
-  //         alt="wait"
-  //         style={{
-  //           marginRight: 10,
-  //           width: 30,
-  //           height: 30,
-  //           borderRadius: "50%",
-  //           objectFit: "fill",
-  //         }}
-  //       />
-  //       <span>{data.Employee.Name}</span>
-  //     </div>
-  //   );
-  // };
-
-  // const handlerStatusDetails = (rowData: any) => {
-  //   let color: string = "";
-  //   let bgColor: string = "";
-  // if (rowData?.Status?.key === "Pending") {
-  //   color = "#1E71B9";
-  //   bgColor = "#D8E5F0";
-  // } else if (rowData?.Status?.key === "Satisfactory") {
-  //   color = "#1EB949";
-  //   bgColor = "#D8F0E3";
-  // } else {
-  //   color = "#B97E1E";
-  //   bgColor = "#F0EAD8";
-  // }
-
-  //   return (
-  //     <div
-  //       className={styles.pendingSts}
-  //       style={{ color: color, backgroundColor: bgColor }}
-  //     >
-  //       <div
-  //         className={styles.statusDot}
-  //         style={{
-  //           background: color,
-  //         }}
-  //       ></div>
-  //       <div>{rowData?.Status?.key}</div>
-  //     </div>
-  //   );
-  // };
-
-  // const handlerActionIcons = (Rowdata: any) => {
-  //   return (
-  //     <div style={{ display: "flex", gap: 6, width: "100%", paddingLeft: 14 }}>
-  //       <i
-  //         className="pi pi-pencil"
-  //         style={{ fontSize: "1rem", color: "#233b83" }}
-  //         onClick={() => {
-  //           setisVisible(true);
-  //           console.log(Rowdata);
-  //           settempEmployeeDetails({ ...Rowdata });
-  //         }}
-  //       />
-  //     </div>
-  //   );
-  // };
-
-  // update sp
 
   const handlerUpdateResponsesToSp = async (tempEmployeeDetails: any) => {
     console.log(curtUserID, "CurrentID");

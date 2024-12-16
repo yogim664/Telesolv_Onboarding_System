@@ -106,9 +106,13 @@ const HrPersons = (props: any) => {
           Assigned: item.Assigned
             ? item.Assigned.map((Assigned: any) => {
                 return {
-                  id: Assigned.ID,
-                  Email: Assigned.EMail,
-                  Name: Assigned.Title,
+                  // id: Assigned.ID,
+                  // Email: Assigned.EMail,
+                  // Name: Assigned.Title,
+                  ID: Assigned.ID,
+                  // imageUrl: any;
+                  text: Assigned.Title,
+                  secondaryText: Assigned.EMail,
                 };
               })
             : [],
@@ -142,7 +146,7 @@ const HrPersons = (props: any) => {
           _item.Assigned.length &&
           _item.Assigned.some((_a: any) =>
             _tempFilterkeys.people.some(
-              (_v: any) => _a.Email === _v.secondaryText
+              (_v: any) => _a.secondaryText === _v.secondaryText
             )
           )
       );
@@ -220,21 +224,26 @@ const HrPersons = (props: any) => {
     rowData: any,
     field: string
   ) => {
-    let updatedQuestions: any = await filteredcheckPoints.map((question: any) =>
-      question.Id === rowData.Id
-        ? {
-            ...question,
-            [field]:
-              field === "Assigned"
-                ? value.map((val: any) => ({
-                    id: val.id,
-                    Email: val.secondaryText,
-                  }))
-                : value,
-          }
-        : question
+    const tempfilteredcheckPoints = [...filteredcheckPoints];
+    let updatedQuestions: any = await tempfilteredcheckPoints.map(
+      (question: any) =>
+        question.Id === rowData.Id
+          ? {
+              ...question,
+              [field]:
+                field === "Assigned"
+                  ? value.map((val: any) => ({
+                      ID: val.ID,
+                      secondaryText: val.secondaryText,
+                      text: val.text,
+                      imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${
+                        val?.secondaryText || ""
+                      }`,
+                    }))
+                  : value,
+            }
+          : question
     );
-
     await handlerQuestionsFilter(updatedQuestions, "", _fkeys);
     await console.log(updatedQuestions, "updatedQuestions");
   };
@@ -297,7 +306,6 @@ const HrPersons = (props: any) => {
 
   /* NormalPeoplePicker Function */
   const GetUserDetails: any = (filterText: any): any[] => {
-    debugger;
     let result: IUserDetail[] = _userDetail?.filter(
       (value, index, self) => index === self.findIndex((t) => t.ID === value.ID)
     );
@@ -324,9 +332,9 @@ const HrPersons = (props: any) => {
                   }`}
                   shape="circle"
                   size="normal"
-                  label={val?.Name}
+                  label={val?.text}
                 />
-                <p>{val?.Name}</p>
+                <p>{val?.text}</p>
               </div>
             );
           })}
@@ -350,17 +358,18 @@ const HrPersons = (props: any) => {
         //   resolveDelay={1000}
         //   disabled={isEdit}
         // />
+
         <NormalPeoplePicker
           inputProps={{ placeholder: "Insert person" }}
           onResolveSuggestions={GetUserDetails}
           itemLimit={10}
           // styles={peoplePickerStyle}
-          selectedItems={userDatas}
-          onChange={(selectedUser: any): void => {
+          // selectedItems={userDatas}
+          selectedItems={rowData?.Assigned?.map((val: any) => val)}
+          onChange={(selectedUser: any[]): void => {
             handlerQuestionConfigChange(selectedUser, rowData, "Assigned");
             console.log(selectedUser);
-            debugger;
-
+            console.log(userDatas);
             if (selectedUser.length) {
               let slctedUsers: any[] = [];
               selectedUser.forEach((value: IUserDetail) => {

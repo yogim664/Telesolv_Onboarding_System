@@ -511,7 +511,7 @@ const Config = (props: any) => {
             : Promise.resolve(),
         ]);
         setIsLoading(false);
-
+        setisSubmitted(!isSubmitted);
         toast.success("Questions saved successfully!", {
           position: "top-right",
           autoClose: 5000,
@@ -523,7 +523,6 @@ const Config = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
-        setisSubmitted(!isSubmitted);
       } catch (error) {
         toast.error("Failed to process questions.", {
           position: "top-right",
@@ -670,7 +669,7 @@ const Config = (props: any) => {
   };
 
   // Function to fetch Title values
-  const hanlderForms = async () => {
+  const hanlderForms = async (id: any) => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.Forms)
       .items.select("Title, ID")
@@ -682,6 +681,7 @@ const Config = (props: any) => {
           name: item.Title,
           ID: item.ID,
         }));
+        setformsDetails([...FormValuesDups]);
 
         if (!currentFormID) {
           setformsDetails([...FormValuesDups]);
@@ -691,16 +691,16 @@ const Config = (props: any) => {
           console.log(FormValuesDups?.[0]?.name);
           setcurrentFormID(firstFormID);
           setcurrentFormName(firstFormName);
-          hanlderfilter("Forms", firstFormID);
+          hanlderfilter("Forms", firstFormID, FormValuesDups);
         } else {
           debugger;
           const tempCurrentFormDetails = [...FormValuesDups];
           const currentFormNamevalue =
-            tempCurrentFormDetails?.find(
-              (form: any) => form.ID === currentFormID
-            )?.name || null;
+            tempCurrentFormDetails?.find((form: any) => form.ID === id)?.name ||
+            null;
+          setcurrentFormID(id);
           setcurrentFormName(currentFormNamevalue);
-          hanlderfilter("Forms", currentFormID);
+          hanlderfilter("Forms", id, FormValuesDups);
         }
       })
       .catch((err) => {
@@ -709,7 +709,7 @@ const Config = (props: any) => {
   };
 
   // Filter function
-  const hanlderfilter = async (key: string, val: any) => {
+  const hanlderfilter = async (key: string, val: any, FormDetails: any) => {
     const formValue = val;
     await handlerQuestionConfig(formValue)
       .then((items: any) => {
@@ -729,7 +729,7 @@ const Config = (props: any) => {
         setfilteredForm(_tempFilterkeys);
         setfilteredQuestions([...filteredData]);
         setquestions([...filteredData]);
-
+        //      setcurrentFormID(formValue);
         setisVisible(false);
         setisFormEdit(false);
       })
@@ -737,11 +737,11 @@ const Config = (props: any) => {
         console.log(err);
       });
     debugger;
-    const tempCurrentFormDetails = [...formsDetails];
+    const tempCurrentFormDetails = [...FormDetails];
     if (tempCurrentFormDetails.length > 0) {
       const currentFormNamevalue =
-        tempCurrentFormDetails?.find((form: any) => form.ID === val)?.name ||
-        null;
+        tempCurrentFormDetails?.find((form: any) => form.ID === formValue)
+          ?.name || null;
       setcurrentFormName(currentFormNamevalue);
       console.log(currentFormNamevalue, "currentFormNamevalue");
     }
@@ -788,9 +788,11 @@ const Config = (props: any) => {
           .update({
             Title: newformDetails,
           })
-          .then(async (li) => {
+          .then(async (li: any) => {
             await setnewformDetails("");
-            await hanlderForms();
+            setcurrentFormID(li?.data?.ID);
+            await hanlderForms(id);
+
             // setcurrentFormName(newformDetails);
             setIsLoading(false);
           })
@@ -804,9 +806,9 @@ const Config = (props: any) => {
           .items.add({
             Title: newformDetails,
           })
-          .then(async (li) => {
+          .then(async (li: any) => {
             await setnewformDetails("");
-            await hanlderForms();
+            await hanlderForms(li?.data?.ID);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -817,7 +819,7 @@ const Config = (props: any) => {
   };
 
   useEffect(() => {
-    hanlderForms();
+    hanlderForms(currentFormID);
   }, [isSubmitted]);
 
   return (
@@ -946,7 +948,7 @@ const Config = (props: any) => {
                         : null
                     }
                     onChange={(e) => {
-                      hanlderfilter("Forms", e.value.ID);
+                      hanlderfilter("Forms", e.value.ID, formsDetails);
                       setcurrentFormID(e.value.ID);
                     }}
                     options={formsDetails || []}
