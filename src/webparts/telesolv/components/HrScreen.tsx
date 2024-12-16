@@ -65,6 +65,7 @@ const HrScreen = (props: any): JSX.Element => {
   const [departmentsDetails, setdepartmentsDetails] = useState<any>([]);
   const [filterKeys, setfilterKeys] = useState<IFilData>({ ...filData });
   const [curtUserID, setcurtUserID] = useState<any>();
+  const [isRunder, setisRunder] = useState(false);
   const [tempEmployeeDetails, settempEmployeeDetails] = useState<any>({
     Employee: {
       Name: "",
@@ -131,15 +132,15 @@ const HrScreen = (props: any): JSX.Element => {
               color:
                 item?.Status?.key === "Pending"
                   ? "#1E71B9"
-                  : item?.Status?.key === "To be resolved" ||
-                    item?.Status?.key === "Resolved"
+                  : // : item?.Status?.key === "To be resolved" ||
+                  item?.Status?.key === "Resolved"
                   ? "#1EB949"
                   : "#B97E1E",
               background:
                 item?.Status?.key === "Pending"
                   ? "#D8E5F0"
-                  : item?.Status?.key === "To be resolved" ||
-                    item?.Status?.key === "Resolved"
+                  : // : item?.Status?.key === "To be resolved" ||
+                  item?.Status?.key === "Resolved"
                   ? "#D8F0E3"
                   : "#F0EAD8",
             }}
@@ -150,9 +151,10 @@ const HrScreen = (props: any): JSX.Element => {
                 background:
                   item?.Status?.key === "Pending"
                     ? "#1E71B9"
-                    : item?.Status?.key === "Resolved" ||
-                      item?.Status?.key === "To be resolved"
-                    ? "#1EB949"
+                    : item?.Status?.key === "Resolved"
+                    ? // ||
+                      //   item?.Status?.key === "To be resolved"
+                      "#1EB949"
                     : "#B97E1E",
               }}
             />
@@ -174,6 +176,8 @@ const HrScreen = (props: any): JSX.Element => {
     });
     console.log(tableData);
     setTableContent([...tableData]);
+    setisRunder(false);
+    setIsLoading(false);
   };
 
   const handlerChangeEmployessResponseDetails = (key: string, value: any) => {
@@ -214,7 +218,7 @@ const HrScreen = (props: any): JSX.Element => {
     if (_tempFilterkey?.search) {
       temp = temp?.filter(
         (value: any) =>
-          value?.QuestionTitle.toLowerCase().includes(
+          value?.Task.toLowerCase().includes(
             _tempFilterkey.search.toLowerCase()
           ) ||
           value?.Role.toLowerCase().includes(
@@ -340,15 +344,20 @@ const HrScreen = (props: any): JSX.Element => {
                       assigned?.EMail?.toLowerCase() ===
                       curUserDetails?.Email.toLowerCase()
                   ) &&
-                  item.Reassigned.length === 0
+                  item.Reassigned.length === 0 &&
+                  (item.Status.key === "To be resolved" ||
+                    item.Status.key === "Resolved")
               ) ||
               (item.Reassigned?.some(
                 (Reassigned: any) =>
                   Reassigned?.Email?.toLowerCase() ===
                   curUserDetails?.Email.toLowerCase()
               ) &&
-                item.Status.key === "To be resolved") ||
-              item.Status.key === "Resolved"
+                (item.Status.key === "To be resolved" ||
+                  item.Status.key === "Resolved"))
+            //  ) ||
+            //   item.Status.key === "To be resolved") ||
+            // item.Status.key === "Resolved"
           )) || [];
 
         tableDataBinding(tempAssigenQuestion);
@@ -416,7 +425,8 @@ const HrScreen = (props: any): JSX.Element => {
         tableDataBinding(updatedEmployeeDetails);
 
         setisVisible(false);
-        setIsLoading(false);
+        setisRunder(true);
+        // setIsLoading(false);
         toast.success("Update Successfully", {
           position: "top-right",
           autoClose: 5000,
@@ -453,8 +463,9 @@ const HrScreen = (props: any): JSX.Element => {
 
   useEffect(() => {
     handlerCurrentUserTasks();
+
     // setRerender(false);
-  }, []);
+  }, [isRunder]);
 
   return (
     <>

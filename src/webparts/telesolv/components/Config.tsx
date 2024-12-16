@@ -387,6 +387,8 @@ const Config = (props: any) => {
       const currentQuestion = updatedQuestions[index];
 
       const previousQuestion = updatedQuestions[index - 1];
+      console.log(previousQuestion.Assigned, "previousQuestion.Assigned");
+      debugger;
       const tempQuestionNo = currentQuestion.QuestionNo;
       updatedQuestions[index] = {
         ...currentQuestion,
@@ -431,12 +433,14 @@ const Config = (props: any) => {
   // !BackUp
   const handlermoveQuestionDownn = (index: any) => {
     if (index < 0 || index >= filteredQuestions.length - 1) return;
-
+    debugger;
     const updatedQuestions = [...filteredQuestions];
 
     const currentQuestion = updatedQuestions[index];
     const nextQuestion = updatedQuestions[index + 1];
     const tempQuestionNo = currentQuestion.QuestionNo;
+    console.log(nextQuestion.Assigned, "     Assigned: nextQuestion.Assigned,");
+
     updatedQuestions[index] = {
       ...currentQuestion,
       QuestionNo: tempQuestionNo,
@@ -588,15 +592,24 @@ const Config = (props: any) => {
   const handlerUpdateQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
+        console.log(questions, "11");
+        console.log(question.Assigned);
+        // const assignedValues = question?.Assigned;
+        debugger;
         return sp.web.lists
           .getByTitle(GCongfig.ListName.CheckpointConfig)
           .items.getById(question.Id)
           .update({
-            Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
-            Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
-            Options: JSON.stringify(question.Options), // Convert Options to JSON string
+            Sno: question.QuestionNo,
+            Title: question.QuestionTitle,
+            Options: JSON.stringify(question.Options),
             Answer: question.Answer.key ? question.Answer.key : "",
             isDelete: question.isDelete,
+            TaskName: question.TaskName,
+            AssignedId: {
+              results:
+                question?.Assigned?.map((Assigned: any) => Assigned.id) ?? [],
+            },
             FormsId: question.Form,
           });
       });
@@ -940,7 +953,7 @@ const Config = (props: any) => {
                     }}
                     options={formsDetails || []}
                     optionLabel="name"
-                    placeholder="Select a Department"
+                    placeholder="Select a Form"
                   />
 
                   <i
@@ -1251,18 +1264,20 @@ const Config = (props: any) => {
                 )}
               </div>
 
-              <div
-                className={styles.addNewQuestionSection}
-                onClick={handlerAddNewQuestion}
-              >
-                <div className={styles.addNewQuestionBtn}>
-                  <i
-                    className="pi pi-plus-circle"
-                    style={{ color: "#233b83" }}
-                  />
-                  <span style={{ color: "#233b83" }}>Add new question</span>
+              {currentFormID && (
+                <div
+                  className={styles.addNewQuestionSection}
+                  onClick={handlerAddNewQuestion}
+                >
+                  <div className={styles.addNewQuestionBtn}>
+                    <i
+                      className="pi pi-plus-circle"
+                      style={{ color: "#233b83" }}
+                    />
+                    <span style={{ color: "#233b83" }}>Add new question</span>
+                  </div>
                 </div>
-              </div>
+              )}
               {filteredQuestions.length > 0 && (
                 <div className={styles.ConfigBtns}>
                   <Button
