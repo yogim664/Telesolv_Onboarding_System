@@ -518,7 +518,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               justifyContent: "center",
             }}
           >
-            <PeoplePicker
+            {/* <PeoplePicker
               context={props.context}
               webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
               personSelectionLimit={100}
@@ -545,10 +545,10 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                     ) || []
               }
               // resolveDelay={1000}
-            />
+            /> */}
             {/* People picker section */}
             <NormalPeoplePicker
-              inputProps={{ placeholder: "Insert person" }}
+              inputProps={{ placeholder: "Select HRPersons" }}
               onResolveSuggestions={GetUserDetails}
               itemLimit={10}
               // styles={peoplePickerStyle}

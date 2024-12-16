@@ -1037,14 +1037,14 @@ const Onboarding = (props: any) => {
                       </div>
                     )} */}
                     {formQuestionsDetails.length === 0 ? (
-                      <div className={styles.addEmpInfo}>
+                      <div className={styles.addForm}>
                         This form has no questions.
                       </div>
                     ) : formQuestionsDetails.some(
                         (item: any) =>
                           !item.Assigned || item.Assigned.length === 0
                       ) ? (
-                      <div className={styles.addEmpInfo}>
+                      <div className={styles.addForm}>
                         No HR response has been assigned to this form.
                       </div>
                     ) : null}
