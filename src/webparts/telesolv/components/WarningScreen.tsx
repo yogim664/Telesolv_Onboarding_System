@@ -1,13 +1,13 @@
 import * as React from "react";
-import "./warning.css";
+import styles from "./Warning.module.scss";
 
 const WarningScreen = (): JSX.Element => {
   return (
-    <div className="BodyContainer">
-      <div className="warning-container">
-        <div className="warning-icon">⚠️</div>
-        <div className="warning-message">
-          You don't have permission to access.
+    <div className={styles.BodyContainer}>
+      <div className={styles.warningContainer}>
+        <div className={styles.warningIcon}>⚠️</div>
+        <div className={styles.warningMessage}>
+          You do not have permission to access this. Please contact the admin.
         </div>
       </div>
     </div>
