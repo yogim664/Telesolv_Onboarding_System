@@ -131,14 +131,14 @@ const HrScreen = (props: any): JSX.Element => {
               color:
                 item?.Status?.key === "Pending"
                   ? "#1E71B9"
-                  : item?.Status?.key === "Satisfactory" ||
+                  : item?.Status?.key === "To be resolved" ||
                     item?.Status?.key === "Resolved"
                   ? "#1EB949"
                   : "#B97E1E",
               background:
                 item?.Status?.key === "Pending"
                   ? "#D8E5F0"
-                  : item?.Status?.key === "Satisfactory" ||
+                  : item?.Status?.key === "To be resolved" ||
                     item?.Status?.key === "Resolved"
                   ? "#D8F0E3"
                   : "#F0EAD8",
@@ -150,8 +150,8 @@ const HrScreen = (props: any): JSX.Element => {
                 background:
                   item?.Status?.key === "Pending"
                     ? "#1E71B9"
-                    : item?.Status?.key === "Satisfactory" ||
-                      item?.Status?.key === "Resolved"
+                    : item?.Status?.key === "Resolved" ||
+                      item?.Status?.key === "To be resolved"
                     ? "#1EB949"
                     : "#B97E1E",
               }}
@@ -347,8 +347,8 @@ const HrScreen = (props: any): JSX.Element => {
                   Reassigned?.Email?.toLowerCase() ===
                   curUserDetails?.Email.toLowerCase()
               ) &&
-                (item.Status.key !== "Satisfactory" ||
-                  item.Status.key !== "Pending"))
+                item.Status.key === "To be resolved") ||
+              item.Status.key === "Resolved"
           )) || [];
 
         tableDataBinding(tempAssigenQuestion);
@@ -412,6 +412,8 @@ const HrScreen = (props: any): JSX.Element => {
           ...tempEmployeeDetails,
         };
         setemployessResponseDetails([...updatedEmployeeDetails]);
+        debugger;
+        tableDataBinding(updatedEmployeeDetails);
 
         setisVisible(false);
         setIsLoading(false);
@@ -611,9 +613,9 @@ const HrScreen = (props: any): JSX.Element => {
                       border: "none",
                       width: "100px",
                     }}
-                    onClick={() =>
-                      handlerUpdateResponsesToSp(tempEmployeeDetails)
-                    }
+                    onClick={() => {
+                      handlerUpdateResponsesToSp(tempEmployeeDetails);
+                    }}
                   />
                 ) : (
                   ""

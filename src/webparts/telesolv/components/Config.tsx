@@ -155,7 +155,7 @@ const Config = (props: any) => {
     );
     console.log(result);
 
-    if (!result) {
+    if (result) {
       toast.error("Please enter valid option", {
         position: "top-right",
         autoClose: 5000,
@@ -239,8 +239,6 @@ const Config = (props: any) => {
   };
 
   const handlerQuestionDeletion = (id: number, qIndex: number) => {
-    debugger;
-
     if (id) {
       sp.web.lists
         .getByTitle(GCongfig.ListName.CheckpointConfig)
@@ -337,7 +335,7 @@ const Config = (props: any) => {
 
   const handlerAddNewOption = (questionId: any) => {
     let result = false;
-
+    debugger;
     const tempQuestions = filteredQuestions.filter(
       (question: any, index: number) => index === questionId
     );
@@ -384,9 +382,10 @@ const Config = (props: any) => {
 
   const handlermoveQuestionUp = (index: any, del: boolean, _tempArr?: any) => {
     const updatedQuestions = [..._tempArr];
-
+    debugger;
     if (index > 0) {
       const currentQuestion = updatedQuestions[index];
+
       const previousQuestion = updatedQuestions[index - 1];
       const tempQuestionNo = currentQuestion.QuestionNo;
       updatedQuestions[index] = {
@@ -395,14 +394,21 @@ const Config = (props: any) => {
         QuestionTitle: previousQuestion.QuestionTitle,
         Options: previousQuestion.Options,
         Answer: previousQuestion.Answer,
+        Assigned: previousQuestion.Assigned,
+        TaskName: previousQuestion.TaskName,
+
         isChanged: true,
       };
+
       updatedQuestions[index - 1] = {
         ...previousQuestion,
         QuestionNo: previousQuestion.QuestionNo,
         QuestionTitle: currentQuestion.QuestionTitle,
         Options: currentQuestion.Options,
         Answer: currentQuestion.Answer,
+        Assigned: currentQuestion.Assigned,
+        TaskName: currentQuestion.TaskName,
+
         isChanged: true,
       };
     } else {
@@ -412,6 +418,8 @@ const Config = (props: any) => {
         QuestionTitle: updatedQuestions[0].QuestionTitle,
         Options: updatedQuestions[0].Options,
         Answer: updatedQuestions[0].Answer,
+        Assigned: updatedQuestions[0].Assigned,
+        TaskName: updatedQuestions[0].TaskName,
         isChanged: true,
       };
     }
@@ -428,23 +436,25 @@ const Config = (props: any) => {
 
     const currentQuestion = updatedQuestions[index];
     const nextQuestion = updatedQuestions[index + 1];
-    // Swap the properties between the current and next question
     const tempQuestionNo = currentQuestion.QuestionNo;
     updatedQuestions[index] = {
       ...currentQuestion,
       QuestionNo: tempQuestionNo,
       QuestionTitle: nextQuestion.QuestionTitle,
       Options: nextQuestion.Options,
+      Assigned: nextQuestion.Assigned,
+      TaskName: nextQuestion.TaskName,
       Answer: nextQuestion.Answer,
       isChanged: true,
     };
     updatedQuestions[index + 1] = {
       ...nextQuestion,
       QuestionNo: nextQuestion.QuestionNo,
-
       QuestionTitle: currentQuestion.QuestionTitle,
       Options: currentQuestion.Options,
       Answer: currentQuestion.Answer,
+      Assigned: currentQuestion.Assigned,
+      TaskName: currentQuestion.TaskName,
       isChanged: true,
     };
     // Update the state with the new order of questions
@@ -597,30 +607,6 @@ const Config = (props: any) => {
     }
   };
 
-  // const handlerDeleteQuestionTOSP = async (questions: any) => {
-  //   try {
-  //     // Create an array of promises to delete questions
-  //     const promises = questions?.map((question: any) =>
-  //       sp.web.lists
-  //         .getByTitle(GCongfig.ListName.CheckpointConfig)
-  //         .items.getById(question.Id)
-  //         .delete()
-  //         .catch((error: any) => {
-  //           console.error(
-  //             `Error deleting question with ID ${question.Id}:`,
-  //             error
-  //           );
-  //         })
-  //     );
-
-  //     // Wait for all delete operations to complete
-  //     await Promise.all(promises);
-  //   } catch (error) {
-  //     console.error("Error in deleteQuestionsToSP function:", error);
-  //   }
-  // };
-
-  // Get items to SP
   const handlerQuestionConfig = async (key: any) => {
     let formattedItems: IQuestionDatas[] = [];
     await sp.web.lists
@@ -764,7 +750,8 @@ const Config = (props: any) => {
     }
     if (
       formsDetails.some(
-        (e: any) => e.key?.toLowerCase() === newformDetails?.toLowerCase()
+        (e: any) =>
+          e.key?.toLowerCase().trim() === newformDetails?.toLowerCase().trim()
       )
     ) {
       toast.error("Form already exists.", {
