@@ -176,7 +176,6 @@ const Onboarding = (props: any) => {
 
         setEmployeeOnboardingDetails(formattedItems);
         setfilteredEmployeeOnboardingDetails(formattedItems);
-        console.log(formattedItems, "formattedItems");
 
         await handlerGetStatusValues();
       })
@@ -434,7 +433,6 @@ const Onboarding = (props: any) => {
               setisVisible(true);
               handleFormQuestions(Rowdata.Forms);
               settempEmployeeOnboardingDetails({ ...Rowdata });
-              console.log(Rowdata);
             }}
           />
         ) : null}
@@ -448,9 +446,8 @@ const Onboarding = (props: any) => {
               display: Rowdata.Status === "Completed" ? "none" : "flex",
             }}
             onClick={() => {
-              console.log("Worked", index);
               showConfirmationPopup(Rowdata.Id, index);
-              console.log("TRashData ID:", Rowdata.Id);
+
               settempEmployeeOnboardingDetails({ ...Rowdata });
             }}
           />
@@ -468,8 +465,6 @@ const Onboarding = (props: any) => {
         item?.Employee.EmployeeEMail?.toLowerCase() ===
         tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase()
     );
-
-    console.log(EmployeeCount.length, "EmployeeCount");
 
     if (EmployeeCount.length !== 0 && !isUpdate) {
       err = true;
@@ -543,11 +538,6 @@ const Onboarding = (props: any) => {
               ...updatedEmployeeOnboarding,
             ]);
 
-            //setEmployeeOnboardingDetails([...updatedEmployeeOnboarding]);
-            console.log(
-              "Updated Employee Onboarding:",
-              updatedEmployeeOnboarding
-            );
             await sp.web.lists
               .getByTitle(GCongfig.ListName.EmployeeResponse)
               .items.select("*,Employee/EMail,Id,ID") // Fetch only necessary fields
@@ -557,7 +547,6 @@ const Onboarding = (props: any) => {
               .get()
               .then(async (_items: any) => {
                 if (tempEmployeeOnboardingDetails.Status === "Completed") {
-                  debugger;
                   const filteredItems = _items.filter(
                     (item: any) =>
                       item?.Employee?.EMail?.toLowerCase() ===
@@ -580,7 +569,6 @@ const Onboarding = (props: any) => {
                   // Wait for all promises to complete
                   Promise.all(updatePromises)
                     .then(async () => {
-                      console.log("All updates completed successfully!");
                       // await handlerGetQuestionDetails();
 
                       await setisVisible(false);
@@ -603,12 +591,6 @@ const Onboarding = (props: any) => {
                     .catch((error) => {
                       console.error("Error during updates:", error);
                     });
-                } else {
-                  console.log(currentUserID);
-
-                  console.log(
-                    "Employee status is not 'Completed'. No updates performed."
-                  );
                 }
               })
 
@@ -658,7 +640,6 @@ const Onboarding = (props: any) => {
             }
           })
           .then(async (eve) => {
-            console.log("Employee responses saved successfully.");
             await handlerGetQuestionDetails();
             await setisVisible(false);
             await setIsLoading(false);
@@ -684,8 +665,6 @@ const Onboarding = (props: any) => {
       }
 
       // fetchQuestions();
-
-      console.log("Questions saved successfully to SharePoint!");
     } catch (error) {
       console.error("Error saving questions:", error);
     }
@@ -905,7 +884,6 @@ const Onboarding = (props: any) => {
                         },
                       }}
                       onChange={(selectedPeople: any[]) => {
-                        console.log(selectedPeople);
                         if (selectedPeople.length !== 0) {
                           handlerEditDetails("Employee", selectedPeople[0]);
                         } else {
@@ -988,12 +966,7 @@ const Onboarding = (props: any) => {
                         : ""
                     }
                     onChange={(e) => {
-                      console.log(
-                        tempEmployeeOnboardingDetails?.Department,
-                        "Value"
-                      );
                       handlerEditDetails("Department", e.value);
-                      console.log(e.value.key);
                     }}
                     style={{ width: "100%" }}
                     options={departmentsDetails || []}
@@ -1086,7 +1059,6 @@ const Onboarding = (props: any) => {
                         }
                         onChange={(e) => {
                           handlerEditDetails("Status", e.value.key);
-                          console.log(e.value.key, "Selectedkey");
                         }}
                         options={statusDetails || []}
                         optionLabel="name"

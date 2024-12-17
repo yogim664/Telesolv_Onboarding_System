@@ -15,14 +15,7 @@ import { GCongfig } from "../../../Config/Config";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
-// import {
-//   ILabelStyles,
-//   IPersonaProps,
-//   Label,
-//   NormalPeoplePicker,
-//   Icon,
-// } from "@fluentui/react";
-//import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+
 import {
   PeoplePicker,
   PrincipalType,
@@ -211,10 +204,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                         imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
                         text: Reassigned.Title,
                         secondaryText: Reassigned.EMail,
-
-                        // Id: Reassigned.ID,
-                        // Email: Reassigned.EMail,
-                        // Title: Reassigned.Title,
                       }))
                     : relatedQitems[0]?.Assigned
                     ? relatedQitems[0].Assigned.map((assignee: any) => ({
@@ -281,21 +270,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           await handlerEmployeeDetails();
           setisVisible(false);
         });
-
-      // console.log("Assignee updated successfully.");
-
-      // const indexValue = filteredQuestions.findIndex(
-      //   (item: any) => item.Id === filteredItem.Id
-      // );
-
-      // if (indexValue !== -1) {
-      //   filteredQuestions[indexValue].Reassigned = [...filteredItem.Reassigned];
-      //   setfilteredQuestions([...filteredQuestions]);
-      //  handlerEmployeeDetails();
-      // setQuestions([...filteredQuestions]);
-      // } else {
-      //   console.error("Item not found in filterData.");
-      // }
     } catch (error) {
       console.error("Error updating assignee:", error);
     }
@@ -388,14 +362,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       tempArray = tempArray.filter((_item: any) =>
         _item.Assigned?.some((assignedPerson: any) => {
           // Log to check the data
-          console.log("Assigned Person Email: ", assignedPerson.secondaryText);
           return curFilterItem.Employee.some((selectedPerson: any) => {
-            // Log to check the selected person's data
-            console.log(
-              "Selected Person Email: ",
-              selectedPerson.secondaryText
-            );
-
             return (
               assignedPerson.secondaryText === selectedPerson.secondaryText
             );
@@ -430,7 +397,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         : question
     );
     setfilteredQuestions([...updatedQuestions]);
-    console.log(updatedQuestions, "updatedQuestions");
   };
 
   // HR Person
@@ -442,7 +408,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       .getById(HRgroupId)
       .members()
       .then((members) => {
-        console.log(members, "members");
         _userDetail = [];
 
         members.forEach((user: any) => {
@@ -452,7 +417,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               (user?.userPrincipalName || "").toLowerCase()
           );
 
-          // if (TempSpUser > 0) {
           _userDetail.push({
             ID: TempSpUser[0].ID || null,
             imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${
@@ -461,8 +425,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             text: user?.displayName || "",
             secondaryText: user?.userPrincipalName || "",
           });
-          //   }
-          console.log(_userDetail, "_userDetail");
         });
       });
   };
@@ -477,7 +439,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
     let result: IUserDetail[] = _userDetail?.filter(
       (value, index, self) => index === self.findIndex((t) => t.ID === value.ID)
     );
-    console.log(_userDetail);
+
     return result.filter((item: IUserDetail) =>
       doesTextStartWith(item.text as string, filterText)
     );
@@ -486,8 +448,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   const handlerSiteUsers = () => {
     userArray = [];
     sp.web.siteUsers.get().then((users: any) => {
-      console.log(users, "Users");
-
       userArray = users.map((user: any) => ({
         Email: user.Email,
         ID: user.Id,
@@ -495,7 +455,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
       hrpersonfun([...userArray]);
     });
-    console.log(userArray, "userArrayuserArrayuserArray");
   };
 
   useEffect(() => {
@@ -523,40 +482,10 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               justifyContent: "center",
             }}
           >
-            {/* <PeoplePicker
-              context={props.context}
-              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-              personSelectionLimit={100}
-              showtooltip={false}
-              ensureUser={true}
-              placeholder={"Search Employee"}
-              onChange={(selectedPeople: any[]) => {
-                handlerReassignedChange(
-                  selectedPeople,
-                  selectedQuestionDetails,
-                  "Reassigned"
-                ); // Pass selectedPeople and rowData
-              }}
-              groupId="HRPersons"
-              principalTypes={[PrincipalType.User]}
-              defaultSelectedUsers={
-                selectedQuestionDetails.Reassigned &&
-                selectedQuestionDetails.Reassigned.length > 0
-                  ? selectedQuestionDetails?.Reassigned?.map(
-                      (assignee: any) => assignee?.Email
-                    )
-                  : selectedQuestionDetails?.Assigned?.map(
-                      (assignee: any) => assignee?.Email
-                    ) || []
-              }
-              // resolveDelay={1000}
-            /> */}
-            {/* People picker section */}
             <NormalPeoplePicker
               inputProps={{ placeholder: "Select HRPersons" }}
               onResolveSuggestions={GetUserDetails}
               itemLimit={10}
-              // styles={peoplePickerStyle}
               selectedItems={userDatas}
               onChange={(selectedUser: any): void => {
                 handlerReassignedChange(
@@ -592,14 +521,12 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               alignItems: "center",
               justifyContent: "center",
               gap: "10px",
-              // width: "50%",
             }}
           >
             <Button
               label="Cancel"
               className={styles.cancelBtn}
               onClick={() => {
-                //  setQuestions(questions);
                 setfilteredQuestions(questions);
                 setisVisible(false);
               }}
@@ -670,11 +597,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                 handlerFilter();
               }}
               principalTypes={[PrincipalType.User]}
-              defaultSelectedUsers={
-                filterkeys.Employee
-                //?
-                //.map((emp: any) => emp.secondaryText) || []
-              }
+              defaultSelectedUsers={filterkeys.Employee}
               resolveDelay={1000}
             />
           </div>
@@ -712,7 +635,6 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         {questions.length > 0 ? (
           <DataTable
             className={styles.employeeResponseDataTable}
-            //  value={questions}
             value={filteredQuestions}
             tableStyle={{ minWidth: "50rem" }}
           >
@@ -727,17 +649,17 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               field="HR Persons"
               header="Assigned to"
               body={handlerAssignedPersonDetails}
-              style={{
-                width: "65%",
-              }}
+              // style={{
+              //   width: "65%",
+              // }}
             />
             <Column
               field="completedBy"
               header="Completed by"
               body={handlerCompletedByPersonDetails}
-              style={{
-                width: "65%",
-              }}
+              // style={{
+              //   width: "65%",
+              // }}
             />
             <Column
               field="CompletedDateAndTime"
