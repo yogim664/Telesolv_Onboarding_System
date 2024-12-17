@@ -527,6 +527,13 @@ const HrPersons = (props: any) => {
               <div className="HRPersonPeopleSearch">
                 <PeoplePicker
                   context={props.context}
+                  // styles={{
+                  //   root: { fontFamily: "Arial, sans-serif", fontSize: "14px" },
+                  //   input: {
+                  //     fontFamily: "Arial, sans-serif",
+                  //     fontSize: "14px",
+                  //   },
+                  // }}
                   webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
                   personSelectionLimit={100}
                   showtooltip={false}

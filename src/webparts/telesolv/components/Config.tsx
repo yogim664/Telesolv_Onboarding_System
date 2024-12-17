@@ -91,7 +91,7 @@ const Config = (props: any) => {
           <span>Are you sure you want to delete this option?</span>
         </div>
       ),
-      // accept: () => accept(id, qIndex),
+
       accept: () => handleDeletion(aIndex, qIndex),
     });
   };
@@ -125,8 +125,21 @@ const Config = (props: any) => {
   };
 
   const handlerOptionChange = (qIndex: number, aIndex: number) => {
-    if (!changeOption.length) {
-      toast.error("Please enter value", {
+    const tempQuestions = filteredQuestions.filter(
+      (question: any, index: number) => index === qIndex
+    );
+
+    if (tempQuestions.length === 0) {
+      return false;
+    }
+    debugger;
+    const result = tempQuestions[0].Options.some(
+      (option: any) =>
+        option.key.toLowerCase().trim() === changeOption.toLowerCase().trim()
+    );
+
+    if (result) {
+      toast.error("Please enter valid option", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -140,23 +153,12 @@ const Config = (props: any) => {
       return;
     }
 
-    const tempQuestions = filteredQuestions.filter(
-      (question: any, index: number) => index === qIndex
-    );
-
-    if (tempQuestions.length === 0) {
-      return false;
-    }
-
-    const result = tempQuestions[0].Options.some(
-      (option: any, oIndex: number) =>
-        oIndex === aIndex &&
-        option.key.toLowerCase().trim() === changeOption.toLowerCase().trim()
-    );
-    console.log(result);
-
-    if (result) {
-      toast.error("Please enter valid option", {
+    const tempchangeOption =
+      typeof changeOption === "string" ? changeOption.trim() : null;
+    debugger;
+    if (!tempchangeOption) {
+      debugger;
+      toast.error("Please enter value", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -195,10 +197,7 @@ const Config = (props: any) => {
 
   const handlerAddNewQuestion = () => {
     const TempQues = filteredQuestions.filter(
-      (_item: any) =>
-        !_item.isDelete &&
-        //  _item.Form === currentFormID &&
-        _item.QuestionNo !== 10000
+      (_item: any) => !_item.isDelete && _item.QuestionNo !== 10000
     );
     const isEmpty = TempQues.length === 0;
     const newQuestionNo = isEmpty
@@ -224,12 +223,6 @@ const Config = (props: any) => {
   };
 
   const handlerEditQuestions = (questionId: number) => {
-    // setquestions((prevQuestions: any) =>
-    //   prevQuestions.map((question: any) => ({
-    //     ...question,
-    //     isEdit: question.Id === questionId ? !question.isEdit : false,
-    //   }))
-    // );
     setfilteredQuestions((prevQuestions: any) =>
       prevQuestions.map((question: any) => ({
         ...question,
@@ -259,7 +252,7 @@ const Config = (props: any) => {
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
     sortQuestion[qIndex].isDelete = true;
-    // setquestions(sortQuestion);
+
     setfilteredQuestions(sortQuestion);
 
     handlerQuestionsReArrange(qIndex);
@@ -298,7 +291,7 @@ const Config = (props: any) => {
       theme: "light",
       transition: Bounce,
     });
-    // setquestions([...updatedQuestion]);
+
     setfilteredQuestions([...updatedQuestion]);
   };
 
@@ -308,9 +301,6 @@ const Config = (props: any) => {
     type: any,
     aIndex?: number
   ) => {
-    // let _masterData: any = filteredQuestions.filter(
-    //   (val: any) => val.Form !== currentFormID
-    // );
     let _questions: any = filteredQuestions
       .filter((val: any) => val.Form === currentFormID)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
@@ -323,9 +313,6 @@ const Config = (props: any) => {
       };
     }
 
-    //const updatedQuestions = [..._masterData, ..._questions];
-
-    // setquestions(updatedQuestions);
     setfilteredQuestions([..._questions]);
   };
 
@@ -339,7 +326,7 @@ const Config = (props: any) => {
     const tempQuestions = filteredQuestions.filter(
       (question: any, index: number) => index === questionId
     );
-
+    debugger;
     if (tempQuestions[0].Options.length > 0) {
       result = tempQuestions[0].Options.some(
         (option: any) =>
@@ -388,8 +375,7 @@ const Config = (props: any) => {
       const currentQuestion = updatedQuestions[index];
 
       const previousQuestion = updatedQuestions[index - 1];
-      console.log(previousQuestion.Assigned, "previousQuestion.Assigned");
-      debugger;
+
       const tempQuestionNo = currentQuestion.QuestionNo;
       updatedQuestions[index] = {
         ...currentQuestion,
@@ -426,7 +412,7 @@ const Config = (props: any) => {
         isChanged: true,
       };
     }
-    // setquestions([...updatedQuestions]); // New
+
     setfilteredQuestions([...updatedQuestions]);
   };
 
@@ -440,7 +426,6 @@ const Config = (props: any) => {
     const currentQuestion = updatedQuestions[index];
     const nextQuestion = updatedQuestions[index + 1];
     const tempQuestionNo = currentQuestion.QuestionNo;
-    console.log(nextQuestion.Assigned, "     Assigned: nextQuestion.Assigned,");
 
     updatedQuestions[index] = {
       ...currentQuestion,
@@ -463,7 +448,7 @@ const Config = (props: any) => {
       isChanged: true,
     };
     // Update the state with the new order of questions
-    //setquestions(updatedQuestions);
+
     setfilteredQuestions(updatedQuestions);
     // !Maasi
   };
@@ -501,23 +486,14 @@ const Config = (props: any) => {
             (_item: any) => _item.Id && !_item.isDelete
           ) || [];
 
-        debugger;
         const saveQuestions: any[] =
           filteredQuestions?.filter(
             (_item: any) => !_item.Id && !_item.isDelete && _item.isEdit
           ) || [];
 
-        // const deleteQuestions: any[] =
-        //   filteredQuestions?.filter(
-        //     (_Item: any) => _Item.Id && _Item.isDelete
-        //   ) || [];
-
         // Execute all operations in parallel
         setIsLoading(true);
         await Promise.all([
-          // deleteQuestions?.length
-          //   ? handlerDeleteQuestionTOSP(deleteQuestions)
-          //   : Promise.resolve(),
           postQuestions?.length
             ? handlerUpdateQuestionsToSP(postQuestions)
             : Promise.resolve(),
@@ -593,9 +569,6 @@ const Config = (props: any) => {
   const handlerUpdateQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
-        console.log(questions, "11");
-        console.log(question.Assigned);
-        // const assignedValues = question?.Assigned;
         debugger;
         return sp.web.lists
           .getByTitle(GCongfig.ListName.CheckpointConfig)
@@ -687,8 +660,7 @@ const Config = (props: any) => {
           setformsDetails([...FormValuesDups]);
           const firstFormID = FormValuesDups?.[0]?.ID;
           const firstFormName = FormValuesDups?.[0]?.name;
-          debugger;
-          console.log(FormValuesDups?.[0]?.name);
+
           setcurrentFormID(firstFormID);
           setcurrentFormName(firstFormName);
           hanlderfilter("Forms", firstFormID, FormValuesDups);
@@ -729,7 +701,7 @@ const Config = (props: any) => {
         setfilteredForm(_tempFilterkeys);
         setfilteredQuestions([...filteredData]);
         setquestions([...filteredData]);
-        //      setcurrentFormID(formValue);
+
         setisVisible(false);
         setisFormEdit(false);
       })
@@ -743,7 +715,6 @@ const Config = (props: any) => {
         tempCurrentFormDetails?.find((form: any) => form.ID === formValue)
           ?.name || null;
       setcurrentFormName(currentFormNamevalue);
-      console.log(currentFormNamevalue, "currentFormNamevalue");
     }
   };
 
@@ -794,7 +765,6 @@ const Config = (props: any) => {
             setcurrentFormID(li?.data?.ID);
             await hanlderForms(id);
 
-            // setcurrentFormName(newformDetails);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -818,7 +788,6 @@ const Config = (props: any) => {
       }
     }
   };
-
   useEffect(() => {
     hanlderForms(currentFormID);
   }, [isSubmitted]);
@@ -877,7 +846,6 @@ const Config = (props: any) => {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "10px",
-                  // width: "50%",
                 }}
               >
                 <Button
@@ -930,7 +898,6 @@ const Config = (props: any) => {
                           } else {
                             console.error("No matching form found!");
                             setnewformDetails(null);
-                            console.log(isFormEdit);
                           }
                         }}
                       />
@@ -957,7 +924,7 @@ const Config = (props: any) => {
                     placeholder="Select a Form"
                   />
 
-                  <i
+                  {/* <i
                     className="pi  pi-file-plus"
                     style={{
                       fontSize: "1.25rem",
@@ -966,12 +933,22 @@ const Config = (props: any) => {
                       borderRadius: 4,
                       backgroundColor: "#233b83",
                     }}
+
+                    onClick={() => {
+                      setnewformDetails(null);
+                      setisVisible(true);
+                    }}
+                  /> */}
+
+                  <Button
+                    className={styles.addNewBtn}
+                    label="Add form"
+                    icon="pi  pi-file-plus"
                     onClick={() => {
                       setnewformDetails(null);
                       setisVisible(true);
                     }}
                   />
-                  {/* <AddForm /> */}
                 </div>
               </div>
 
@@ -1041,12 +1018,10 @@ const Config = (props: any) => {
                             placeholder="Enter here"
                             onChange={(e) => {
                               handlerQuestionChange(
-                                //   question?.Id,
                                 qIndex,
                                 e.target.value,
                                 "Question"
                               );
-                              console.log(qIndex);
                             }}
                             disabled={!question.isEdit}
                           />
@@ -1077,15 +1052,12 @@ const Config = (props: any) => {
                                                 name={`category-${question.QuestionNo}`}
                                                 value={category.name}
                                                 onChange={(e) => {
-                                                  console.log(e, "radio");
-
                                                   handlerQuestionChange(
                                                     qIndex,
                                                     e.target.value,
                                                     "Radio",
                                                     aIndex
                                                   );
-                                                  //handleOptionChange(question.Answer, e.value)
                                                 }}
                                                 checked={
                                                   question.Answer.key ===
@@ -1127,7 +1099,6 @@ const Config = (props: any) => {
                                                   qIndex
                                                 );
                                               }}
-                                              // deleteQuestion(question.Id)}}
                                               style={{
                                                 cursor: "pointer",
                                                 color: "red",
@@ -1241,7 +1212,6 @@ const Config = (props: any) => {
                           className={styles.AddOptionContainer}
                           onClick={() => {
                             handlerAddOptionClick(qIndex);
-                            console.log(qIndex);
                           }}
                           style={{
                             cursor: question.isEdit ? "pointer" : "not-allowed",
@@ -1257,6 +1227,11 @@ const Config = (props: any) => {
                         </div>
                       </div>
                     ))
+                ) : !currentFormID ? (
+                  <div className={styles.noQuestionFound}>
+                    No forms have been added yet. Please click the{" "}
+                    <b>&nbsp;Add form&nbsp;</b> button to add one!
+                  </div>
                 ) : (
                   <div className={styles.noQuestionFound}>
                     No questions have been added yet. Please click the{" "}
@@ -1286,7 +1261,6 @@ const Config = (props: any) => {
                     label="Cancel"
                     onClick={() => {
                       setSelectedQuestionId(null);
-                      console.log(questions);
 
                       setfilteredQuestions(questions);
                     }}

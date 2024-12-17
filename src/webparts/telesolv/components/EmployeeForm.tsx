@@ -41,17 +41,14 @@ const EmployeeForm = (props: any): JSX.Element => {
   // Define a function to calculate progress percentage
   const calculateProgressPercentage = (_tempArr: any) => {
     const totalItems = _tempArr.length;
-    console.log(totalItems, "totalItems");
 
     const completedItems = _tempArr.filter(
       (item: any) =>
         item.Status === "Satisfactory" || item.Status === "Resolved"
     ).length;
-    console.log(completedItems, "completedItems");
 
     const progressPercentage =
       totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-    console.log(progressPercentage, "%");
 
     setProgressPercent(Math.round(progressPercentage));
     setIsLoading(false);
@@ -74,12 +71,10 @@ const EmployeeForm = (props: any): JSX.Element => {
       .top(5000)
       .get()
       .then((_items: any) => {
-        console.log(_items, "REsponse");
         const temp: any = _items?.filter(
           (val: any) =>
             val?.Employee?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
         );
-        console.log(temp, "temp");
 
         // Transform fetched items
         const _tempArr = temp?.map((item: any) => {
@@ -111,13 +106,11 @@ const EmployeeForm = (props: any): JSX.Element => {
             isAnswered: item.Response ? true : false,
           };
         });
-        debugger;
+
         if (_tempArr.length === 0) {
           sethaveAccess(false);
         }
-        debugger;
-        // Update state
-        console.log(_tempArr); // Log for debugging
+
         setquestions(_tempArr);
         if (_tempArr.length > 0) {
           setComment(_tempArr[0].ResponseComments); // Set the first comment
@@ -166,9 +159,6 @@ const EmployeeForm = (props: any): JSX.Element => {
     }
 
     if (!err) {
-      // const postQuestions = questions?.filter((_item: any) => !!_item.Id) || [];
-
-      // If there are questions to post, update SharePoint
       if (questions.length) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         await updateQuestionsToSP(questions);
@@ -249,7 +239,6 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   const getCurrentUser = () => {
     sp.web.currentUser.get().then((user) => {
-      console.log(user);
       setCurUserName({ Name: user.Title, Email: user.Email });
     });
     questionConfig();
@@ -387,7 +376,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                                                     onChange={(e) => {
                                                       handleQuestionChange(
                                                         qIndex,
-                                                        // _item.QuestionNo,
+
                                                         e.target.value,
                                                         "Radio",
                                                         aIndex
