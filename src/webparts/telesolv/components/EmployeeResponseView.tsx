@@ -580,9 +580,10 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             options={statusValues || []}
             optionLabel="name"
             placeholder="Select a status"
+            className={styles.filterStatus}
           />
 
-          <div>
+          <div className={styles.filterPeople}>
             <PeoplePicker
               context={props.context}
               webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
@@ -603,6 +604,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           </div>
 
           <InputText
+            className={styles.filterSearch}
             value={filterkeys?.search || ""}
             placeholder={"Search Questions"}
             onChange={(e) => {

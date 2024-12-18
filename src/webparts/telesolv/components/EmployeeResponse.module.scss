@@ -24,6 +24,17 @@
         .FilterOption {
             display: flex;
             gap: 8px;
+            align-items: flex-start;
+            margin: 8px 0;
+            .filterStatus {
+                width: 220px;
+            }
+            .filterPeople {
+                width: 220px;
+            }
+            .filterSearch {
+                width: 220px;
+            }
         }
     }
     .employeeResponseDataTable {
@@ -54,7 +65,8 @@
 
 .pageTitle {
     color: #233b83;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 18px;
 }
 
 .pendingSts {
