@@ -1013,6 +1013,7 @@ const Config = (props: any) => {
 
                         <div className={styles.QuestionSection}>
                           <InputText
+                            id={question.QuestionNo}
                             className={styles.questionInput}
                             value={question?.QuestionTitle}
                             placeholder="Enter here"
@@ -1240,40 +1241,54 @@ const Config = (props: any) => {
                 )}
               </div>
 
-              {currentFormID && (
-                <div
-                  className={styles.addNewQuestionSection}
-                  onClick={handlerAddNewQuestion}
-                >
-                  <div className={styles.addNewQuestionBtn}>
-                    <i
-                      className="pi pi-plus-circle"
-                      style={{ color: "#233b83" }}
-                    />
-                    <span style={{ color: "#233b83" }}>Add new question</span>
+              <div className={styles.questionsActionBtns}>
+                {currentFormID && (
+                  <div
+                    className={styles.addNewQuestionSection}
+                    onClick={async () => {
+                      await handlerAddNewQuestion();
+                      let _tempFilteredQuestions = filteredQuestions.filter(
+                        (value: any) => value.QuestionNo !== 10000
+                      );
+                      let filteredItem = await _tempFilteredQuestions[
+                        _tempFilteredQuestions.length - 1
+                      ].QuestionNo;
+                      let focusItem = document.getElementById(
+                        `${filteredItem + 1}`
+                      );
+                      await focusItem?.focus();
+                    }}
+                  >
+                    <div className={styles.addNewQuestionBtn}>
+                      <i
+                        className="pi pi-plus-circle"
+                        style={{ color: "#233b83" }}
+                      />
+                      <span style={{ color: "#233b83" }}>Add new question</span>
+                    </div>
                   </div>
-                </div>
-              )}
-              {filteredQuestions.length > 0 && (
-                <div className={styles.ConfigBtns}>
-                  <Button
-                    className={styles.cancelBtn}
-                    label="Cancel"
-                    onClick={() => {
-                      setSelectedQuestionId(null);
+                )}
+                {filteredQuestions.length > 0 && (
+                  <div className={styles.ConfigBtns}>
+                    <Button
+                      className={styles.cancelBtn}
+                      label="Cancel"
+                      onClick={() => {
+                        setSelectedQuestionId(null);
 
-                      setfilteredQuestions(questions);
-                    }}
-                  />
-                  <Button
-                    label="Save"
-                    className={styles.saveBtn}
-                    onClick={() => {
-                      handlervalidation();
-                    }}
-                  />
-                </div>
-              )}
+                        setfilteredQuestions(questions);
+                      }}
+                    />
+                    <Button
+                      label="Save"
+                      className={styles.saveBtn}
+                      onClick={() => {
+                        handlervalidation();
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </TabPanel>
             <TabPanel header="HR Persons">
               <HrPersons context={props.context} Question={questions} />
