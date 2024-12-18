@@ -651,17 +651,11 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               field="HR Persons"
               header="Assigned to"
               body={handlerAssignedPersonDetails}
-              // style={{
-              //   width: "65%",
-              // }}
             />
             <Column
               field="completedBy"
               header="Completed by"
               body={handlerCompletedByPersonDetails}
-              // style={{
-              //   width: "65%",
-              // }}
             />
             <Column
               field="CompletedDateAndTime"

@@ -952,7 +952,15 @@ const Config = (props: any) => {
                 </div>
               </div>
 
-              <div className={styles.questionInputSection}>
+              <div
+                className={`${
+                  filteredQuestions.filter(
+                    (value: any) => value.QuestionNo !== 10000
+                  ) > 0
+                    ? styles.questionInputSection
+                    : styles.questionsInputSectionEmpty
+                }`}
+              >
                 {filteredQuestions.length > 0 ? (
                   filteredQuestions
                     .filter((value: any) => value.QuestionNo !== 10000)

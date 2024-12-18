@@ -49,12 +49,14 @@ const Onboarding = (props: any) => {
     Employee: any;
     search: string;
     dept: string;
+    form: string;
   }
 
   let _fkeys: IFilData = {
     Employee: {},
     search: "",
     dept: "",
+    form: "",
   };
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setisVisible] = useState(false);
@@ -119,7 +121,9 @@ const Onboarding = (props: any) => {
   const handlerEmployeeOnboardingDetails = async (formattedQuestions: any) => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeOnboarding)
-      .items.select("*,Employee/ID,Employee/EMail,Employee/Title,Form/ID")
+      .items.select(
+        "*,Employee/ID,Employee/EMail,Employee/Title,Form,Form/ID,Form/Title"
+      )
       .expand("Employee,Form")
       .top(5000)
       .filter("isDelete ne 1")
@@ -130,6 +134,7 @@ const Onboarding = (props: any) => {
             index: index,
             Id: item.Id,
             Forms: item.Form?.ID || null,
+            FormTitle: item.Form?.Title || null,
             Employee: item.Employee?.Title
               ? {
                   EmployeeId: item.Employee.ID || null,
@@ -173,9 +178,13 @@ const Onboarding = (props: any) => {
                 : true,
             SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
           })) || [];
-
-        setEmployeeOnboardingDetails(formattedItems);
-        setfilteredEmployeeOnboardingDetails(formattedItems);
+        debugger;
+        console.log(formattedItems);
+        const tempFormattedItems = formattedItems.sort(
+          (a: any, b: any) => b.Id - a.Id
+        );
+        setEmployeeOnboardingDetails(tempFormattedItems);
+        setfilteredEmployeeOnboardingDetails(tempFormattedItems);
 
         await handlerGetStatusValues();
       })
@@ -203,6 +212,8 @@ const Onboarding = (props: any) => {
               QuestionTitle: item.QuestionID?.Title,
               Answer: item.QuestionID?.Answer,
               Status: item.Status,
+              // FormID: item.FormID?.ID,
+              // FormTitle: item.FormID?.Title,
               Comments: item.Comments,
               Employee: {
                 EmployeeName: item.Employee ? item.Employee.Title : "",
@@ -214,6 +225,8 @@ const Onboarding = (props: any) => {
               SecondaryEmail: item.SecondaryEmail || "No Email",
             };
           }) || [];
+
+        console.log(formattedResponseItems);
 
         await handlerEmployeeOnboardingDetails(formattedResponseItems);
       })
@@ -342,6 +355,12 @@ const Onboarding = (props: any) => {
         value?.Role?.toLowerCase().includes(
           _tempFilterkeys.search.toLowerCase()
         )
+      );
+    }
+
+    if (_tempFilterkeys.form) {
+      filteredData = filteredData?.filter(
+        (value: any) => value?.Forms === _tempFilterkeys.form
       );
     }
 
@@ -647,7 +666,7 @@ const Onboarding = (props: any) => {
           .then(async (eve) => {
             await setisVisible(false);
             await setIsLoading(false);
-            await toast.success("Employee add Successfully", {
+            await toast.success("Employee added Successfully", {
               position: "top-right",
               autoClose: 5000,
               hideProgressBar: false,
@@ -737,6 +756,26 @@ const Onboarding = (props: any) => {
             <h2 className={styles.pageTitle}>Employee Onboarding</h2>
             <div className={styles.OnboardingRightContainer}>
               <Dropdown
+                // value={formsDetails.find(
+                //   (choice: any) => choice.ID === filterkeys.form
+                // )}
+
+                value={
+                  formsDetails.find(
+                    (choice: any) => choice.ID === filterkeys.form
+                  ) || null
+                }
+                onChange={(e) => {
+                  hanlderfilter("form", e.value.ID);
+                }}
+                options={formsDetails || []}
+                style={{ width: "100%" }}
+                className={`${styles.filterDepartment} w-full md:w-14rem`}
+                optionLabel="name"
+                placeholder="Select a Form"
+              />
+
+              <Dropdown
                 value={
                   departmentsDetails
                     ? departmentsDetails?.find(
@@ -771,6 +810,7 @@ const Onboarding = (props: any) => {
 
               <InputText
                 placeholder={"Search Role"}
+                value={filterkeys.search}
                 className={styles.filterRole}
                 onChange={(e) => {
                   hanlderfilter("search", e.target.value);
@@ -800,7 +840,7 @@ const Onboarding = (props: any) => {
                   filterkeys.Employee = {};
                   filterkeys.dept = "";
                   filterkeys.search = "";
-
+                  filterkeys.form = "";
                   setfilteredEmployeeOnboardingDetails(
                     EmployeeOnboardingDetails
                   );
@@ -828,6 +868,7 @@ const Onboarding = (props: any) => {
               <Column field="Department.key" header="Department" />
               <Column field="Employee.EmployeeEMail" header="Email" />
               <Column field="SecondaryEmail" header="SecondryEmail" />
+              <Column field="FormTitle" header="Form" />
               <Column field="Status" header="Status" body={stsTemplate} />
               <Column
                 field="Action"

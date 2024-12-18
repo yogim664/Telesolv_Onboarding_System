@@ -360,9 +360,12 @@ const HrScreen = (props: any): JSX.Element => {
             // item.Status.key === "Resolved"
           )) || [];
 
-        tableDataBinding(tempAssigenQuestion);
-        console.log("tempAssigenQuestion: ", tempAssigenQuestion);
-        setemployessResponseDetails(tempAssigenQuestion);
+        const tempTempAssigenQuestion = tempAssigenQuestion.sort(
+          (a: any, b: any) => b.Id - a.Id
+        );
+        tableDataBinding(tempTempAssigenQuestion);
+        console.log("tempAssigenQuestion: ", tempTempAssigenQuestion);
+        setemployessResponseDetails(tempTempAssigenQuestion);
 
         // setfilteredEmployessResponseDetails(tempAssigenQuestion);
       })
