@@ -561,6 +561,12 @@ const HrPersons = (props: any) => {
                   //   setfilteredcheckPoints([...checkPointDetails]);
                   // }
                   !isEdit && setfilteredcheckPoints([...checkPointDetails]);
+
+                  if (!isEdit) {
+                    filterkeys.Forms = null;
+                    filterkeys.people = [];
+                    filterkeys.search = "";
+                  }
                 }}
               />
               <i
@@ -615,6 +621,9 @@ const HrPersons = (props: any) => {
                 onClick={() => {
                   setisEdit(!isEdit);
                   !isEdit && setfilteredcheckPoints([...checkPointDetails]);
+                  filterkeys.Forms = null;
+                  filterkeys.people = [];
+                  filterkeys.search = "";
                 }}
                 disabled={isEdit}
               />

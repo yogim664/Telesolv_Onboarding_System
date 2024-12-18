@@ -278,13 +278,15 @@ const EmployeeForm = (props: any): JSX.Element => {
                 <div className={styles.EmployeeAnsContainerheaderConatiner}>
                   <div className={styles.EmployeeAnsContainerheader}>
                     <div className={styles.formGuide}>
-                      <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
                       {questions.filter((item: any) => item.isAnswered === true)
                         .length === 0 && (
-                        <h4>
-                          Fill in the check points below to get started with
-                          your onboarding process
-                        </h4>
+                        <div>
+                          <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
+                          <h4>
+                            Fill the form to get started with your onboarding
+                            process
+                          </h4>
+                        </div>
                       )}
                     </div>
                     <div className={styles.userGreetingSection}>

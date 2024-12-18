@@ -41,15 +41,12 @@
     th {
       padding: 16px !important;
     }
-    td {
-      min-width: 200px;
-    }
     td:nth-child(1) {
-      min-width: 480px;
+      min-width: 380px;
       font-weight: 600;
     }
     td:nth-child(3) {
-      min-width: 100px;
+      //   min-width: 100px;
       font-weight: 600;
     }
   }
