@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
 /* eslint-disable no-debugger */
@@ -527,13 +528,6 @@ const HrPersons = (props: any) => {
               <div className="HRPersonPeopleSearch">
                 <PeoplePicker
                   context={props.context}
-                  // styles={{
-                  //   root: { fontFamily: "Arial, sans-serif", fontSize: "14px" },
-                  //   input: {
-                  //     fontFamily: "Arial, sans-serif",
-                  //     fontSize: "14px",
-                  //   },
-                  // }}
                   webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
                   personSelectionLimit={100}
                   showtooltip={false}
@@ -563,6 +557,10 @@ const HrPersons = (props: any) => {
                 }}
                 onClick={() => {
                   setisEdit(!isEdit);
+                  // if (isEdit === false) {
+                  //   setfilteredcheckPoints([...checkPointDetails]);
+                  // }
+                  !isEdit && setfilteredcheckPoints([...checkPointDetails]);
                 }}
               />
               <i
@@ -613,6 +611,10 @@ const HrPersons = (props: any) => {
                   backgroundColor: "#cfcfcf",
                   color: "#000",
                   border: "none",
+                }}
+                onClick={() => {
+                  setisEdit(!isEdit);
+                  !isEdit && setfilteredcheckPoints([...checkPointDetails]);
                 }}
                 disabled={isEdit}
               />

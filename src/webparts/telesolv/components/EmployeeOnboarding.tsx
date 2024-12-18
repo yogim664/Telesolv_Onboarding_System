@@ -771,6 +771,7 @@ const Onboarding = (props: any) => {
 
               <InputText
                 placeholder={"Search Role"}
+                value={filterkeys.search}
                 className={styles.filterRole}
                 onChange={(e) => {
                   hanlderfilter("search", e.target.value);
