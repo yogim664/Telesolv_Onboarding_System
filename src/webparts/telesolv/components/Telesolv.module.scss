@@ -1,505 +1,521 @@
 .navBar {
-  width: 99%;
-  display: flex;
-  box-shadow: 0px 5px 0px #f9f9f9;
-  justify-content: space-between;
-  border-bottom: 1px solid #cbcbcb;
+    width: 99%;
+    display: flex;
+    box-shadow: 0px 5px 0px #f9f9f9;
+    justify-content: space-between;
+    border-bottom: 1px solid #cbcbcb;
 }
 
 .navRightContainers {
-  // img {
-  //   width: 190px;
-  // }
-  h2 {
-    color: #233b83;
-  }
+    // img {
+    //   width: 190px;
+    // }
+    h2 {
+        color: #233b83;
+    }
 }
 
 .configContainer {
-  padding: 16px;
-  // background: url("../assets//Images//EmployeeFormBG.jpg");
-  background: radial-gradient(
-    circle,
-    rgba(226, 215, 251, 1) 0%,
-    rgba(218, 235, 254, 1) 100%
-  );
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  min-height: 83vh;
-  .formSelectionSection {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 16px;
-    .formFilterDD {
-      width: 242px;
+    padding: 16px;
+    // background: url("../assets//Images//EmployeeFormBG.jpg");
+    background: radial-gradient( circle, rgba(226, 215, 251, 1) 0%, rgba(218, 235, 254, 1) 100%);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    min-height: 83vh;
+    .formSelectionSection {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        .formFilterDD {
+            width: 242px;
+        }
     }
-  }
-  .formDetailsContainer {
-    display: "flex";
-    align-items: "center";
-    gap: 16px;
-    margin-left: 14px;
-    h2 {
-      width: max-content;
-      font-weight: 300;
-      color: #223b83;
+    .formDetailsContainer {
+        display: "flex";
+        align-items: "center";
+        gap: 16px;
+        margin-left: 14px;
+        h2 {
+            width: max-content;
+            font-weight: 300;
+            color: #223b83;
+        }
     }
-  }
-  .questionConfigContaier {
-    padding: 8px;
-    .questionInputSection {
-      height: 52vh;
-      overflow: auto !important;
-      margin: 12px 0;
+    .questionConfigContaier {
+        padding: 8px;
+        .questionInputSection {
+            height: 52vh;
+            overflow: auto !important;
+            margin: 12px 0;
+            .questionBlock {
+                box-shadow: -1px -2px 18px -1px #c6d4ff;
+                padding: 8px;
+                border-radius: 6px;
+                margin: 12px;
+                position: relative;
+                animation: moveUp 1s ease-out forwards;
+            }
+        }
+        .questionsInputSectionEmpty {
+            height: 32vh;
+            overflow: auto !important;
+        }
     }
-    .questionsInputSectionEmpty {
-      height: 32vh;
-    }
-  }
 }
 
 .navLeftContainers {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.navLeftContainers P {
-  padding: 10px;
-  cursor: pointer;
-  .selected {
-    padding: 10px;
-    border-bottom: 2px solid #233b83;
-    color: #233b83;
-  }
-}
-
-.ConfigContainer {
-  display: flex;
-}
-
-.CheckPointSection {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.leftSection {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 10px;
-}
-
-.RightSection {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  i {
-    cursor: pointer;
-  }
-}
-
-.AnswersContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.NewOptionContainer {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.AddOptionContainer {
-  margin: 15px;
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  cursor: pointer;
-}
-
-.addNewQuestionSection {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #233b83;
-}
-
-.ConfigBtns {
-  padding: 10px;
-  display: flex;
-  justify-content: end;
-  gap: 10px;
-}
-
-.saveBtn {
-  color: ffff;
-  background-color: #233b83;
-  border: none;
-  font-weight: 600;
-  padding: 8px 24px;
-}
-
-.cancelBtn {
-  background-color: #cfcfcf;
-  color: #000;
-  border: none;
-  font-weight: 600;
-  padding: 8px 24px;
-}
-
-.CheckpointConfigHeader {
-  width: 70%;
-  margin-left: 15%;
-  margin-right: 15%;
-  background-color: #f0f8ff;
-  .HeaderTitle {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    color: #233b83;
-  }
-}
-
-.addDialog {
-  display: flex !important;
-  align-items: center;
-  justify-content: center !important;
-  margin: 24px 16px;
-  .addDialogHeader {
-    align-items: center;
-    display: flex;
-    justify-content: flex-start;
-    width: 36%;
-    color: #233b83;
-    font-weight: 600;
-  }
-  .addDialogInput {
-    align-items: center;
-    display: flex;
-    justify-content: flex-start;
-    width: 70% !important;
-  }
-}
-
-.addDialogBtnContainer {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.HeaderTabview {
-  border: none !important;
-  .p-tabview-nav-container {
-    .p-tabview .p-tabview-nav {
-      border: none !important;
-    }
-  }
-}
-
-.card {
-  //display: flex !important;
-  width: 100%;
-  margin: auto;
-  justify-content: center;
-  align-items: center !important;
-  .DataTable {
-    border: 1px solid black !important;
-  }
-}
-
-.HrEditContainer {
-  display: flex;
-  justify-content: end;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 12px 0;
-}
-
-.Bgstyle {
-  background-image: url("../assets//Images//Bg.svg");
-  height: 70vh;
-  width: 100%;
-  background-size: cover;
-}
-
-.EmployeeAnsContainer {
-  width: 50%;
-  margin-top: 10px;
-  margin-left: 25%;
-  justify-content: center;
-  align-items: center;
-  border-radius: 5px;
-  background-color: #fff;
-  // padding: 10px 0px;
-}
-
-.EmployeeAnsContainerheader {
-  p {
-    display: flex;
-    font-size: 20px;
-    font-weight: 600;
-    font-family: interRegular;
-  }
-  span {
-    font-size: 16px;
-    font-family: interRegular;
-  }
-  color: white;
-  background-color: #233b83;
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px 6px 0px 0px;
-}
-
-.EmployeeQuestionContainer {
-  display: flex;
-  background-color: white;
-  padding: 0px 10px;
-  margin: 10px 0px;
-}
-
-.EmployeeQuestionContainer .question {
-  //box-shadow: 0px 4px 24px -9px #00000026;
-  padding: 10px;
-  min-height: 80px;
-  max-height: fit-content;
-  border: 1px solid #233b83;
-  border-radius: 4px;
-  margin: 10px 0px;
-}
-
-.commentsContainer {
-  background-color: #fff;
-  margin: 20px 10px;
-  padding: 0;
-  textarea {
-    width: 100%;
-    resize: none;
-    height: 80px;
-  }
-  .commentsContainerHeader {
     display: flex;
     gap: 10px;
     align-items: center;
+    justify-content: space-between;
+}
+
+.navLeftContainers P {
+    padding: 10px;
+    cursor: pointer;
+    .selected {
+        padding: 10px;
+        border-bottom: 2px solid #233b83;
+        color: #233b83;
+    }
+}
+
+.ConfigContainer {
+    display: flex;
+}
+
+.CheckPointSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px;
+}
+
+.RightSection {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    i {
+        cursor: pointer;
+    }
+}
+
+.AnswersContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.NewOptionContainer {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.AddOptionContainer {
+    margin: 15px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    cursor: pointer;
+}
+
+.addNewQuestionSection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #233b83;
+}
+
+.ConfigBtns {
+    padding: 10px;
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+}
+
+.saveBtn {
+    color: ffff;
+    background-color: #233b83;
+    border: none;
+    font-weight: 600;
+    padding: 8px 24px;
+}
+
+.cancelBtn {
+    background-color: #cfcfcf;
+    color: #000;
+    border: none;
+    font-weight: 600;
+    padding: 8px 24px;
+}
+
+.CheckpointConfigHeader {
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+    background-color: #f0f8ff;
+    .HeaderTitle {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        color: #233b83;
+    }
+}
+
+.addDialog {
+    display: flex !important;
+    align-items: center;
+    justify-content: center !important;
+    margin: 24px 16px;
+    .addDialogHeader {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 36%;
+        color: #233b83;
+        font-weight: 600;
+    }
+    .addDialogInput {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 70% !important;
+    }
+}
+
+.addDialogBtnContainer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.HeaderTabview {
+    border: none !important;
+    .p-tabview-nav-container {
+        .p-tabview .p-tabview-nav {
+            border: none !important;
+        }
+    }
+}
+
+.card {
+    //display: flex !important;
+    width: 100%;
+    margin: auto;
+    justify-content: center;
+    align-items: center !important;
+    .DataTable {
+        border: 1px solid black !important;
+    }
+}
+
+.HrEditContainer {
+    display: flex;
+    justify-content: end;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 12px 0;
+}
+
+.Bgstyle {
+    background-image: url("../assets//Images//Bg.svg");
+    height: 70vh;
+    width: 100%;
+    background-size: cover;
+}
+
+.EmployeeAnsContainer {
+    width: 50%;
+    margin-top: 10px;
+    margin-left: 25%;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background-color: #fff;
+    // padding: 10px 0px;
+}
+
+.EmployeeAnsContainerheader {
+    p {
+        display: flex;
+        font-size: 20px;
+        font-weight: 600;
+        font-family: interRegular;
+    }
+    span {
+        font-size: 16px;
+        font-family: interRegular;
+    }
+    color: white;
+    background-color: #233b83;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px 6px 0px 0px;
+}
+
+.EmployeeQuestionContainer {
+    display: flex;
+    background-color: white;
+    padding: 0px 10px;
     margin: 10px 0px;
-  }
+}
+
+.EmployeeQuestionContainer .question {
+    //box-shadow: 0px 4px 24px -9px #00000026;
+    padding: 10px;
+    min-height: 80px;
+    max-height: fit-content;
+    border: 1px solid #233b83;
+    border-radius: 4px;
+    margin: 10px 0px;
+}
+
+.commentsContainer {
+    background-color: #fff;
+    margin: 20px 10px;
+    padding: 0;
+    textarea {
+        width: 100%;
+        resize: none;
+        height: 80px;
+    }
+    .commentsContainerHeader {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin: 10px 0px;
+    }
 }
 
 .employeeFormFooter {
-  display: flex;
-  padding: 10px;
-  justify-content: flex-end;
-  gap: 14px;
+    display: flex;
+    padding: 10px;
+    justify-content: flex-end;
+    gap: 14px;
 }
 
 .employeeFormFooter button {
-  border: none;
+    border: none;
 }
 
 .CongifTab {
-  margin: 16px 0px;
+    margin: 16px 0px;
 }
 
 .ResponseHeader {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
 }
 
 .noQuestionFound {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;
-  color: #233b83;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    color: #233b83;
 }
 
 .addNewQuestionBtn {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  background-color: #e5eafb;
-  padding: 8px 16px;
-  border-radius: 6px;
-  align-items: center;
-  cursor: pointer;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    background-color: #e5eafb;
+    padding: 8px 16px;
+    border-radius: 6px;
+    align-items: center;
+    cursor: pointer;
 }
 
 .flowTriggerIndicator {
-  margin-left: auto;
-  background-color: #e2fbe9;
-  color: green;
-  font-size: 14px;
-  padding: 6px;
-  border-radius: 4px;
+    margin-left: auto;
+    background-color: #e2fbe9;
+    color: green;
+    font-size: 14px;
+    padding: 6px;
+    border-radius: 4px;
 }
 
 .QuestionSection {
-  padding: 12px;
-  background-color: #ffffff7a;
-  width: 75%;
-  border-radius: 6px;
-  .questionInput {
-    width: 100%;
-    color: #233b83;
-    font-weight: 600;
-  }
-  .QuestionTag {
-    text-align: right;
-    margin-top: 6px;
-    color: #837023;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .optionSection {
-    display: flex;
-    align-items: center;
-    margin: 16px 0;
-    .optionChoice {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      .radioOption {
+    padding: 12px;
+    background-color: #ffffff7a;
+    width: 75%;
+    border-radius: 6px;
+    .questionInput {
+        width: 100%;
+        color: #233b83;
+        font-weight: 600;
+    }
+    .QuestionTag {
+        text-align: right;
+        margin-top: 6px;
+        color: #837023;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .optionSection {
         display: flex;
         align-items: center;
-        cursor: pointer;
-      }
-      .radioBtn {
-        color: #233b83;
-        margin: 2px;
-      }
-      .optionLabel {
-        cursor: pointer;
-        padding-left: 8px;
-      }
+        margin: 16px 0;
+        .optionChoice {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            .radioOption {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+            .radioBtn {
+                color: #233b83;
+                margin: 2px;
+            }
+            .optionLabel {
+                cursor: pointer;
+                padding-left: 8px;
+            }
+        }
     }
-  }
 }
 
 .ProgressBar {
-  margin: 10px;
+    margin: 10px;
 }
 
 .pendingSts {
-  background: #d8e5f0;
-  padding: 6px 4px;
-  border-radius: 6px;
-  text-align: center;
-  color: #1e71b9;
-  font-weight: 600;
-  font-size: 14px;
+    background: #d8e5f0;
+    padding: 6px 4px;
+    border-radius: 6px;
+    text-align: center;
+    color: #1e71b9;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .OnboardingContainer {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  margin: 10px 0px;
-  justify-content: space-between;
-  .OnboardingRightContainer {
     display: flex;
-    gap: 20px;
-    justify-content: center;
+    width: 100%;
     align-items: center;
-  }
+    margin: 10px 0px;
+    justify-content: space-between;
+    .OnboardingRightContainer {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+    }
 }
 
 .ChangeOptionContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  .questionInput {
-    margin-left: 12px;
-  }
-  .optionActionContainer {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 8px;
-    .actionBtn {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      box-shadow: 1px 0px 14px -5px #233b83;
-      padding: 6px;
-      border-radius: 8px;
-      cursor: pointer;
+    align-items: center;
+    gap: 16px;
+    .questionInput {
+        margin-left: 12px;
     }
-  }
+    .optionActionContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        .actionBtn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            box-shadow: 1px 0px 14px -5px #233b83;
+            padding: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    }
 }
 
 .optionEditIcon {
-  color: #233b83;
-  cursor: pointer;
+    color: #233b83;
+    cursor: pointer;
 }
 
 .HRConfigDataTable {
-  overflow: unset !important;
-  th {
-    padding: 16px !important;
-  }
-  .questionsTD {
-    min-width: 40%;
-    font-weight: 600;
-  }
-  .HRPersonsList {
-    min-width: 40%;
-  }
-  .p-datatable-wrapper {
     overflow: unset !important;
-  }
-  .taskName {
-    color: #000;
-  }
+    th {
+        padding: 16px !important;
+    }
+    .questionsTD {
+        min-width: 40%;
+        font-weight: 600;
+    }
+    .HRPersonsList {
+        min-width: 40%;
+    }
+    .p-datatable-wrapper {
+        overflow: unset !important;
+    }
+    .taskName {
+        color: #000;
+    }
 }
 
 .onboardingUser {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .addNewForm {
-  width: 30rem;
-  .addFormFooter {
-    padding: 20px;
-  }
+    width: 30rem;
+    .addFormFooter {
+        padding: 20px;
+    }
 }
 
 .filterForm {
-  width: 220px;
+    width: 220px;
 }
 
 .filterSearch {
-  width: 220px;
+    width: 220px;
 }
 
 .addNewBtn {
-  background-color: #233b83 !important;
-  padding: 8px 16px !important;
-  border: none !important;
-  width: 130px;
+    background-color: #233b83 !important;
+    padding: 8px 16px !important;
+    border: none !important;
+    width: 130px;
 }
 
 .questionsActionBtns {
-  display: flex;
-  justify-content: space-between;
-  position: absolute;
-  width: 100%;
-  left: 0;
-  bottom: 0;
-  padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    padding: 8px 20px;
+}
+
+@keyframes moveUp {
+    from {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
