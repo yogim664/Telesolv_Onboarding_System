@@ -956,7 +956,7 @@ const Config = (props: any) => {
                 className={`${
                   filteredQuestions.filter(
                     (value: any) => value.QuestionNo !== 10000
-                  ) > 0
+                  ).length > 0
                     ? styles.questionInputSection
                     : styles.questionsInputSectionEmpty
                 }`}
@@ -965,7 +965,10 @@ const Config = (props: any) => {
                   filteredQuestions
                     .filter((value: any) => value.QuestionNo !== 10000)
                     .map((question: any, qIndex: any) => (
-                      <div key={question.QuestionNo} className="question-block">
+                      <div
+                        key={question.QuestionNo}
+                        className={styles.questionBlock}
+                      >
                         <div className={styles.CheckPointSection}>
                           <div className={styles.leftSection}>
                             {/* <i className="pi pi-comment" /> */}
