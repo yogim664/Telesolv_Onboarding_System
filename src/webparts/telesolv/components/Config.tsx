@@ -79,6 +79,58 @@ const Config = (props: any) => {
     });
   };
 
+  function textAreaAdjust(element: HTMLTextAreaElement) {
+    if (element) {
+      element.style.height = "1px"; // Reset height
+      element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
+    }
+  }
+
+  // useEffect(() => {
+  //   function textAreaAdjust(element: HTMLTextAreaElement) {
+  //     // Add a small delay to ensure scrollHeight is accurate
+  //     setTimeout(() => {
+  //       element.style.height = "1px"; // Reset height
+  //       element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
+  //     }, 0);
+  //   }
+
+  //   // Adjust existing <textarea> elements
+  //   const adjustExistingTextareas = () => {
+  //     const existingTextareas = document.getElementsByTagName("textarea");
+  //     Array.from(existingTextareas).forEach((textarea) =>
+  //       textAreaAdjust(textarea)
+  //     );
+  //     console.log("existingTextareas", existingTextareas);
+  //   };
+
+  //   // Adjust on new <textarea> additions
+  //   const observerCallback: MutationCallback = (mutationsList) => {
+  //     mutationsList.forEach((mutation) => {
+  //       if (mutation.type === "childList") {
+  //         Array.from(mutation.addedNodes).forEach((node) => {
+  //           if (
+  //             node instanceof HTMLTextAreaElement &&
+  //             node.classList.contains("questionInput")
+  //           ) {
+  //             textAreaAdjust(node);
+  //           }
+  //         });
+  //       }
+  //     });
+  //   };
+
+  //   // Set up the MutationObserver
+  //   const observer = new MutationObserver(observerCallback);
+  //   observer.observe(document.body, { childList: true, subtree: true });
+
+  //   // Adjust any existing <textarea> elements initially
+  //   adjustExistingTextareas();
+
+  //   // Cleanup on unmount
+  //   return () => observer.disconnect();
+  // }, []);
+
   const handlerDeleteOptionConfirmationPopup = (
     aIndex: any,
     qIndex: number
@@ -280,7 +332,7 @@ const Config = (props: any) => {
         return (qus.QuestionNo = 10000);
       }
     });
-    toast.success("Deleted Successfully", {
+    toast.success("Question deleted successfully", {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -477,7 +529,7 @@ const Config = (props: any) => {
       )
     ) {
       err = true;
-      errmsg = "Select Answer";
+      errmsg = "Select any valid answer";
     }
     if (!err) {
       try {
@@ -942,7 +994,7 @@ const Config = (props: any) => {
 
                   <Button
                     className={styles.addNewBtn}
-                    label="Add form"
+                    label="New form"
                     icon="pi  pi-file-plus"
                     onClick={() => {
                       setnewformDetails(null);
@@ -986,7 +1038,11 @@ const Config = (props: any) => {
                           </div>
                           <div className={styles.RightSection}>
                             <i
-                              className="pi  pi-pencil"
+                              className={
+                                !question.isEdit
+                                  ? "pi  pi-pencil"
+                                  : "pi pi-check"
+                              }
                               style={{ fontSize: "1rem" }}
                               onClick={() => handlerEditQuestions(question.Id)}
                             />
@@ -1023,18 +1079,21 @@ const Config = (props: any) => {
                         </div>
 
                         <div className={styles.QuestionSection}>
-                          <InputText
+                          {/* //   <InputText */}
+                          <textarea
                             id={question.QuestionNo}
-                            className={styles.questionInput}
+                            className={`${styles.questionInput} questionInput`}
                             value={question?.QuestionTitle}
                             placeholder="Enter here"
                             onChange={(e) => {
+                              textAreaAdjust(e.target);
                               handlerQuestionChange(
                                 qIndex,
                                 e.target.value,
                                 "Question"
                               );
                             }}
+                            maxLength={240}
                             disabled={!question.isEdit}
                           />
                           <div className={styles.QuestionTag}>
@@ -1242,12 +1301,12 @@ const Config = (props: any) => {
                 ) : !currentFormID ? (
                   <div className={styles.noQuestionFound}>
                     No forms have been added yet. Please click the{" "}
-                    <b>&nbsp;Add form&nbsp;</b> button to add one!
+                    <b>&nbsp;New form&nbsp;</b> button to get started!
                   </div>
                 ) : (
                   <div className={styles.noQuestionFound}>
                     No questions have been added yet. Please click the{" "}
-                    <b>&nbsp;Add New Question&nbsp;</b> button to add one!
+                    <b>&nbsp;Add New Question&nbsp;</b> button to get started!
                   </div>
                 )}
               </div>

@@ -182,6 +182,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                   QuestionTitle: item.QuestionID?.Title,
                   QuestionSno: item.QuestionID?.Sno,
                   Answer: item.QuestionID?.Answer,
+                  EmpResponse: item.Response ? item.Response : "-",
                   Status: item.Status,
                   Comments: item.Comments,
                   ResponseComments: item.ResponseComments,
@@ -590,7 +591,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               personSelectionLimit={100}
               showtooltip={false}
               ensureUser={true}
-              placeholder={"Search Employee"}
+              placeholder={"Search assigened to"}
               onChange={(selectedPeople: any[]) => {
                 console.log("Selected People:", selectedPeople);
                 curFilterItem.Employee = selectedPeople;
@@ -606,7 +607,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           <InputText
             className={styles.filterSearch}
             value={filterkeys?.search || ""}
-            placeholder={"Search Questions"}
+            placeholder={"Search questions"}
             onChange={(e) => {
               const value: any = e.target.value.trimStart();
               curFilterItem.search = value;
@@ -641,7 +642,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
             tableStyle={{ minWidth: "50rem" }}
           >
             <Column field="QuestionTitle" header="Questions" />
-            <Column field="Answer" header="Answer" />
+            <Column field="EmpResponse" header="Response" />
             <Column
               field="Status"
               header="Status"

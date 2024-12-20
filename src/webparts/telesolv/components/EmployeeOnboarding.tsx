@@ -91,6 +91,7 @@ const Onboarding = (props: any) => {
       },
       Forms: "",
       index: null,
+      ID: null,
       Role: "",
       Department: { key: "", name: "" },
       Email: "",
@@ -127,6 +128,7 @@ const Onboarding = (props: any) => {
       .expand("Employee,Form")
       .top(5000)
       .filter("isDelete ne 1")
+      .orderBy("Created", false)
       .get()
       .then(async (items: any) => {
         const formattedItems =
@@ -178,13 +180,13 @@ const Onboarding = (props: any) => {
                 : true,
             SecondaryEmail: item.SecondaryEmail ? item.SecondaryEmail : "",
           })) || [];
-        debugger;
-        console.log(formattedItems);
-        const tempFormattedItems = formattedItems.sort(
-          (a: any, b: any) => b.Id - a.Id
-        );
-        setEmployeeOnboardingDetails(tempFormattedItems);
-        setfilteredEmployeeOnboardingDetails(tempFormattedItems);
+        // debugger;
+        // console.log(formattedItems);
+        // const tempFormattedItems = formattedItems.sort(
+        //   (a: any, b: any) => b.Id - a.Id
+        // );
+        setEmployeeOnboardingDetails(formattedItems);
+        setfilteredEmployeeOnboardingDetails(formattedItems);
 
         await handlerGetStatusValues();
       })
@@ -350,7 +352,7 @@ const Onboarding = (props: any) => {
         val.some((_v: any) => _item.Employee.EmployeeEMail === _v.secondaryText)
       );
     }
-    if (_tempFilterkeys.search) {
+    if (_tempFilterkeys?.search) {
       filteredData = filteredData?.filter((value: any) =>
         value?.Role?.toLowerCase().includes(
           _tempFilterkeys.search.toLowerCase()
@@ -579,7 +581,7 @@ const Onboarding = (props: any) => {
                       .getByTitle(GCongfig.ListName.EmployeeResponse)
                       .items.getById(_Empitem.Id)
                       .update({
-                        Status: "Satisfactory",
+                        Status: "Resolved",
                         CompletedById: currentUserID,
                         CompletedDateAndTime: new Date().toISOString(),
                       })
@@ -666,7 +668,7 @@ const Onboarding = (props: any) => {
           .then(async (eve) => {
             await setisVisible(false);
             await setIsLoading(false);
-            await toast.success("Employee added Successfully", {
+            await toast.success("Employee onboarded Successfully", {
               position: "top-right",
               autoClose: 5000,
               hideProgressBar: false,
@@ -769,7 +771,7 @@ const Onboarding = (props: any) => {
                   hanlderfilter("form", e.value.ID);
                 }}
                 options={formsDetails || []}
-                style={{ width: "100%" }}
+                // style={{ width: "100%" }}
                 className={`${styles.filterDepartment} w-full md:w-14rem`}
                 optionLabel="name"
                 placeholder="Select a Form"
@@ -1124,6 +1126,7 @@ const Onboarding = (props: any) => {
                     }}
                     onClick={() => setisVisible(false)}
                   />
+
                   <Button
                     label="Save"
                     style={{
@@ -1144,7 +1147,9 @@ const Onboarding = (props: any) => {
                           !item.Assigned || item.Assigned.length === 0
                       )
                     }
-                    onClick={() => handlerVaildation()}
+                    onClick={() => {
+                      handlerVaildation();
+                    }}
                   />
                 </div>
               </div>

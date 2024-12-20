@@ -430,7 +430,7 @@ const HrScreen = (props: any): JSX.Element => {
         setisVisible(false);
         setisRunder(true);
         // setIsLoading(false);
-        toast.success("Update Successfully", {
+        toast.success("Task updated successfully", {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
