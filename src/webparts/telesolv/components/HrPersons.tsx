@@ -469,202 +469,192 @@ const HrPersons = (props: any) => {
     handlerSiteUsers();
   }, []);
 
-  return (
-    <>
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <div>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
-          />
+  return isLoading ? (
+    <Loader />
+  ) : (
+    <div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
 
-          {/* Same as */}
-          <ToastContainer />
-          <div className={styles.card}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <h4>
-                {" "}
-                {formsValues
-                  ? formsValues?.filter(
+      {/* Same as */}
+      <ToastContainer />
+      <div className={styles.card}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <h4>
+            {" "}
+            {formsValues
+              ? formsValues?.filter(
+                  (choice: any) => choice.ID === filterkeys.Forms
+                )?.[0]?.key || ""
+              : ""}
+          </h4>
+          <div className={styles.HrEditContainer}>
+            <Dropdown
+              className={styles.filterForm}
+              value={
+                formsValues
+                  ? formsValues?.find(
                       (choice: any) => choice.ID === filterkeys.Forms
-                    )?.[0]?.key || ""
-                  : ""}
-              </h4>
-              <div className={styles.HrEditContainer}>
-                <Dropdown
-                  className={styles.filterForm}
-                  value={
-                    formsValues
-                      ? formsValues?.find(
-                          (choice: any) => choice.ID === filterkeys.Forms
-                        ) || ""
-                      : ""
-                  }
-                  onChange={(e) => {
-                    handlerQuestionsFilter(
-                      checkPointDetails,
-                      "Forms",
-                      e.value.ID
-                    );
-                    setcurrentFormID(e.value.ID);
-                  }}
-                  options={formsValues || []}
-                  optionLabel="name"
-                  placeholder="Select a Form"
-                />
+                    ) || ""
+                  : ""
+              }
+              onChange={(e) => {
+                handlerQuestionsFilter(checkPointDetails, "Forms", e.value.ID);
+                setcurrentFormID(e.value.ID);
+              }}
+              options={formsValues || []}
+              optionLabel="name"
+              placeholder="Select a Form"
+            />
 
-                <InputText
-                  className={styles.filterSearch}
-                  placeholder={"Search"}
-                  value={filterkeys.search || ""}
-                  onChange={(e) => {
-                    console.log(e.target.value);
-                    handlerQuestionsFilter(
-                      checkPointDetails,
-                      "search",
-                      e.target.value
-                    );
-                  }}
-                />
-                <div className="HRPersonPeopleSearch">
-                  <PeoplePicker
-                    context={props.context}
-                    webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
-                    personSelectionLimit={100}
-                    showtooltip={false}
-                    ensureUser={true}
-                    placeholder={"Search HR Persons"}
-                    onChange={(selectedPeople: any[]) => {
-                      handlerQuestionsFilter(
-                        checkPointDetails,
-                        "people",
-                        selectedPeople
-                      ); // Pass selectedPeople and rowData
-                    }}
-                    principalTypes={[PrincipalType.User]}
-                    defaultSelectedUsers={filterkeys.people}
-                    resolveDelay={1000}
-                  />
-                </div>
-
-                <Button
-                  label={isEdit ? "Edit" : "Cancel"}
-                  outlined
-                  icon="pi pi-pencil"
-                  style={{
-                    color: "#ffff",
-                    backgroundColor: "#233b83",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setisEdit(!isEdit);
-                    // if (isEdit === false) {
-                    //   setfilteredcheckPoints([...checkPointDetails]);
-                    // }
-                    !isEdit && setfilteredcheckPoints([...checkPointDetails]);
-
-                    if (!isEdit) {
-                      filterkeys.Forms = null;
-                      filterkeys.people = [];
-                      filterkeys.search = "";
-                    }
-                  }}
-                />
-                <i
-                  className="pi pi-refresh"
-                  style={{
-                    backgroundColor: "#223b83",
-                    padding: 10,
-                    borderRadius: 4,
-                    color: "#fff",
-                  }}
-                  onClick={() => {
-                    filterkeys.people = [];
-                    filterkeys.Forms = null;
-                    filterkeys.search = "";
-                    setfilteredcheckPoints([...checkPointDetails]);
-                    handlerQuestionsFilter(
-                      [...checkPointDetails],
-                      "Forms",
-                      firtFormID
-                    );
-                  }}
-                />
-              </div>
+            <InputText
+              className={styles.filterSearch}
+              placeholder={"Search"}
+              value={filterkeys.search || ""}
+              onChange={(e) => {
+                console.log(e.target.value);
+                handlerQuestionsFilter(
+                  checkPointDetails,
+                  "search",
+                  e.target.value
+                );
+              }}
+            />
+            <div className="HRPersonPeopleSearch">
+              <PeoplePicker
+                context={props.context}
+                webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                personSelectionLimit={100}
+                showtooltip={false}
+                ensureUser={true}
+                placeholder={"Search HR Persons"}
+                onChange={(selectedPeople: any[]) => {
+                  handlerQuestionsFilter(
+                    checkPointDetails,
+                    "people",
+                    selectedPeople
+                  ); // Pass selectedPeople and rowData
+                }}
+                principalTypes={[PrincipalType.User]}
+                defaultSelectedUsers={filterkeys.people}
+                resolveDelay={1000}
+              />
             </div>
-            <DataTable
-              className={styles.HRConfigDataTable}
-              value={[...filteredcheckPoints]}
-            >
-              <Column
-                field="QuestionTitle"
-                header="Questions"
-                className={styles.questionsTD}
-                body={(row) => {
-                  return (
-                    <div title={row.QuestionTitle}>{row.QuestionTitle}</div>
-                  );
-                }}
-              ></Column>
-              <Column
-                className={styles.taskName}
-                field="TaskName"
-                header="Task Name"
-                body={handlerTaskDetails}
-              ></Column>
-              {/* <Column field="FormTitle" header="Form"></Column> */}
-              <Column
-                className={styles.HRPersonsList}
-                field="Assigenee"
-                header="HR Persons"
-                body={handlerAssigneeDetails}
-              ></Column>
-            </DataTable>
-          </div>
-          {HrPersons.length > 0 && (
-            <div className={styles.ConfigBtns}>
-              <Button
-                label="Cancel"
-                style={{
-                  backgroundColor: "#cfcfcf",
-                  color: "#000",
-                  border: "none",
-                }}
-                onClick={() => {
-                  setisEdit(!isEdit);
-                  !isEdit && setfilteredcheckPoints([...checkPointDetails]);
+
+            <Button
+              label={isEdit ? "Edit" : "Cancel"}
+              outlined
+              icon="pi pi-pencil"
+              style={{
+                color: "#ffff",
+                backgroundColor: "#233b83",
+                border: "none",
+              }}
+              onClick={() => {
+                setisEdit(!isEdit);
+                // if (isEdit === false) {
+                //   setfilteredcheckPoints([...checkPointDetails]);
+                // }
+                !isEdit && setfilteredcheckPoints([...checkPointDetails]);
+
+                if (!isEdit) {
                   filterkeys.Forms = null;
                   filterkeys.people = [];
                   filterkeys.search = "";
-                }}
-                disabled={isEdit}
-              />
-              <Button
-                label="Save"
-                disabled={isEdit}
-                style={{
-                  color: "#ffff",
-                  backgroundColor: "#233b83",
-                  border: "none",
-                }}
-                onClick={() => handlerValidation()}
-              />
-            </div>
-          )}
+                }
+              }}
+            />
+            <i
+              className="pi pi-refresh"
+              style={{
+                backgroundColor: "#223b83",
+                padding: 10,
+                borderRadius: 4,
+                color: "#fff",
+              }}
+              onClick={() => {
+                filterkeys.people = [];
+                filterkeys.Forms = null;
+                filterkeys.search = "";
+                setfilteredcheckPoints([...checkPointDetails]);
+                handlerQuestionsFilter(
+                  [...checkPointDetails],
+                  "Forms",
+                  firtFormID
+                );
+              }}
+            />
+          </div>
+        </div>
+        <DataTable
+          className={styles.HRConfigDataTable}
+          value={[...filteredcheckPoints]}
+        >
+          <Column
+            field="QuestionTitle"
+            header="Questions"
+            className={styles.questionsTD}
+            body={(row) => {
+              return <div title={row.QuestionTitle}>{row.QuestionTitle}</div>;
+            }}
+          ></Column>
+          <Column
+            className={styles.taskName}
+            field="TaskName"
+            header="Task Name"
+            body={handlerTaskDetails}
+          ></Column>
+          {/* <Column field="FormTitle" header="Form"></Column> */}
+          <Column
+            className={styles.HRPersonsList}
+            field="Assigenee"
+            header="HR Persons"
+            body={handlerAssigneeDetails}
+          ></Column>
+        </DataTable>
+      </div>
+      {HrPersons.length > 0 && (
+        <div className={styles.ConfigBtns}>
+          <Button
+            label="Cancel"
+            style={{
+              backgroundColor: "#cfcfcf",
+              color: "#000",
+              border: "none",
+            }}
+            onClick={() => {
+              setisEdit(!isEdit);
+              !isEdit && setfilteredcheckPoints([...checkPointDetails]);
+              filterkeys.Forms = null;
+              filterkeys.people = [];
+              filterkeys.search = "";
+            }}
+            disabled={isEdit}
+          />
+          <Button
+            label="Save"
+            disabled={isEdit}
+            style={{
+              color: "#ffff",
+              backgroundColor: "#233b83",
+              border: "none",
+            }}
+            onClick={() => handlerValidation()}
+          />
         </div>
       )}
-    </>
+    </div>
   );
 };
 export default HrPersons;

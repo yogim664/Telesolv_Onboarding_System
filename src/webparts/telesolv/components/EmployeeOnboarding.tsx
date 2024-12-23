@@ -596,7 +596,7 @@ const Onboarding = (props: any) => {
                       await setIsLoading(false);
 
                       setIsLoading(false);
-                      toast.success("Employee Updated Successfully", {
+                      toast.success("Employee updated successfully", {
                         position: "top-right",
                         autoClose: 5000,
                         hideProgressBar: false,
@@ -668,7 +668,7 @@ const Onboarding = (props: any) => {
           .then(async (eve) => {
             await setisVisible(false);
             await setIsLoading(false);
-            await toast.success("Employee onboarded Successfully", {
+            await toast.success("New employee onboarded successfully", {
               position: "top-right",
               autoClose: 5000,
               hideProgressBar: false,
@@ -947,7 +947,10 @@ const Onboarding = (props: any) => {
                     />
 
                     <div className={styles.addEmpInfo}>
-                      Please contact admin if you do not find the user
+                      {(!tempEmployeeOnboardingDetails?.Employee
+                        ?.EmployeeEMail ||
+                        isUpdate) &&
+                        "Please contact admin if you do not find the user"}
                     </div>
                   </div>
                 </div>

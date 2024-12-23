@@ -57,10 +57,12 @@ const Config = (props: any) => {
   const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
   const [filteredQuestions, setfilteredQuestions] = React.useState<any>([]);
   const [changeOption, setchangeOption] = useState<any>([]);
+  const [isHrPersonScreenVisible, setisHrPersonScreenVisible] = useState(false);
   const [selectedOption, setselectedOption] = useState({
     qIndex: null,
     aIndex: null,
   });
+  const [activeIndex, setactiveIndex] = useState<number>(0);
 
   const handlerAcceptance = (id: any, qIndex: number) => {
     handlerQuestionDeletion(id, qIndex);
@@ -77,6 +79,42 @@ const Config = (props: any) => {
       ),
       accept: () => handlerAcceptance(id, qIndex),
     });
+  };
+
+  const showConfirmationHRscreenPop = (index: any) => {
+    if (index === 1) {
+      confirmDialog({
+        group: "templating",
+        header: "Confirmation",
+        message: (
+          <div className="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
+            <span>Do you want save the changes?</span>
+          </div>
+        ),
+
+        accept: async () => {
+          await handlervalidation(true);
+        },
+
+        reject: () => setactiveIndex(1),
+        closable: true,
+      });
+
+      // <ConfirmDialog
+      //   group="declarative"
+      //   visible={isHrPersonScreenVisible}
+      //   onHide={() => setisHrPersonScreenVisible(false)}
+      //   message="Are you sure you want to proceed?"
+      //   header="Confirmation"
+      //   icon="pi pi-exclamation-triangle"
+      //   accept={handlervalidation(true)}
+      //   reject={setactiveIndex(1)}
+      //   style={{ width: "50vw" }}
+      //   breakpoints={{ "1100px": "75vw", "960px": "100vw" }}
+      // />;
+    } else {
+      setactiveIndex(0);
+    }
   };
 
   function textAreaAdjust(element: HTMLTextAreaElement) {
@@ -507,7 +545,7 @@ const Config = (props: any) => {
 
   // Post into list SP
 
-  const handlervalidation = async (): Promise<void> => {
+  const handlervalidation = async (value: boolean): Promise<void> => {
     let errmsg: string = "";
     let err: boolean = false;
     const tempquestion = filteredQuestions.filter(
@@ -566,6 +604,9 @@ const Config = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
+        if (value) {
+          setactiveIndex(1);
+        }
       } catch (error) {
         toast.error("Failed to process questions.", {
           position: "top-right",
@@ -816,7 +857,7 @@ const Config = (props: any) => {
             await setnewformDetails("");
             setcurrentFormID(li?.data?.ID);
             await hanlderForms(id);
-
+            setisVisible(false);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -832,6 +873,7 @@ const Config = (props: any) => {
           .then(async (li: any) => {
             await setnewformDetails("");
             await hanlderForms(li?.data?.ID);
+            setisVisible(false);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -921,8 +963,32 @@ const Config = (props: any) => {
           </div>
 
           <ConfirmDialog group="templating" />
+          <ConfirmDialog />
+          <Dialog
+            header="Header"
+            visible={isHrPersonScreenVisible}
+            style={{ width: "50vw" }}
+            onHide={() => {
+              if (!isHrPersonScreenVisible) return;
+              setisHrPersonScreenVisible(false);
+            }}
+          >
+            <p className="m-0">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+              reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+              sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+          </Dialog>
 
-          <TabView className="CongifTab">
+          <TabView
+            className="CongifTab"
+            activeIndex={activeIndex}
+            onTabChange={(e) => showConfirmationHRscreenPop(e.index)}
+          >
             <TabPanel
               header="Questions"
               className={`${styles.questionConfigContaier} MainTab`}
@@ -958,6 +1024,8 @@ const Config = (props: any) => {
                 </div>
 
                 <div className={styles.formSelectionSection}>
+                  <div>{`No of questions - ${filteredQuestions.length}`}</div>
+
                   <Dropdown
                     className={styles.formFilterDD}
                     value={
@@ -1345,7 +1413,6 @@ const Config = (props: any) => {
                       label="Cancel"
                       onClick={() => {
                         setSelectedQuestionId(null);
-
                         setfilteredQuestions(questions);
                       }}
                     />
@@ -1353,7 +1420,7 @@ const Config = (props: any) => {
                       label="Save"
                       className={styles.saveBtn}
                       onClick={() => {
-                        handlervalidation();
+                        handlervalidation(false);
                       }}
                     />
                   </div>
@@ -1361,7 +1428,10 @@ const Config = (props: any) => {
               </div>
             </TabPanel>
             <TabPanel header="HR Persons">
+              {/* {isHrPersonScreen ? ( */}
               <HrPersons context={props.context} Question={questions} />
+              {/* <p></p> */}
+              {/* )} */}
             </TabPanel>
           </TabView>
         </div>
