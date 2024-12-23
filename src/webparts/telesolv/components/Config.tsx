@@ -57,10 +57,12 @@ const Config = (props: any) => {
   const [filteredForm, setfilteredForm] = React.useState<IFilData>(_fkeys);
   const [filteredQuestions, setfilteredQuestions] = React.useState<any>([]);
   const [changeOption, setchangeOption] = useState<any>([]);
+  const [isHrPersonScreenVisible, setisHrPersonScreenVisible] = useState(false);
   const [selectedOption, setselectedOption] = useState({
     qIndex: null,
     aIndex: null,
   });
+  const [activeIndex, setactiveIndex] = useState<number>(0);
 
   const handlerAcceptance = (id: any, qIndex: number) => {
     handlerQuestionDeletion(id, qIndex);
@@ -78,6 +80,94 @@ const Config = (props: any) => {
       accept: () => handlerAcceptance(id, qIndex),
     });
   };
+
+  const showConfirmationHRscreenPop = (index: any) => {
+    if (index === 1) {
+      confirmDialog({
+        group: "templating",
+        header: "Confirmation",
+        message: (
+          <div className="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
+            <span>Do you want save the changes?</span>
+          </div>
+        ),
+
+        accept: async () => {
+          await handlervalidation(true);
+        },
+
+        reject: () => setactiveIndex(1),
+        closable: true,
+      });
+
+      // <ConfirmDialog
+      //   group="declarative"
+      //   visible={isHrPersonScreenVisible}
+      //   onHide={() => setisHrPersonScreenVisible(false)}
+      //   message="Are you sure you want to proceed?"
+      //   header="Confirmation"
+      //   icon="pi pi-exclamation-triangle"
+      //   accept={handlervalidation(true)}
+      //   reject={setactiveIndex(1)}
+      //   style={{ width: "50vw" }}
+      //   breakpoints={{ "1100px": "75vw", "960px": "100vw" }}
+      // />;
+    } else {
+      setactiveIndex(0);
+    }
+  };
+
+  function textAreaAdjust(element: HTMLTextAreaElement) {
+    if (element) {
+      element.style.height = "1px"; // Reset height
+      element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
+    }
+  }
+
+  // useEffect(() => {
+  //   function textAreaAdjust(element: HTMLTextAreaElement) {
+  //     // Add a small delay to ensure scrollHeight is accurate
+  //     setTimeout(() => {
+  //       element.style.height = "1px"; // Reset height
+  //       element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
+  //     }, 0);
+  //   }
+
+  //   // Adjust existing <textarea> elements
+  //   const adjustExistingTextareas = () => {
+  //     const existingTextareas = document.getElementsByTagName("textarea");
+  //     Array.from(existingTextareas).forEach((textarea) =>
+  //       textAreaAdjust(textarea)
+  //     );
+  //     console.log("existingTextareas", existingTextareas);
+  //   };
+
+  //   // Adjust on new <textarea> additions
+  //   const observerCallback: MutationCallback = (mutationsList) => {
+  //     mutationsList.forEach((mutation) => {
+  //       if (mutation.type === "childList") {
+  //         Array.from(mutation.addedNodes).forEach((node) => {
+  //           if (
+  //             node instanceof HTMLTextAreaElement &&
+  //             node.classList.contains("questionInput")
+  //           ) {
+  //             textAreaAdjust(node);
+  //           }
+  //         });
+  //       }
+  //     });
+  //   };
+
+  //   // Set up the MutationObserver
+  //   const observer = new MutationObserver(observerCallback);
+  //   observer.observe(document.body, { childList: true, subtree: true });
+
+  //   // Adjust any existing <textarea> elements initially
+  //   adjustExistingTextareas();
+
+  //   // Cleanup on unmount
+  //   return () => observer.disconnect();
+  // }, []);
 
   const handlerDeleteOptionConfirmationPopup = (
     aIndex: any,
@@ -280,7 +370,7 @@ const Config = (props: any) => {
         return (qus.QuestionNo = 10000);
       }
     });
-    toast.success("Deleted Successfully", {
+    toast.success("Question deleted successfully", {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -455,7 +545,7 @@ const Config = (props: any) => {
 
   // Post into list SP
 
-  const handlervalidation = async (): Promise<void> => {
+  const handlervalidation = async (value: boolean): Promise<void> => {
     let errmsg: string = "";
     let err: boolean = false;
     const tempquestion = filteredQuestions.filter(
@@ -477,7 +567,7 @@ const Config = (props: any) => {
       )
     ) {
       err = true;
-      errmsg = "Select Answer";
+      errmsg = "Select any valid answer";
     }
     if (!err) {
       try {
@@ -514,6 +604,9 @@ const Config = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
+        if (value) {
+          setactiveIndex(1);
+        }
       } catch (error) {
         toast.error("Failed to process questions.", {
           position: "top-right",
@@ -764,7 +857,7 @@ const Config = (props: any) => {
             await setnewformDetails("");
             setcurrentFormID(li?.data?.ID);
             await hanlderForms(id);
-
+            setisVisible(false);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -780,6 +873,7 @@ const Config = (props: any) => {
           .then(async (li: any) => {
             await setnewformDetails("");
             await hanlderForms(li?.data?.ID);
+            setisVisible(false);
             setIsLoading(false);
           })
           .catch((err) => {
@@ -869,8 +963,32 @@ const Config = (props: any) => {
           </div>
 
           <ConfirmDialog group="templating" />
+          <ConfirmDialog />
+          <Dialog
+            header="Header"
+            visible={isHrPersonScreenVisible}
+            style={{ width: "50vw" }}
+            onHide={() => {
+              if (!isHrPersonScreenVisible) return;
+              setisHrPersonScreenVisible(false);
+            }}
+          >
+            <p className="m-0">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+              reprehenderit in voluptate velit esse cillum dolore eu fugiat
+              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+              sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+          </Dialog>
 
-          <TabView className="CongifTab">
+          <TabView
+            className="CongifTab"
+            activeIndex={activeIndex}
+            onTabChange={(e) => showConfirmationHRscreenPop(e.index)}
+          >
             <TabPanel
               header="Questions"
               className={`${styles.questionConfigContaier} MainTab`}
@@ -906,6 +1024,8 @@ const Config = (props: any) => {
                 </div>
 
                 <div className={styles.formSelectionSection}>
+                  <div>{`No of questions - ${filteredQuestions.length}`}</div>
+
                   <Dropdown
                     className={styles.formFilterDD}
                     value={
@@ -942,7 +1062,7 @@ const Config = (props: any) => {
 
                   <Button
                     className={styles.addNewBtn}
-                    label="Add form"
+                    label="New form"
                     icon="pi  pi-file-plus"
                     onClick={() => {
                       setnewformDetails(null);
@@ -986,7 +1106,11 @@ const Config = (props: any) => {
                           </div>
                           <div className={styles.RightSection}>
                             <i
-                              className="pi  pi-pencil"
+                              className={
+                                !question.isEdit
+                                  ? "pi  pi-pencil"
+                                  : "pi pi-check"
+                              }
                               style={{ fontSize: "1rem" }}
                               onClick={() => handlerEditQuestions(question.Id)}
                             />
@@ -1023,18 +1147,21 @@ const Config = (props: any) => {
                         </div>
 
                         <div className={styles.QuestionSection}>
-                          <InputText
+                          {/* //   <InputText */}
+                          <textarea
                             id={question.QuestionNo}
-                            className={styles.questionInput}
+                            className={`${styles.questionInput} questionInput`}
                             value={question?.QuestionTitle}
                             placeholder="Enter here"
                             onChange={(e) => {
+                              textAreaAdjust(e.target);
                               handlerQuestionChange(
                                 qIndex,
                                 e.target.value,
                                 "Question"
                               );
                             }}
+                            maxLength={240}
                             disabled={!question.isEdit}
                           />
                           <div className={styles.QuestionTag}>
@@ -1242,12 +1369,12 @@ const Config = (props: any) => {
                 ) : !currentFormID ? (
                   <div className={styles.noQuestionFound}>
                     No forms have been added yet. Please click the{" "}
-                    <b>&nbsp;Add form&nbsp;</b> button to add one!
+                    <b>&nbsp;New form&nbsp;</b> button to get started!
                   </div>
                 ) : (
                   <div className={styles.noQuestionFound}>
                     No questions have been added yet. Please click the{" "}
-                    <b>&nbsp;Add New Question&nbsp;</b> button to add one!
+                    <b>&nbsp;Add New Question&nbsp;</b> button to get started!
                   </div>
                 )}
               </div>
@@ -1286,7 +1413,6 @@ const Config = (props: any) => {
                       label="Cancel"
                       onClick={() => {
                         setSelectedQuestionId(null);
-
                         setfilteredQuestions(questions);
                       }}
                     />
@@ -1294,7 +1420,7 @@ const Config = (props: any) => {
                       label="Save"
                       className={styles.saveBtn}
                       onClick={() => {
-                        handlervalidation();
+                        handlervalidation(false);
                       }}
                     />
                   </div>
@@ -1302,7 +1428,10 @@ const Config = (props: any) => {
               </div>
             </TabPanel>
             <TabPanel header="HR Persons">
+              {/* {isHrPersonScreen ? ( */}
               <HrPersons context={props.context} Question={questions} />
+              {/* <p></p> */}
+              {/* )} */}
             </TabPanel>
           </TabView>
         </div>

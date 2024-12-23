@@ -216,7 +216,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                     .update({ isEmployeeCompleted: true })
                 );
 
-                toast.success("Updated Successfully", {
+                toast.success("Form submitted successfully", {
                   position: "top-right",
                   autoClose: 5000,
                   hideProgressBar: false,
