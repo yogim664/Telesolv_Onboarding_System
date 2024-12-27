@@ -891,7 +891,7 @@ const Config = (props: any) => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div style={{ padding: 10 }}>
+        <div style={{ padding: 10, marginBottom: 30 }}>
           <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -985,7 +985,7 @@ const Config = (props: any) => {
           </Dialog>
 
           <TabView
-            className="CongifTab"
+            className="MainTab"
             activeIndex={activeIndex}
             onTabChange={(e) => showConfirmationHRscreenPop(e.index)}
           >
@@ -1356,6 +1356,7 @@ const Config = (props: any) => {
                             cursor: question.isEdit ? "pointer" : "not-allowed",
                             pointerEvents: question.isEdit ? "auto" : "none",
                             opacity: question.isEdit ? 1 : 0.5,
+                            display: question.isEdit ? "block" : "none",
                           }}
                         >
                           <i

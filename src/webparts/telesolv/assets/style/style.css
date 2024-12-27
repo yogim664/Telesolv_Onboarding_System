@@ -25,7 +25,7 @@
 
 div[data-automation-id="CanvasZone-SectionContainer"] {
     margin: 0 !important;
-    margin-top: 33px !important;
+    /* margin-top: 33px !important; */
 }
 
 .CanvasZone-SectionContainer {
@@ -173,7 +173,7 @@ td {
 }
 
 .p-dialog {
-    background: #ffffffe0 !important;
+    background: #fffffff0 !important;
 }
 
 @keyframes depth-animation {
@@ -337,7 +337,8 @@ i {
 }
 
 .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-    background: #ffffff61;
+    background: #ffffffcc;
+    padding: 0.75rem 3rem !important;
 }
 
 .p-dropdown,

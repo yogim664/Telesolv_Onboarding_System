@@ -1,10 +1,21 @@
 .MainTab .p-tabview-nav-link {
-  border: none !important;
+    border: none !important;
 }
+
 .MainTab .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  border-bottom: 3px solid #233b83 !important;
-  color: #233b83 !important;
+    border-bottom: 3px solid #233b83 !important;
+    color: #233b83 !important;
 }
+
 .p-tabview .p-tabview-nav {
-  border: none !important;
+    border: none !important;
+}
+
+.MainTab .p-tabview-nav li .p-tabview-nav-link {
+    border-bottom: 3px solid #afafaf !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    border-top-right-radius: 0px !important;
+    border-top-left-radius: 0px !important;
 }

@@ -2,9 +2,8 @@
     width: 99%;
     background-color: #ffffff;
     display: flex;
-    box-shadow: 0px 5px 0px #f9f9f9;
     justify-content: space-between;
-    border-bottom: 1px solid #cbcbcb;
+    border-bottom: 1px solid #fff;
 }
 
 .navRightContainers {
@@ -61,11 +60,11 @@
 .EmployeeAnsContainerheaderConatiner {
     width: 90%;
     backdrop-filter: blur(15px);
-    box-shadow: 0px 0px 20px rgba(227, 228, 237, 0.35);
-    border: 2px solid rgba(255, 255, 255, 0.18);
+    box-shadow: -1px -2px 18px -1px #c6d4ff;
     border-radius: 8px;
     margin: 12px auto;
-    background: #ffffff61;
+    background: linear-gradient(90deg, rgba(225, 244, 251, 1) 0%, rgb(214 215 255) 86%, rgba(231, 225, 251, 1) 100%);
+    padding: 12px;
     .EmployeeAnsContainerheader {
         display: flex;
         justify-content: space-between;
@@ -221,12 +220,10 @@
     .cancelBtn {
         background-color: #cfcfcf;
         color: #000;
-        font-weight: 600;
     }
     .primaryBtn {
         background-color: #233b83;
         color: #fff;
-        font-weight: 600;
     }
 }
 
