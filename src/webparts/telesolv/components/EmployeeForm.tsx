@@ -9,6 +9,7 @@ import * as React from "react";
 import { RadioButton } from "primereact/radiobutton"; // Importing PrimeReact RadioButton
 import styles from "./EmployeeForm.module.scss";
 // import styles from "./Telesolv.module.scss";
+import "./EmployeeForm.scss";
 import "../assets/style/employeeform.css";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
@@ -279,12 +280,19 @@ const EmployeeForm = (props: any): JSX.Element => {
                   <div className={styles.EmployeeAnsContainerheader}>
                     <div className={styles.formGuide}>
                       {questions.filter((item: any) => item.isAnswered === true)
-                        .length === 0 && (
+                        .length === 0 ? (
                         <div>
                           <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
                           <h4>
                             Fill the form to get started with your onboarding
                             process
+                          </h4>
+                        </div>
+                      ) : (
+                        <div>
+                          <h2 style={{ margin: "6px 0" }}>Let's get started</h2>
+                          <h4>
+                            Welcome aboard! We're thrilled to have you with us.
                           </h4>
                         </div>
                       )}

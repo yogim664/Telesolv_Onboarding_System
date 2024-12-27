@@ -1,175 +1,170 @@
 .navBar {
-  display: flex;
-  box-shadow: 0px 5px 0px #f9f9f9;
-  border-bottom: 1px solid #cbcbcb;
+    display: flex;
+    border-bottom: 1px solid #fff;
 }
 
 .HrPersonContainer {
-  padding: 20px;
-  min-height: 76vh;
-  // background-image: url("../assets//Images//EmployeeFormBG.jpg");
-  background: radial-gradient(
-    circle,
-    rgba(226, 215, 251, 1) 0%,
-    rgba(218, 235, 254, 1) 100%
-  );
-  .HRPersonHeaderFilters {
-    display: flex;
-    gap: 8px;
-    justify-content: space-between;
-    // width: 90%;
-    margin: auto;
-    align-items: center;
-    .pageTitle {
-      color: #233b83;
-      font-weight: 600;
-      font-size: 18px;
+    padding: 20px;
+    min-height: 76vh;
+    // background-image: url("../assets//Images//EmployeeFormBG.jpg");
+    background: radial-gradient( circle, rgba(226, 215, 251, 1) 0%, rgba(218, 235, 254, 1) 100%);
+    .HRPersonHeaderFilters {
+        display: flex;
+        gap: 8px;
+        justify-content: space-between;
+        // width: 90%;
+        margin: auto;
+        align-items: center;
+        .pageTitle {
+            color: #233b83;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .HRPersonFilters {
+            display: flex;
+            gap: 16px;
+        }
+        .filterDepartment {
+            width: 200px !important;
+        }
+        .filterStatus {
+            width: 200px !important;
+        }
+        .filterOverAll {
+            width: 200px !important;
+        }
     }
-    .HRPersonFilters {
-      display: flex;
-      gap: 16px;
-    }
-    .filterDepartment {
-      width: 200px !important;
-    }
-    .filterStatus {
-      width: 200px !important;
-    }
-    .filterOverAll {
-      width: 200px !important;
-    }
-  }
 }
 
 .HRPersonDashboard {
-  // width: 90%;
-  margin: auto;
-  th {
-    padding: 16px !important;
-  }
-  td:nth-child(1) {
-    font-weight: 600;
-  }
+    // width: 90%;
+    margin: auto;
+    th {
+        padding: 16px !important;
+    }
+    td:nth-child(1) {
+        font-weight: 600;
+    }
 }
 
 .pendingSts {
-  background: #d8e5f0;
-  padding: 6px 12px;
-  border-radius: 25px;
-  text-align: center;
-  color: #1e71b9;
-  font-size: 14px;
-  display: flex;
-  width: max-content;
-  // justify-content: space-between;
-  gap: 8px;
-  align-items: center;
-  .statusDot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
+    background: #d8e5f0;
+    padding: 6px 12px;
+    border-radius: 25px;
+    text-align: center;
+    color: #1e71b9;
+    font-size: 14px;
+    display: flex;
+    width: max-content;
+    // justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    .statusDot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
 }
 
 .addDialog {
-  display: flex !important;
-  align-items: center;
-  justify-content: center !important;
-  margin: 24px 16px;
-  .addDialogHeader {
+    display: flex !important;
     align-items: center;
-    display: flex;
-    justify-content: flex-start;
-    width: 36%;
-    color: #233b83;
-    font-weight: 600;
-  }
-  .addDialogInput {
-    align-items: center;
-    display: flex;
-    justify-content: flex-start;
-    width: 70% !important;
-  }
+    justify-content: center !important;
+    margin: 24px 16px;
+    .addDialogHeader {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 36%;
+        color: #233b83;
+        font-weight: 600;
+    }
+    .addDialogInput {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
+        width: 70% !important;
+    }
 }
 
 .addDialogBtnContainer {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 .navRightContainers {
-  img {
-    width: 190px;
-  }
+    img {
+        width: 190px;
+    }
 }
 
 .navLeftContainers {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .navLeftContainers P {
-  padding: 10px;
-  cursor: pointer;
-  .selected {
     padding: 10px;
-    border-bottom: 2px solid #233b83;
-    color: #233b83;
-  }
+    cursor: pointer;
+    .selected {
+        padding: 10px;
+        border-bottom: 2px solid #233b83;
+        color: #233b83;
+    }
 }
 
 .employeeStatusSection {
-  display: flex;
-  justify-content: flex-end;
-  color: #1eb949;
-  .employeeStatus {
-    width: 50%;
-  }
-  .popUpStatusUpdation {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 16px;
-    background: #d8e5f0;
-    color: #1e71b9;
-    border-radius: 8px;
-  }
-  .popUpResolved {
-    background: #d8f0e3;
+    justify-content: flex-end;
     color: #1eb949;
-    padding: 8px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 20px;
-    .statusDot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+    .employeeStatus {
+        width: 50%;
     }
-  }
+    .popUpStatusUpdation {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 16px;
+        background: #d8e5f0;
+        color: #1e71b9;
+        border-radius: 8px;
+    }
+    .popUpResolved {
+        background: #d8f0e3;
+        color: #1eb949;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 20px;
+        .statusDot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+    }
 }
 
 .tableEmployeeProfile {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .tableStatus {
-  padding: 8px 16px;
-  width: max-content;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  .statusDot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
+    padding: 8px 16px;
+    width: max-content;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .statusDot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
 }
