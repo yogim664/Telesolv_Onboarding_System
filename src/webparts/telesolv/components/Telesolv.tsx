@@ -31,7 +31,8 @@ const Telesolve = (props: any): JSX.Element => {
   const [ShowHrPerson, setShowHrPerson] = useState<boolean>(false);
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
     useState<boolean>(false);
-
+  const [isQuestionUpdated, setIsQUestionUpdated] = useState(false);
+  const [isQuestionActivated, setIsQuestionActivated] = useState(false);
   // HR Person
   const hrpersonfun = async () => {
     const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
@@ -67,7 +68,14 @@ const Telesolve = (props: any): JSX.Element => {
         await hrpersonfun();
       });
   };
-
+  const getChangesFromConfig = (changes: any) => {
+    console.log(changes);
+    setIsQUestionUpdated(changes);
+    if (isQuestionUpdated) {
+      setActiveIndex(1);
+    }
+    console.log(isQuestionUpdated);
+  };
   useEffect(() => {
     getGroups();
   }, []);
@@ -89,7 +97,14 @@ const Telesolve = (props: any): JSX.Element => {
             <div className={styles.navLeftContainers}>
               <TabView
                 activeIndex={activeIndex}
-                onTabChange={(e) => setActiveIndex(e.index)}
+                onTabChange={async (e) => {
+                  await setIsQuestionActivated(isQuestionUpdated);
+                  if (isQuestionUpdated) {
+                    setActiveIndex(0);
+                  } else {
+                    setActiveIndex(e.index);
+                  }
+                }}
                 className="MainTab"
               >
                 <TabPanel header="Forms" style={{ fontFamily: "interRegular" }}>
@@ -107,7 +122,11 @@ const Telesolve = (props: any): JSX.Element => {
           {activeIndex !== 0 ? (
             <Onboarding context={props.context} />
           ) : (
-            <Config context={props.context} />
+            <Config
+              context={props.context}
+              onChange={getChangesFromConfig}
+              isQuestionActivated={isQuestionActivated}
+            />
           )}
         </div>
       ) : (

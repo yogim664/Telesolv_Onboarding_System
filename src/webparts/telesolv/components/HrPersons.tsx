@@ -155,7 +155,7 @@ const HrPersons = (props: any) => {
           Id: item.Id,
           isEdit: false,
           QuestionNo: item.Sno,
-          QuestionTitle: item.Title,
+          QuestionTitle: item.Question,
           isDelete: item.isDelete,
           TaskName: item.TaskName,
           FormID: item.Forms?.ID,

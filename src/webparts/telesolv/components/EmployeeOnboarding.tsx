@@ -211,7 +211,7 @@ const Onboarding = (props: any) => {
             return {
               index: index,
               QuestionID: item.QuestionID?.ID,
-              QuestionTitle: item.QuestionID?.Title,
+              QuestionTitle: item.Question,
               Answer: item.QuestionID?.Answer,
               Status: item.Status,
               // FormID: item.FormID?.ID,
@@ -253,7 +253,7 @@ const Onboarding = (props: any) => {
           isEdit: false,
           QuestionNo: item.Sno,
           Forms: item.Forms?.ID || null,
-          QuestionTitle: item.Title,
+          QuestionTitle: item.Question,
           isDelete: item.isDelete,
           Status: item.Status,
           Answer: item.Answer
@@ -638,14 +638,15 @@ const Onboarding = (props: any) => {
               const filterQuestion = questions.filter(
                 (val: any) => val.Forms === currentFormID
               );
-
+              debugger;
               await Promise.all(
                 filterQuestion.map(async (question: any) => {
                   await sp.web.lists
                     .getByTitle(GCongfig.ListName.EmployeeResponse)
                     .items.add({
                       EmployeeIDId: res.data.ID,
-                      Title: question.QuestionTitle,
+                      // Title: question.QuestionTitle,
+                      Question: question.QuestionTitle,
                       Sno: question.QuestionNo,
                       Status: "Pending",
                       FormId: question.Forms,
