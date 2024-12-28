@@ -63,10 +63,31 @@ const EmployeeForm = (props: any): JSX.Element => {
 
   //Get EmployeeResponse
   const questionConfig = async () => {
+    let tempQuestions: any = [];
+    sp.web.lists
+      .getByTitle(GCongfig.ListName.CheckpointConfig)
+      .items.select("ID,Question")
+      .top(5000)
+      .get()
+      .then((questionData: any) => {
+        questionData.forEach((qitem: any) => {
+          tempQuestions.push({
+            ID: qitem.ID,
+            QTitle: qitem.Question,
+          });
+        });
+        console.log("Appended Questions:", tempQuestions);
+      })
+      .catch((error: any) => {
+        console.error("Error fetching data:", error);
+      });
+
+    console.log(tempQuestions, "tempQuestionswe");
+
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
-        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options, Employee/ID, Employee/EMail"
+        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options ,Employee/ID, Employee/EMail"
       )
       .expand("QuestionID, Employee")
       .top(5000)
@@ -77,7 +98,6 @@ const EmployeeForm = (props: any): JSX.Element => {
             val?.Employee?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
         );
 
-        // Transform fetched items
         const _tempArr = temp?.map((item: any) => {
           let options = [];
           try {
@@ -85,27 +105,65 @@ const EmployeeForm = (props: any): JSX.Element => {
           } catch (error) {
             console.error("Error parsing options:", error);
           }
+          console.log(item.Status);
+          if (item.Status === "Pending") {
+            const CurQuestion = tempQuestions.filter((qitems: any) => {
+              console.log(qitems, "qitems");
 
-          return {
-            Id: item.Id,
-            QuestionNo: item.QuestionID?.Sno,
-            QuestionTitle: item.QuestionID?.Title,
-            Answer: item.QuestionID?.Answer,
-            Status: item.Status,
-            Comments: item.Comments,
-            ResponseComments: item.ResponseComments,
-            Options: options,
-            Response: item.Response
-              ? {
-                  key: item.Response,
-                  name: item.Response,
-                }
-              : {
-                  key: null,
-                  name: null,
-                },
-            isAnswered: item.Response ? true : false,
-          };
+              return qitems.ID === item.QuestionID.ID;
+            });
+            console.log(
+              CurQuestion[0]?.QTitle,
+              CurQuestion,
+              "CurQuestion[0]?.QTitle"
+            );
+            debugger;
+            return {
+              Id: item.Id,
+              QuestionNo: item.QuestionID?.Sno,
+              QuestionTitle: CurQuestion[0]?.QTitle,
+              Answer: item.QuestionID?.Answer,
+              Status: item.Status,
+              Comments: item.Comments,
+              ResponseComments: item.ResponseComments,
+              Options: options,
+              Response: item.Response
+                ? {
+                    key: item.Response,
+                    name: item.Response,
+                  }
+                : {
+                    key: null,
+                    name: null,
+                  },
+              isAnswered: item.Response ? true : false,
+            };
+
+            debugger;
+            console.log(CurQuestion, "CurQuestion");
+            //   debugger;
+          } else {
+            return {
+              Id: item.Id,
+              QuestionNo: item.QuestionID?.Sno,
+              QuestionTitle: item.Question,
+              Answer: item.QuestionID?.Answer,
+              Status: item.Status,
+              Comments: item.Comments,
+              ResponseComments: item.ResponseComments,
+              Options: options,
+              Response: item.Response
+                ? {
+                    key: item.Response,
+                    name: item.Response,
+                  }
+                : {
+                    key: null,
+                    name: null,
+                  },
+              isAnswered: item.Response ? true : false,
+            };
+          }
         });
 
         if (_tempArr.length === 0) {
@@ -188,6 +246,7 @@ const EmployeeForm = (props: any): JSX.Element => {
         .getByTitle(GCongfig.ListName.EmployeeResponse)
         .items.getById(questions[i].Id)
         .update({
+          Question: questions[i].QuestionTitle,
           Response: questions[i].Response ? questions[i].Response.key : "",
           Status:
             questions[i].Response.key !== questions[i].Answer

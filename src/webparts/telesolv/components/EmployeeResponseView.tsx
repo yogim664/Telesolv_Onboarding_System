@@ -161,7 +161,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       .then(async (items: any) => {
         await sp.web.lists
           .getByTitle(GCongfig.ListName.CheckpointConfig)
-          .items.select("*,Assigned/ID,Assigned/EMail,Assigned/Title")
+          .items.select("*,Assigned/ID,Assigned/EMail,Assigned/Title,Question")
           .expand("Assigned")
           .filter("isDelete ne 1")
           .top(5000)
@@ -176,53 +176,104 @@ const EmployeeResponseView = (props: any): JSX.Element => {
 
                 console.log(item, "Checktems");
                 console.log(Qitems, "Qitems");
-                return {
-                  Id: item.ID,
-                  QuestionID: item.QuestionID?.ID,
-                  QuestionTitle: item.QuestionID?.Title,
-                  QuestionSno: item.QuestionID?.Sno,
-                  Answer: item.QuestionID?.Answer,
-                  EmpResponse: item.Response ? item.Response : "-",
-                  Status: item.Status,
-                  Comments: item.Comments,
-                  ResponseComments: item.ResponseComments,
-                  Employee: {
-                    Name: item.Employee ? item.Employee.Title : "",
-                    Email: item.Employee ? item.Employee.EMail : "",
-                  },
-                  CompletedBy: item.CompletedBy
-                    ? {
-                        Name: item.CompletedBy ? item.CompletedBy.Title : "",
-                        Email: item.CompletedBy ? item.CompletedBy.EMail : "",
-                      }
-                    : [],
-                  Role: item.EmployeeID?.Role || "No Role",
-                  CompletedDateAndTime: item.CompletedDateAndTime || null,
-                  Department: item.EmployeeID?.Department || "No Department",
-                  Assigned: item?.Reassigned
-                    ? item.Reassigned.map((Reassigned: any) => ({
-                        ID: Reassigned.ID,
-                        imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
-                        text: Reassigned.Title,
-                        secondaryText: Reassigned.EMail,
-                      }))
-                    : relatedQitems[0]?.Assigned
-                    ? relatedQitems[0].Assigned.map((assignee: any) => ({
-                        ID: assignee.ID,
-                        imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${assignee.EMail}`,
-                        text: assignee.Title,
-                        secondaryText: assignee.EMail,
-                      }))
-                    : [],
-                  Reassigned: item?.Reassigned
-                    ? item.Reassigned.map((Reassigned: any) => ({
-                        ID: Reassigned.ID,
-                        imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
-                        text: Reassigned.Title,
-                        secondaryText: Reassigned.EMail,
-                      }))
-                    : [],
-                };
+                debugger;
+                if (item.Status === "Pending") {
+                  return {
+                    Id: item.ID,
+                    QuestionID: item.QuestionID?.ID,
+                    QuestionTitle: relatedQitems[0].Question,
+                    QuestionSno: item.QuestionID?.Sno,
+                    Answer: item.QuestionID?.Answer,
+                    EmpResponse: item.Response ? item.Response : "-",
+                    Status: item.Status,
+                    Comments: item.Comments,
+                    ResponseComments: item.ResponseComments,
+                    Employee: {
+                      Name: item.Employee ? item.Employee.Title : "",
+                      Email: item.Employee ? item.Employee.EMail : "",
+                    },
+                    CompletedBy: item.CompletedBy
+                      ? {
+                          Name: item.CompletedBy ? item.CompletedBy.Title : "",
+                          Email: item.CompletedBy ? item.CompletedBy.EMail : "",
+                        }
+                      : [],
+                    Role: item.EmployeeID?.Role || "No Role",
+                    CompletedDateAndTime: item.CompletedDateAndTime || null,
+                    Department: item.EmployeeID?.Department || "No Department",
+                    Assigned: item?.Reassigned
+                      ? item.Reassigned.map((Reassigned: any) => ({
+                          ID: Reassigned.ID,
+                          imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
+                          text: Reassigned.Title,
+                          secondaryText: Reassigned.EMail,
+                        }))
+                      : relatedQitems[0]?.Assigned
+                      ? relatedQitems[0].Assigned.map((assignee: any) => ({
+                          ID: assignee.ID,
+                          imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${assignee.EMail}`,
+                          text: assignee.Title,
+                          secondaryText: assignee.EMail,
+                        }))
+                      : [],
+                    Reassigned: item?.Reassigned
+                      ? item.Reassigned.map((Reassigned: any) => ({
+                          ID: Reassigned.ID,
+                          imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
+                          text: Reassigned.Title,
+                          secondaryText: Reassigned.EMail,
+                        }))
+                      : [],
+                  };
+                } else {
+                  return {
+                    Id: item.ID,
+                    QuestionID: item.QuestionID?.ID,
+                    QuestionTitle: item.Question,
+                    QuestionSno: item.QuestionID?.Sno,
+                    Answer: item.QuestionID?.Answer,
+                    EmpResponse: item.Response ? item.Response : "-",
+                    Status: item.Status,
+                    Comments: item.Comments,
+                    ResponseComments: item.ResponseComments,
+                    Employee: {
+                      Name: item.Employee ? item.Employee.Title : "",
+                      Email: item.Employee ? item.Employee.EMail : "",
+                    },
+                    CompletedBy: item.CompletedBy
+                      ? {
+                          Name: item.CompletedBy ? item.CompletedBy.Title : "",
+                          Email: item.CompletedBy ? item.CompletedBy.EMail : "",
+                        }
+                      : [],
+                    Role: item.EmployeeID?.Role || "No Role",
+                    CompletedDateAndTime: item.CompletedDateAndTime || null,
+                    Department: item.EmployeeID?.Department || "No Department",
+                    Assigned: item?.Reassigned
+                      ? item.Reassigned.map((Reassigned: any) => ({
+                          ID: Reassigned.ID,
+                          imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
+                          text: Reassigned.Title,
+                          secondaryText: Reassigned.EMail,
+                        }))
+                      : relatedQitems[0]?.Assigned
+                      ? relatedQitems[0].Assigned.map((assignee: any) => ({
+                          ID: assignee.ID,
+                          imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${assignee.EMail}`,
+                          text: assignee.Title,
+                          secondaryText: assignee.EMail,
+                        }))
+                      : [],
+                    Reassigned: item?.Reassigned
+                      ? item.Reassigned.map((Reassigned: any) => ({
+                          ID: Reassigned.ID,
+                          imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${Reassigned.EMail}`,
+                          text: Reassigned.Title,
+                          secondaryText: Reassigned.EMail,
+                        }))
+                      : [],
+                  };
+                }
               }) || [];
 
             setresponseComments(
@@ -281,11 +332,15 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       <div
         style={{
           pointerEvents:
-            Rowdata.Status === "Satisfactory" || Rowdata.Status === "Resolved"
+            Rowdata.Status === "Satisfactory" ||
+            Rowdata.Status === "Resolved" ||
+            Rowdata.Status === "To be resolved"
               ? "none"
               : "auto",
           opacity:
-            Rowdata.Status === "Satisfactory" || Rowdata.Status === "Resolved"
+            Rowdata.Status === "Satisfactory" ||
+            Rowdata.Status === "Resolved" ||
+            Rowdata.Status === "To be resolved"
               ? 0.5
               : 1,
         }}

@@ -43,6 +43,7 @@ const Config = (props: any) => {
   let _fkeys: IFilData = {
     Forms: "",
   };
+  let filteredArr: any = [];
   const [isLoading, setIsLoading] = useState(false);
   const [questions, setquestions] = useState<any>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
@@ -93,10 +94,15 @@ const Config = (props: any) => {
         ),
 
         accept: async () => {
+          console.log(props.isQuestionActivated, "props.isQuestionActivated);");
+          debugger;
           await handlervalidation(true);
         },
 
-        reject: () => setactiveIndex(1),
+        reject: () => {
+          setactiveIndex(1);
+          props.onChange(false);
+        },
         closable: true,
       });
 
@@ -185,7 +191,6 @@ const Config = (props: any) => {
       accept: () => handleDeletion(aIndex, qIndex),
     });
   };
-
   const handleDeletion = (aIndex: number, qIndex: number) => {
     const updatedQuestions = filteredQuestions.map(
       (question: any, index: number) =>
@@ -195,6 +200,7 @@ const Config = (props: any) => {
               Options: question.Options.filter(
                 (_: any, optionIndex: number) => optionIndex !== aIndex
               ),
+              isChanged: true,
             }
           : question
     );
@@ -207,11 +213,29 @@ const Config = (props: any) => {
   };
 
   const handleOptionChange = (qIndex: any, aIndex: any, e: any) => {
-    if (!e || e.trim() === "") {
-      setchangeOption(null);
-    } else {
-      setchangeOption(e.trim());
-    }
+    // if (!e || e.trim() === "") {
+    //   setchangeOption(null);
+    // } else {
+    //   setchangeOption(e.trim());
+    // }
+    console.log(e, "e");
+
+    // const updatedQuestions = filteredQuestions.forEach(
+    //   (question: any, index: number) =>
+    //     index === qIndex
+    //       ? {
+    //           ...question,
+    //           Options: question.Options.forEach((option: any, oIndex: number) =>
+    //             oIndex === aIndex ? { ...option, key: e, name: e } : option
+    //           ),
+    //         }
+    //       : question
+    // );
+    debugger;
+    let changeOption: any = filteredQuestions;
+    changeOption[qIndex].Options[aIndex] = { key: e, name: e };
+
+    setfilteredQuestions([...changeOption]);
   };
 
   const handlerOptionChange = (qIndex: number, aIndex: number) => {
@@ -345,6 +369,8 @@ const Config = (props: any) => {
 
     setfilteredQuestions(sortQuestion);
 
+    console.log(filteredArr, "filteredArr");
+
     handlerQuestionsReArrange(qIndex);
   };
 
@@ -389,18 +415,26 @@ const Config = (props: any) => {
     qIndex: number,
     value: any,
     type: any,
-    aIndex?: number
+    aIndex?: any
   ) => {
+    debugger;
     let _questions: any = filteredQuestions
       .filter((val: any) => val.Form === currentFormID)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
     if (type === "Question") {
       _questions[qIndex].QuestionTitle = value;
+      _questions[qIndex].isChanged = true;
+    } else if (type === "Option") {
+      _questions[qIndex].Options[aIndex] = {
+        key: value,
+        name: value,
+      };
     } else {
       _questions[qIndex].Answer = {
         key: value,
         name: value,
       };
+      _questions[qIndex].isChanged = true;
     }
 
     setfilteredQuestions([..._questions]);
@@ -449,6 +483,7 @@ const Config = (props: any) => {
                 ...question.Options,
                 { key: newOptionValue, name: newOptionValue },
               ],
+              isChanged: true,
             }
           : question
     );
@@ -475,7 +510,6 @@ const Config = (props: any) => {
         Answer: previousQuestion.Answer,
         Assigned: previousQuestion.Assigned,
         TaskName: previousQuestion.TaskName,
-
         isChanged: true,
       };
 
@@ -642,11 +676,12 @@ const Config = (props: any) => {
           .getByTitle(GCongfig.ListName.CheckpointConfig)
           .items.add({
             Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
-            Title: question.QuestionTitle, // Maps to 'Title' in SharePoint
+            Question: question.QuestionTitle, // Maps to 'Title' in SharePoint
             Options: JSON.stringify(question.Options), // Convert Options to JSON string
             Answer: question.Answer.key ? question.Answer.key : "",
             TaskName: question.QuestionTitle,
             isDelete: false,
+            isChanged: false,
             FormsId: question.Form,
           });
       });
@@ -668,7 +703,7 @@ const Config = (props: any) => {
           .items.getById(question.Id)
           .update({
             Sno: question.QuestionNo,
-            Title: question.QuestionTitle,
+            Question: question.QuestionTitle,
             Options: JSON.stringify(question.Options),
             Answer: question.Answer.key ? question.Answer.key : "",
             isDelete: question.isDelete,
@@ -703,7 +738,7 @@ const Config = (props: any) => {
               Id: val.Id,
               isEdit: false,
               QuestionNo: val.Sno,
-              QuestionTitle: val.Title,
+              QuestionTitle: val.Question,
               isDelete: val.isDelete,
               TaskName: val.TaskName,
               Form: val.Forms.ID || null,
@@ -775,6 +810,7 @@ const Config = (props: any) => {
 
   // Filter function
   const hanlderfilter = async (key: string, val: any, FormDetails: any) => {
+    debugger;
     const formValue = val;
     await handlerQuestionConfig(formValue)
       .then((items: any) => {
@@ -793,6 +829,9 @@ const Config = (props: any) => {
 
         setfilteredForm(_tempFilterkeys);
         setfilteredQuestions([...filteredData]);
+        filteredArr = [...filteredData];
+        console.log(filteredArr, "filteredArr");
+
         setquestions([...filteredData]);
 
         setisVisible(false);
@@ -885,7 +924,9 @@ const Config = (props: any) => {
   useEffect(() => {
     hanlderForms(currentFormID);
   }, [isSubmitted]);
-
+  useEffect(() => {
+    props.isQuestionActivated ? showConfirmationHRscreenPop(1) : "";
+  }, [props.isQuestionActivated]);
   return (
     <>
       {isLoading ? (
@@ -987,7 +1028,21 @@ const Config = (props: any) => {
           <TabView
             className="MainTab"
             activeIndex={activeIndex}
-            onTabChange={(e) => showConfirmationHRscreenPop(e.index)}
+            onTabChange={(e) => {
+              if (e.index === 1) {
+                if (
+                  filteredQuestions.filter(
+                    (value: any) => value.isChanged === true
+                  ).length > 0
+                ) {
+                  showConfirmationHRscreenPop(e.index);
+                } else {
+                  setactiveIndex(1);
+                }
+              } else {
+                setactiveIndex(0);
+              }
+            }}
           >
             <TabPanel
               header="Questions"
@@ -1112,7 +1167,10 @@ const Config = (props: any) => {
                                   : "pi pi-check"
                               }
                               style={{ fontSize: "1rem" }}
-                              onClick={() => handlerEditQuestions(question.Id)}
+                              onClick={() => {
+                                handlerEditQuestions(question.Id);
+                                //  props.onChange(true);
+                              }}
                             />
                             <i
                               className="pi pi-trash"
@@ -1161,7 +1219,10 @@ const Config = (props: any) => {
                                 "Question"
                               );
                             }}
-                            maxLength={240}
+                            // onFocusCapture={() => {
+                            //   setfilteredQuestions([...filteredArr]);
+                            // }}
+                            // maxLength={240}
                             disabled={!question.isEdit}
                           />
                           <div className={styles.QuestionTag}>
@@ -1204,13 +1265,35 @@ const Config = (props: any) => {
                                                 }
                                                 disabled={!question.isEdit}
                                               />
+                                              {/* {!question.isEdit ? (
+                                                <label
+                                                  className={`${styles.optionLabel} ml-2`}
+                                                  htmlFor={`${question.Answer.name}-${category.key}`}
+                                                >
+                                                  {category.name}{" "}
+                                                  {/* Add content for the label if needed */}
+                                              {/* </label> */}
+                                              {/* ) : ( */}
+                                              <InputText
+                                                className={styles.questionInput}
+                                                value={category.name}
+                                                placeholder="Enter here"
+                                                onChange={(e) => {
+                                                  // handleOptionChange(
+                                                  //   qIndex,
+                                                  //   aIndex,
+                                                  //   e.target.value.trimStart()
+                                                  // );
 
-                                              <label
-                                                className={`${styles.optionLabel} ml-2`}
-                                                htmlFor={`${question.Answer.name}-${category.key}`}
-                                              >
-                                                {category.name}
-                                              </label>
+                                                  handlerQuestionChange(
+                                                    qIndex,
+                                                    e.target.value.trimStart(),
+                                                    "Option",
+                                                    aIndex
+                                                  );
+                                                  console.log(e, "df");
+                                                }}
+                                              />
                                             </>
                                           </div>
                                         )}
@@ -1421,6 +1504,7 @@ const Config = (props: any) => {
                       label="Save"
                       className={styles.saveBtn}
                       onClick={() => {
+                        props.onChanges(false);
                         handlervalidation(false);
                       }}
                     />
