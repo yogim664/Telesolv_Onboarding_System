@@ -47,7 +47,7 @@ const Config = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [questions, setquestions] = useState<any>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
-  const [newOptionValue, setnewOptionValue] = useState("");
+  // const [newOptionValue, setnewOptionValue] = useState("");
   const [isSubmitted, setisSubmitted] = useState(false);
   const [isVisible, setisVisible] = useState(false);
   const [newformDetails, setnewformDetails] = useState<any>([]);
@@ -95,7 +95,7 @@ const Config = (props: any) => {
 
         accept: async () => {
           console.log(props.isQuestionActivated, "props.isQuestionActivated);");
-          debugger;
+
           await handlervalidation(true);
         },
 
@@ -231,7 +231,7 @@ const Config = (props: any) => {
     //         }
     //       : question
     // );
-    debugger;
+
     let changeOption: any = filteredQuestions;
     changeOption[qIndex].Options[aIndex] = { key: e, name: e };
 
@@ -246,7 +246,7 @@ const Config = (props: any) => {
     if (tempQuestions.length === 0) {
       return false;
     }
-    debugger;
+
     const result = tempQuestions[0].Options.some(
       (option: any) =>
         option.key.toLowerCase().trim() === changeOption.toLowerCase().trim()
@@ -269,9 +269,8 @@ const Config = (props: any) => {
 
     const tempchangeOption =
       typeof changeOption === "string" ? changeOption.trim() : null;
-    debugger;
+
     if (!tempchangeOption) {
-      debugger;
       toast.error("Please enter value", {
         position: "top-right",
         autoClose: 5000,
@@ -306,6 +305,8 @@ const Config = (props: any) => {
       aIndex: null,
     });
     setchangeOption([]);
+    console.log(selectedQuestionId);
+
     setSelectedQuestionId(null);
   };
 
@@ -317,6 +318,13 @@ const Config = (props: any) => {
     const newQuestionNo = isEmpty
       ? 1
       : Math.max(...TempQues.map((q: any) => q.QuestionNo)) + 1;
+    const TempQuesIndex: any =
+      filteredQuestions === null || filteredQuestions.length === 0
+        ? 0
+        : filteredQuestions.length === 1
+        ? 1 // If only one question exists, return 1
+        : Math.max(...filteredQuestions.map((q: any) => q.index)) + 1;
+
     const newQuestion = {
       Id: null,
       QuestionNo: newQuestionNo,
@@ -329,18 +337,21 @@ const Config = (props: any) => {
       isEdit: true,
       isDelete: false,
       Form: currentFormID,
+      index: TempQuesIndex,
     };
     setfilteredQuestions((prevQuestions: any) => [
       ...prevQuestions,
       newQuestion,
     ]);
+    setSelectedQuestionId(TempQuesIndex);
   };
 
-  const handlerEditQuestions = (questionId: number) => {
+  const handlerEditQuestions = (questionId: number, qIndex: any) => {
     setfilteredQuestions((prevQuestions: any) =>
       prevQuestions.map((question: any) => ({
         ...question,
-        isEdit: question.Id === questionId ? !question.isEdit : false,
+        //  isEdit: question.Id === questionId ? !question.isEdit : false,
+        isEdit: question.index === qIndex ? !question.isEdit : false,
       }))
     );
   };
@@ -417,7 +428,6 @@ const Config = (props: any) => {
     type: any,
     aIndex?: any
   ) => {
-    debugger;
     let _questions: any = filteredQuestions
       .filter((val: any) => val.Form === currentFormID)
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
@@ -442,60 +452,74 @@ const Config = (props: any) => {
 
   const handlerAddOptionClick = (questionId: any) => {
     setSelectedQuestionId(questionId);
-  };
-
-  const handlerAddNewOption = (questionId: any) => {
-    let result = false;
-    debugger;
-    const tempQuestions = filteredQuestions.filter(
-      (question: any, index: number) => index === questionId
-    );
-    debugger;
-    if (tempQuestions[0].Options.length > 0) {
-      result = tempQuestions[0].Options.some(
-        (option: any) =>
-          option.key.toLowerCase().trim() ===
-          newOptionValue.toLowerCase().trim()
-      );
-    }
-
-    if (result || !newOptionValue.trim()) {
-      toast.error("Please enter valid option", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
-      return;
-    }
-
     const updatedQuestions: any = filteredQuestions.map(
       (question: any, index: number) =>
         index === questionId
           ? {
               ...question,
-              Options: [
-                ...question.Options,
-                { key: newOptionValue, name: newOptionValue },
-              ],
+              Options: [...question.Options, { key: "", name: "" }],
               isChanged: true,
             }
           : question
     );
 
     setfilteredQuestions([...updatedQuestions]);
-    setnewOptionValue("");
-    setSelectedQuestionId(null); // Hide the input container
+    //  setnewOptionValue("");
+    // setSelectedQuestionId(null);
   };
+
+  // const handlerAddNewOption = (questionId: any) => {
+  //   let result = false;
+
+  //   const tempQuestions = filteredQuestions.filter(
+  //     (question: any, index: number) => index === questionId
+  //   );
+
+  //   if (tempQuestions[0].Options.length > 0) {
+  //     result = tempQuestions[0].Options.some(
+  //       (option: any) =>
+  //         option.key.toLowerCase().trim() ===
+  //         newOptionValue.toLowerCase().trim()
+  //     );
+  //   }
+
+  //   if (result || !newOptionValue.trim()) {
+  //     toast.error("Please enter valid option", {
+  //       position: "top-right",
+  //       autoClose: 5000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //       transition: Bounce,
+  //     });
+  //     return;
+  //   }
+
+  //   const updatedQuestions: any = filteredQuestions.map(
+  //     (question: any, index: number) =>
+  //       index === questionId
+  //         ? {
+  //             ...question,
+  //             Options: [
+  //               ...question.Options,
+  //               { key: newOptionValue, name: newOptionValue },
+  //             ],
+  //             isChanged: true,
+  //           }
+  //         : question
+  //   );
+
+  //   setfilteredQuestions([...updatedQuestions]);
+  //   setnewOptionValue("");
+  //   setSelectedQuestionId(null); // Hide the input container
+  // };
 
   const handlermoveQuestionUp = (index: any, del: boolean, _tempArr?: any) => {
     const updatedQuestions = [..._tempArr];
-    debugger;
+
     if (index > 0) {
       const currentQuestion = updatedQuestions[index];
 
@@ -544,7 +568,7 @@ const Config = (props: any) => {
   // !BackUp
   const handlermoveQuestionDownn = (index: any) => {
     if (index < 0 || index >= filteredQuestions.length - 1) return;
-    debugger;
+
     const updatedQuestions = [...filteredQuestions];
 
     const currentQuestion = updatedQuestions[index];
@@ -577,15 +601,161 @@ const Config = (props: any) => {
     // !Maasi
   };
 
+  // const handlerQuestionvalidation = async (
+  //   id: any,
+  //   value: boolean,
+  //   qIndex: any
+  // ): Promise<void> => {
+
+  //   let errmsg: string = "";
+  //   let err: boolean = false;
+  //   const TempupdatedQuestion = filteredQuestions.sort(
+  //     (a: any, b: any) => a.QuestionNo - b.QuestionNo
+  //   );
+  //   const currentQuestion = TempupdatedQuestion.filter(
+  //     (question: any, index: number) => index === qIndex
+  //   );
+
+  //   if (
+  //     currentQuestion.some((_item: any) => _item.QuestionTitle.trim() === "")
+  //   ) {
+  //     err = true;
+  //     errmsg = "Enter Question Title";
+  //   } else if (currentQuestion.some((_item: any) => !_item.Options.length)) {
+  //     err = true;
+  //     errmsg = "Enter Options";
+  //   } else if (
+  //     currentQuestion.some(
+  //       (_item: any) =>
+  //         _item.Options.length < 2 ||
+  //         _item.Options.length === 1 ||
+  //         _item.Options.length === 0
+  //     )
+  //   ) {
+  //     err = true;
+  //     errmsg = "Each question must have at least two options.";
+  //   } else if (
+  //     currentQuestion.some(
+  //       (item: any) =>
+  //         !item.Options.some((option: any) => option.key === item.Answer.key)
+  //     )
+  //   ) {
+  //     err = true;
+  //     errmsg = "Select any valid answer";
+  //   }
+  //   currentQuestion.forEach((_item: any) => {
+  //     const options = _item.Options.map((option: any) => option.name);
+  //     const duplicate = options.some(
+  //       (option: any, index: any) => options.indexOf(option) !== index
+  //     );
+
+  //     if (duplicate) {
+  //       err = true;
+  //       errmsg = "Duplicate options are not allowed";
+  //     }
+  //   });
+  //   console.log(errmsg, "errmsg");
+
+  //   if (err) {
+  //     toast.warn(errmsg, {
+  //       position: "top-right",
+  //       autoClose: 5000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //       theme: "light",
+  //       transition: Bounce,
+  //     });
+  //   } else {
+  //     await handlerEditQuestions(id, qIndex);
+  //     setSelectedQuestionId(null);
+  //   }
+  // };
+
   // Post into list SP
 
+  const handlerQuestionvalidation = async (
+    id: any,
+    value: boolean,
+    qIndex: any
+  ): Promise<void> => {
+    let errmsg: string = "";
+    let err: boolean = false;
+
+    const TempupdatedQuestion = filteredQuestions.sort(
+      (a: any, b: any) => a.QuestionNo - b.QuestionNo
+    );
+    const currentQuestion = TempupdatedQuestion.filter(
+      (question: any, index: number) => index === qIndex
+    );
+
+    if (
+      currentQuestion.some((_item: any) => _item.QuestionTitle.trim() === "")
+    ) {
+      err = true;
+      errmsg = "Enter Question Title";
+    } else if (currentQuestion.some((_item: any) => !_item.Options.length)) {
+      err = true;
+      errmsg = "Enter Options";
+    } else if (currentQuestion.some((_item: any) => _item.Options.length < 2)) {
+      err = true;
+      errmsg = "Each question must have at least two options.";
+    } else if (
+      currentQuestion.some(
+        (item: any) =>
+          !item.Options.some((option: any) => option.key === item.Answer.key)
+      )
+    ) {
+      err = true;
+      errmsg = "Select any valid answer.";
+    } else {
+      currentQuestion.forEach((_item: any) => {
+        const options = _item.Options.map((option: any) =>
+          option.name.toLowerCase().trim()
+        );
+        const uniqueOptions = new Set(options);
+        if (options.length !== uniqueOptions.size) {
+          err = true;
+          errmsg = "Duplicate options are not allowed.";
+        }
+      });
+    }
+
+    // Display error or proceed with editing
+    if (err) {
+      toast.warn(errmsg, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } else {
+      await handlerEditQuestions(id, qIndex);
+      setSelectedQuestionId(null);
+    }
+  };
+
   const handlervalidation = async (value: boolean): Promise<void> => {
+    debugger;
     let errmsg: string = "";
     let err: boolean = false;
     const tempquestion = filteredQuestions.filter(
       (item: any) => !item.isDelete
     );
-    if (tempquestion.some((_item: any) => _item.QuestionTitle.trim() === "")) {
+
+    if (tempquestion.some((_item: any) => _item.isEdit)) {
+      err = true;
+      errmsg = "Please save question";
+    } else if (
+      tempquestion.some((_item: any) => _item.QuestionTitle.trim() === "")
+    ) {
       err = true;
       errmsg = "Enter Question Title";
     } else if (tempquestion.some((_item: any) => !_item.Options.length)) {
@@ -681,7 +851,7 @@ const Config = (props: any) => {
             Answer: question.Answer.key ? question.Answer.key : "",
             TaskName: question.QuestionTitle,
             isDelete: false,
-            isChanged: false,
+            // isChanged: false,
             FormsId: question.Form,
           });
       });
@@ -697,7 +867,6 @@ const Config = (props: any) => {
   const handlerUpdateQuestionsToSP = async (questions: any) => {
     try {
       const promises = questions.map((question: any) => {
-        debugger;
         return sp.web.lists
           .getByTitle(GCongfig.ListName.CheckpointConfig)
           .items.getById(question.Id)
@@ -733,8 +902,9 @@ const Config = (props: any) => {
       .get()
       .then((items) => {
         formattedItems =
-          items?.map((val: any) => {
+          items?.map((val: any, index: number) => {
             return {
+              index: index,
               Id: val.Id,
               isEdit: false,
               QuestionNo: val.Sno,
@@ -793,7 +963,6 @@ const Config = (props: any) => {
           setcurrentFormName(firstFormName);
           hanlderfilter("Forms", firstFormID, FormValuesDups);
         } else {
-          debugger;
           const tempCurrentFormDetails = [...FormValuesDups];
           const currentFormNamevalue =
             tempCurrentFormDetails?.find((form: any) => form.ID === id)?.name ||
@@ -810,7 +979,6 @@ const Config = (props: any) => {
 
   // Filter function
   const hanlderfilter = async (key: string, val: any, FormDetails: any) => {
-    debugger;
     const formValue = val;
     await handlerQuestionConfig(formValue)
       .then((items: any) => {
@@ -840,7 +1008,7 @@ const Config = (props: any) => {
       .catch((err) => {
         console.log(err);
       });
-    debugger;
+
     const tempCurrentFormDetails = [...FormDetails];
     if (tempCurrentFormDetails.length > 0) {
       const currentFormNamevalue =
@@ -921,6 +1089,57 @@ const Config = (props: any) => {
       }
     }
   };
+
+  const hanlderAnotherQuestionEdit = (id: any, sno: any) => {
+    toast.error(`Question ${sno} already editing`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+    return;
+  };
+
+  const HandlerOptionValidation = (
+    qIndex: any,
+    val: any,
+    type: any,
+    aindex: any
+  ) => {
+    let err = false;
+    // let errmsg = "";
+    const tempFilteredQuestion = filteredQuestions[qIndex];
+
+    const options = tempFilteredQuestion.Options.map((option: any) =>
+      option.name.toLowerCase().trim()
+    );
+    const uniqueOptions = new Set(options);
+    if (options.length !== uniqueOptions.size) {
+      err = true;
+    }
+
+    if (err) {
+      toast.error("Please remove duplicate options", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } else {
+      handlerQuestionChange(qIndex, val, "Radio", aindex);
+    }
+  };
+
   useEffect(() => {
     hanlderForms(currentFormID);
   }, [isSubmitted]);
@@ -1168,8 +1387,29 @@ const Config = (props: any) => {
                               }
                               style={{ fontSize: "1rem" }}
                               onClick={() => {
-                                handlerEditQuestions(question.Id);
-                                //  props.onChange(true);
+                                if (
+                                  !question.isEdit &&
+                                  selectedQuestionId === null
+                                ) {
+                                  setSelectedQuestionId(qIndex);
+                                  handlerEditQuestions(question.Id, qIndex);
+                                } else if (
+                                  question.isEdit &&
+                                  selectedQuestionId === qIndex
+                                ) {
+                                  handlerQuestionvalidation(
+                                    question.Id,
+                                    false,
+                                    qIndex
+                                  );
+                                  //setSelectedQuestionId(null);
+                                } else {
+                                  hanlderAnotherQuestionEdit(
+                                    qIndex,
+                                    question.QuestionNo
+                                  );
+                                }
+                                props.onChanges(true);
                               }}
                             />
                             <i
@@ -1246,89 +1486,100 @@ const Config = (props: any) => {
                                         ) && (
                                           <div className={styles.radioOption}>
                                             <>
-                                              <RadioButton
-                                                className={styles.radioBtn}
-                                                inputId={`${question.QuestionNo}-${category.key}`}
-                                                name={`category-${question.QuestionNo}`}
-                                                value={category.name}
-                                                onChange={(e) => {
-                                                  handlerQuestionChange(
-                                                    qIndex,
-                                                    e.target.value,
-                                                    "Radio",
-                                                    aIndex
-                                                  );
-                                                }}
-                                                checked={
-                                                  question.Answer.key ===
-                                                  category.name
-                                                }
-                                                disabled={!question.isEdit}
-                                              />
-                                              {/* {!question.isEdit ? (
+                                              {!question.isEdit ? (
                                                 <label
                                                   className={`${styles.optionLabel} ml-2`}
                                                   htmlFor={`${question.Answer.name}-${category.key}`}
                                                 >
                                                   {category.name}{" "}
-                                                  {/* Add content for the label if needed */}
-                                              {/* </label> */}
-                                              {/* ) : ( */}
-                                              <InputText
-                                                className={styles.questionInput}
-                                                value={category.name}
-                                                placeholder="Enter here"
-                                                onChange={(e) => {
-                                                  // handleOptionChange(
-                                                  //   qIndex,
-                                                  //   aIndex,
-                                                  //   e.target.value.trimStart()
-                                                  // );
-
-                                                  handlerQuestionChange(
-                                                    qIndex,
-                                                    e.target.value.trimStart(),
-                                                    "Option",
-                                                    aIndex
-                                                  );
-                                                  console.log(e, "df");
-                                                }}
-                                              />
+                                                </label>
+                                              ) : (
+                                                <>
+                                                  <RadioButton
+                                                    className={styles.radioBtn}
+                                                    inputId={`${question.QuestionNo}-${category.key}`}
+                                                    name={`category-${question.QuestionNo}`}
+                                                    value={category.name}
+                                                    onChange={(e) => {
+                                                      HandlerOptionValidation(
+                                                        qIndex,
+                                                        e.target.value,
+                                                        "Radio",
+                                                        aIndex
+                                                      );
+                                                      // handlerQuestionChange(
+                                                      //   qIndex,
+                                                      //   e.target.value,
+                                                      //   "Radio",
+                                                      //   aIndex
+                                                      // );
+                                                    }}
+                                                    checked={
+                                                      question.Answer.key ===
+                                                      category.name
+                                                    }
+                                                    disabled={!question.isEdit}
+                                                  />
+                                                  <InputText
+                                                    id={`${qIndex}_${aIndex}`}
+                                                    className={
+                                                      styles.questionInput
+                                                    }
+                                                    value={category.name}
+                                                    placeholder="Enter here"
+                                                    onChange={async (e) => {
+                                                      await handlerQuestionChange(
+                                                        qIndex,
+                                                        e.target.value.trimStart(),
+                                                        "Option",
+                                                        aIndex
+                                                      );
+                                                      console.log(e, "df");
+                                                      let targetElement =
+                                                        document.getElementById(
+                                                          e.target.id
+                                                        );
+                                                      await targetElement?.focus();
+                                                    }}
+                                                  />
+                                                </>
+                                              )}
                                             </>
                                           </div>
                                         )}
                                         {!(
                                           selectedOption.qIndex === qIndex &&
                                           selectedOption.aIndex === aIndex
-                                        ) && (
-                                          <>
-                                            <i
-                                              className={`${styles.optionEditIcon} pi pi-pencil`}
-                                              style={{ fontSize: "1rem" }}
-                                              onClick={() => {
-                                                setnewOptionValue(""); // Clear the new option value
-                                                setselectedOption({
-                                                  qIndex: qIndex,
-                                                  aIndex: aIndex,
-                                                }); // Set selected option with qIndex and aIndex
-                                              }}
-                                            />
-                                            <i
-                                              className="pi pi-trash"
-                                              onClick={() => {
-                                                handlerDeleteOptionConfirmationPopup(
-                                                  aIndex,
-                                                  qIndex
-                                                );
-                                              }}
-                                              style={{
-                                                cursor: "pointer",
-                                                color: "red",
-                                                fontSize: "1rem",
-                                              }}
-                                            />
-                                          </>
-                                        )}
+                                        ) &&
+                                          question.isEdit && (
+                                            <>
+                                              {/* <i
+                                                className={`${styles.optionEditIcon} pi pi-pencil`}
+                                                style={{ fontSize: "1rem" }}
+                                                onClick={() => {
+                                                  setnewOptionValue(""); // Clear the new option value
+                                                  setselectedOption({
+                                                    qIndex: qIndex,
+                                                    aIndex: aIndex,
+                                                  }); // Set selected option with qIndex and aIndex
+                                                }}
+                                              /> */}
+                                              <i
+                                                className="pi pi-trash"
+                                                onClick={() => {
+                                                  handlerDeleteOptionConfirmationPopup(
+                                                    aIndex,
+                                                    qIndex
+                                                  );
+                                                }}
+                                                style={{
+                                                  cursor: "pointer",
+                                                  color: "red",
+                                                  fontSize: "1rem",
+                                                }}
+                                              />
+                                            </>
+                                          )}
                                       </div>
 
                                       {selectedOption.aIndex === aIndex &&
@@ -1404,7 +1655,7 @@ const Config = (props: any) => {
                         </div>
 
                         {/* Conditionally render the NewOptionContainer */}
-                        {selectedQuestionId === qIndex && (
+                        {/* {selectedQuestionId === qIndex && (
                           <div className={styles.NewOptionContainer}>
                             <InputText
                               placeholder="Enter your new option"
@@ -1429,7 +1680,7 @@ const Config = (props: any) => {
                               }}
                             />
                           </div>
-                        )}
+                        )} */}
                         <div
                           className={styles.AddOptionContainer}
                           onClick={() => {
@@ -1464,7 +1715,10 @@ const Config = (props: any) => {
               </div>
 
               <div className={styles.questionsActionBtns}>
-                {currentFormID && (
+                {currentFormID &&
+                filteredQuestions.filter(
+                  (question: any) => question.isEdit === true
+                ).length === 0 ? (
                   <div
                     className={styles.addNewQuestionSection}
                     onClick={async () => {
@@ -1489,6 +1743,8 @@ const Config = (props: any) => {
                       <span style={{ color: "#233b83" }}>Add new question</span>
                     </div>
                   </div>
+                ) : (
+                  <div></div>
                 )}
                 {filteredQuestions.length > 0 && (
                   <div className={styles.ConfigBtns}>
@@ -1504,8 +1760,8 @@ const Config = (props: any) => {
                       label="Save"
                       className={styles.saveBtn}
                       onClick={() => {
-                        props.onChanges(false);
                         handlervalidation(false);
+                        props.onChanges(false);
                       }}
                     />
                   </div>

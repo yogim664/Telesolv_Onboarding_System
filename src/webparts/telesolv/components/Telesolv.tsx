@@ -27,7 +27,7 @@ const Telesolve = (props: any): JSX.Element => {
 
   // State to manage visibility
   const [isLoader, setIsLoader] = useState(true);
-  const [activeIndex, setActiveIndex] = useState<number>(1);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [ShowHrPerson, setShowHrPerson] = useState<boolean>(false);
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
     useState<boolean>(false);
