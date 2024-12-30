@@ -177,7 +177,9 @@ const Config = (props: any) => {
 
   const handlerDeleteOptionConfirmationPopup = (
     aIndex: any,
-    qIndex: number
+    qIndex: number,
+    val: any,
+    Answer: any
   ) => {
     confirmDialog({
       group: "templating",
@@ -188,10 +190,18 @@ const Config = (props: any) => {
         </div>
       ),
 
-      accept: () => handleDeletion(aIndex, qIndex),
+      accept: () => handleDeletion(aIndex, qIndex, val, Answer),
     });
   };
-  const handleDeletion = (aIndex: number, qIndex: number) => {
+  const handleDeletion = (
+    aIndex: number,
+    qIndex: number,
+    val: any,
+    answer: any
+  ) => {
+    debugger;
+    const updatedAnswer = answer.key === val ? "" : answer;
+
     const updatedQuestions = filteredQuestions.map(
       (question: any, index: number) =>
         index === qIndex
@@ -201,6 +211,7 @@ const Config = (props: any) => {
                 (_: any, optionIndex: number) => optionIndex !== aIndex
               ),
               isChanged: true,
+              Answer: updatedAnswer,
             }
           : question
     );
@@ -1465,11 +1476,13 @@ const Config = (props: any) => {
                             // maxLength={240}
                             disabled={!question.isEdit}
                           />
-                          <div className={styles.QuestionTag}>
-                            {/* Note: Choose any one option that triggers the workflow */}
-                            Note: Choose one option that requires attention from
-                            the HR personnel
-                          </div>
+                          {!question.Answer && (
+                            <div className={styles.QuestionTag}>
+                              {/* Note: Choose any one option that triggers the workflow */}
+                              Note: Choose one option that requires attention
+                              from the HR personnel
+                            </div>
+                          )}
                           {question.Options.length > 0 && (
                             <div className="flex flex-column gap-3">
                               {question?.Options?.map(
@@ -1569,7 +1582,9 @@ const Config = (props: any) => {
                                                 onClick={() => {
                                                   handlerDeleteOptionConfirmationPopup(
                                                     aIndex,
-                                                    qIndex
+                                                    qIndex,
+                                                    category.name,
+                                                    question.Answer
                                                   );
                                                 }}
                                                 style={{
