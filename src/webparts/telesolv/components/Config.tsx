@@ -681,6 +681,7 @@ const Config = (props: any) => {
     value: boolean,
     qIndex: any
   ): Promise<void> => {
+    props.onChanges(true);
     let errmsg: string = "";
     let err: boolean = false;
 
@@ -1409,7 +1410,6 @@ const Config = (props: any) => {
                                     question.QuestionNo
                                   );
                                 }
-                                props.onChanges(true);
                               }}
                             />
                             <i
