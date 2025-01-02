@@ -83,7 +83,7 @@ const Config = (props: any) => {
   };
 
   const showConfirmationHRscreenPop = (index: any) => {
-    if (index === 1) {
+    if (index === 1 || props.isQuestionActivated) {
       confirmDialog({
         group: "templating",
         header: "Confirmation",
@@ -123,12 +123,12 @@ const Config = (props: any) => {
     }
   };
 
-  function textAreaAdjust(element: HTMLTextAreaElement) {
-    if (element) {
-      element.style.height = "1px"; // Reset height
-      element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
-    }
-  }
+  // function textAreaAdjust(element: HTMLTextAreaElement) {
+  //   if (element) {
+  //     element.style.height = "1px"; // Reset height
+  //     element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
+  //   }
+  // }
 
   // useEffect(() => {
   //   function textAreaAdjust(element: HTMLTextAreaElement) {
@@ -692,7 +692,7 @@ const Config = (props: any) => {
     value: boolean,
     qIndex: any
   ): Promise<void> => {
-    props.onChanges(true);
+    // props.onChanges(true);
     let errmsg: string = "";
     let err: boolean = false;
 
@@ -849,6 +849,7 @@ const Config = (props: any) => {
         transition: Bounce,
       });
     }
+    props.onChange(false);
   };
 
   const handlerSaveQuestionsToSP = async (questions: any) => {
@@ -1227,6 +1228,7 @@ const Config = (props: any) => {
                   className={styles.saveBtn}
                   disabled={!newformDetails}
                   onClick={() => {
+                    props.onChange(false);
                     handlerSaveForm();
                   }}
                 />
@@ -1310,7 +1312,12 @@ const Config = (props: any) => {
                 </div>
 
                 <div className={styles.formSelectionSection}>
-                  <div>{`No of questions - ${filteredQuestions.length}`}</div>
+                  <div className={styles.questionNoSection}>
+                    {`No of questions - `}
+                    <span className={styles.questionCountNo}>
+                      {filteredQuestions.length}
+                    </span>
+                  </div>
 
                   <Dropdown
                     className={styles.formFilterDD}
@@ -1330,7 +1337,7 @@ const Config = (props: any) => {
                     placeholder="Select a Form"
                   />
 
-                  {/* <i
+                  {/* <i 
                     className="pi  pi-file-plus"
                     style={{
                       fontSize: "1.25rem",
@@ -1403,6 +1410,7 @@ const Config = (props: any) => {
                                   !question.isEdit &&
                                   selectedQuestionId === null
                                 ) {
+                                  props.onChange(true);
                                   setSelectedQuestionId(qIndex);
                                   handlerEditQuestions(question.Id, qIndex);
                                 } else if (
@@ -1414,6 +1422,7 @@ const Config = (props: any) => {
                                     false,
                                     qIndex
                                   );
+
                                   //setSelectedQuestionId(null);
                                 } else {
                                   hanlderAnotherQuestionEdit(
@@ -1463,12 +1472,19 @@ const Config = (props: any) => {
                             value={question?.QuestionTitle}
                             placeholder="Enter here"
                             onChange={(e) => {
-                              textAreaAdjust(e.target);
+                              // textAreaAdjust(e.target);
                               handlerQuestionChange(
                                 qIndex,
                                 e.target.value,
                                 "Question"
                               );
+                            }}
+                            style={{
+                              height: `${
+                                question?.QuestionTitle.length > 510
+                                  ? question?.QuestionTitle.length / 10
+                                  : 70
+                              }px`,
                             }}
                             // onFocusCapture={() => {
                             //   setfilteredQuestions([...filteredArr]);
@@ -1776,7 +1792,6 @@ const Config = (props: any) => {
                       className={styles.saveBtn}
                       onClick={() => {
                         handlervalidation(false);
-                        props.onChanges(false);
                       }}
                     />
                   </div>

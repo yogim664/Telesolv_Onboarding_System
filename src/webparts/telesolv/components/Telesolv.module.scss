@@ -21,7 +21,8 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    min-height: 77.5vh;
+    height: calc(100vh - 48px);
+    overflow: auto;
     .formSelectionSection {
         width: 100%;
         display: flex;
@@ -29,6 +30,16 @@
         align-items: center;
         gap: 16px;
         padding: 8px 14px;
+        .questionNoSection {
+            color: #223b83;
+            padding: 8px 16px;
+            border-radius: 4px;
+            box-shadow: -1px -2px 18px -1px #c6d4ff;
+            .questionCountNo {
+                font-weight: 600;
+                color: #223b83;
+            }
+        }
         .formFilterDD {
             width: 242px;
         }
@@ -43,11 +54,12 @@
             color: #223b83;
             margin: 0;
             padding: 10px 16px;
-            background: linear-gradient(-45deg, #e2d7fb, #ffddea, #daebfe, #e6fff9);
+            background: linear-gradient(-45deg, #e2d7fb, #ffeaf2, #daebfe, #e6fff9);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
             min-width: 300px;
             box-shadow: -1px -2px 18px -1px #c6d4ff;
+            border-radius: 4px;
         }
     }
     @keyframes gradient {
@@ -376,6 +388,7 @@
         padding-top: 10px;
         padding-left: 3px;
         // min-height: 38px;
+        outline: none;
     }
     .QuestionTag {
         text-align: right;

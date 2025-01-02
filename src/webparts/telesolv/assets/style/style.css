@@ -355,3 +355,11 @@ i {
     font-family: "interLight";
     font-size: 16px !important;
 }
+
+.p-button.p-button-danger {
+    border: none !important;
+}
+
+button {
+    border: none !important;
+}
