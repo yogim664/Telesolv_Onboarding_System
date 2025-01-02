@@ -1,3 +1,15 @@
 #spSiteHeader {
     display: none !important;
 }
+
+// div#SuiteNavWrapper {
+//     display: none !important;
+// }
+body:has(div [class^="EmployeeAnsContainer"]) div#SuiteNavWrapper {
+    display: none !important;
+}
+
+// warningContainer
+body:has(div [class^="warningContainer"]) div#SuiteNavWrapper {
+    display: none !important;
+}

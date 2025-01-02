@@ -18,7 +18,7 @@ import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
-
+let isOnboardSelected: boolean = false;
 const Telesolve = (props: any): JSX.Element => {
   const CurUser = {
     Name: props?.context?._pageContext?._user?.displayName || "Unknown User",
@@ -27,7 +27,7 @@ const Telesolve = (props: any): JSX.Element => {
 
   // State to manage visibility
   const [isLoader, setIsLoader] = useState(true);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<number>(1);
   const [ShowHrPerson, setShowHrPerson] = useState<boolean>(false);
   const [ShowHrDirectorScreen, setShowHrDirectorScreen] =
     useState<boolean>(false);
@@ -71,12 +71,14 @@ const Telesolve = (props: any): JSX.Element => {
   const getChangesFromConfig = (changes: any) => {
     console.log(changes);
     setIsQUestionUpdated(changes);
-    if (isQuestionUpdated) {
+    if (isQuestionUpdated && isOnboardSelected) {
       setActiveIndex(1);
+      isOnboardSelected = false;
     }
     console.log(isQuestionUpdated);
   };
   useEffect(() => {
+    setIsQuestionActivated(false);
     getGroups();
   }, []);
 
@@ -98,6 +100,7 @@ const Telesolve = (props: any): JSX.Element => {
               <TabView
                 activeIndex={activeIndex}
                 onTabChange={async (e) => {
+                  isOnboardSelected = e.index !== 0;
                   await setIsQuestionActivated(isQuestionUpdated);
                   if (isQuestionUpdated) {
                     setActiveIndex(0);
