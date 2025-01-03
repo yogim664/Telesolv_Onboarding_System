@@ -151,10 +151,10 @@ const EmployeeResponseView = (props: any): JSX.Element => {
       .getByTitle(GCongfig.ListName.EmployeeResponse)
 
       .items.select(
-        "*,QuestionID/ID,QuestionID/Sno,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail, CompletedBy/ID, CompletedBy/Title, CompletedBy/EMail"
+        "*,QuestionID/ID,QuestionID/Sno,QuestionID/Title,QuestionID/Answer,Employee/ID,Employee/EMail,Employee/Title,EmployeeID/Department,EmployeeID/Role, Reassigned/ID, Reassigned/Title, Reassigned/EMail, CompletedBy/ID, CompletedBy/Title, CompletedBy/EMail, Assigned/ID, Assigned/Title, Assigned/EMail"
       )
 
-      .expand("QuestionID,Employee,EmployeeID,Reassigned,CompletedBy")
+      .expand("QuestionID,Employee,EmployeeID,Reassigned,CompletedBy,Assigned")
       .filter(`Employee/ID eq ${employeeIdString}`)
       .top(5000)
       .get()
@@ -256,8 +256,8 @@ const EmployeeResponseView = (props: any): JSX.Element => {
                           text: Reassigned.Title,
                           secondaryText: Reassigned.EMail,
                         }))
-                      : relatedQitems[0]?.Assigned
-                      ? relatedQitems[0].Assigned.map((assignee: any) => ({
+                      : item?.Assigned
+                      ? item.Assigned.map((assignee: any) => ({
                           ID: assignee.ID,
                           imageUrl: `/_layouts/15/userphoto.aspx?size=S&accountname=${assignee.EMail}`,
                           text: assignee.Title,
@@ -320,6 +320,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
         })
         .then(async () => {
           await handlerEmployeeDetails();
+
           setisVisible(false);
         });
     } catch (error) {
@@ -597,6 +598,11 @@ const EmployeeResponseView = (props: any): JSX.Element => {
               )}
               onClick={() => {
                 handlerUpdateAssigeneDetails(selectedQuestionDetails);
+                curFilterItem.search = "";
+                curFilterItem.Status = "";
+                curFilterItem.Employee = [];
+                setfilterkeys({ ..._fkeys });
+                handlerFilter();
               }}
             />
           </div>

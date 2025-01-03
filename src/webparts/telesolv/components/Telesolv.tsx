@@ -33,6 +33,9 @@ const Telesolve = (props: any): JSX.Element => {
     useState<boolean>(false);
   const [isQuestionUpdated, setIsQUestionUpdated] = useState(false);
   const [isQuestionActivated, setIsQuestionActivated] = useState(false);
+  const [selTab, setSelTab] = useState<string>("Onboarding");
+  const [isTriger, setIsTriger] = useState<boolean>(false);
+
   // HR Person
   const hrpersonfun = async () => {
     const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
@@ -102,10 +105,13 @@ const Telesolve = (props: any): JSX.Element => {
                 onTabChange={async (e) => {
                   isOnboardSelected = e.index !== 0;
                   await setIsQuestionActivated(isQuestionUpdated);
-                  if (isQuestionUpdated) {
+                  setIsTriger(!isTriger);
+                  if (isOnboardSelected) {
+                    setSelTab("Onboarding");
                     setActiveIndex(0);
                   } else {
-                    setActiveIndex(e.index);
+                    setSelTab("Forms");
+                    setActiveIndex(0);
                   }
                 }}
                 className="MainTab"
@@ -129,6 +135,11 @@ const Telesolve = (props: any): JSX.Element => {
               context={props.context}
               onChange={getChangesFromConfig}
               isQuestionActivated={isQuestionActivated}
+              setActiveIndex={setActiveIndex}
+              activeIndex={activeIndex}
+              selTab={selTab}
+              setSelTab={setSelTab}
+              isTriger={isTriger}
             />
           )}
         </div>

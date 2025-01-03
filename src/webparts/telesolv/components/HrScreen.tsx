@@ -284,9 +284,9 @@ const HrScreen = (props: any): JSX.Element => {
     await sp.web.lists
       .getByTitle(GCongfig.ListName.EmployeeResponse)
       .items.select(
-        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/TaskName,  Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role, EmployeeID/SecondaryEmail , Reassigned/ID, Reassigned/EMail, Reassigned/Title"
+        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno,  Employee/EMail, Employee/Title, EmployeeID/Department, EmployeeID/Role, EmployeeID/SecondaryEmail , Reassigned/ID, Reassigned/EMail, Reassigned/Title, Assigned/ID, Assigned/EMail, Assigned/Title"
       )
-      .expand("QuestionID,Employee,EmployeeID,Reassigned")
+      .expand("QuestionID,Employee,EmployeeID,Reassigned,Assigned")
       .top(5000)
       .get()
       .then(async (_items: any) => {
@@ -298,7 +298,8 @@ const HrScreen = (props: any): JSX.Element => {
             QuestionID: item?.QuestionIDId || null,
             QuestionNo: item.QuestionID?.Sno || "N/A",
             QuestionTitle: item.QuestionID?.Title || "No Title",
-            Task: item.QuestionID?.TaskName || "No Title",
+            Task: item.Task || "No Title",
+
             Role: item.EmployeeID?.Role || "No Role",
             Department: item.EmployeeID?.Department || "No Department",
             Answer: item.QuestionID?.Answer || "No Answer",
@@ -336,18 +337,18 @@ const HrScreen = (props: any): JSX.Element => {
         const tempAssigenQuestion =
           (await _tempArr?.filter(
             (item: any) =>
-              assArray?.some(
-                (val: any) =>
-                  val?.ID === item?.QuestionID &&
-                  val.Assigned?.some(
-                    (assigned: any) =>
-                      assigned?.EMail?.toLowerCase() ===
-                      curUserDetails?.Email.toLowerCase()
-                  ) &&
-                  item.Reassigned.length === 0 &&
-                  (item.Status.key === "To be resolved" ||
-                    item.Status.key === "Resolved")
-              ) ||
+              // assArray?.some(
+              // (val: any) =>
+              // val?.ID === item?.QuestionID &&
+              (item.Assigned?.some(
+                (assigned: any) =>
+                  assigned?.Email?.toLowerCase() ===
+                  curUserDetails?.Email.toLowerCase()
+              ) &&
+                item.Reassigned.length === 0 &&
+                (item.Status.key === "To be resolved" ||
+                  item.Status.key === "Resolved")) ||
+              // )
               (item.Reassigned?.some(
                 (Reassigned: any) =>
                   Reassigned?.Email?.toLowerCase() ===
@@ -627,8 +628,8 @@ const HrScreen = (props: any): JSX.Element => {
                       border: "none",
                       width: "100px",
                     }}
-                    onClick={() => {
-                      handlerUpdateResponsesToSp(tempEmployeeDetails);
+                    onClick={async () => {
+                      await handlerUpdateResponsesToSp(tempEmployeeDetails);
                     }}
                   />
                 ) : (

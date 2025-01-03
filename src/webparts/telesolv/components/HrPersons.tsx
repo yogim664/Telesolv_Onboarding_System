@@ -109,6 +109,7 @@ const HrPersons = (props: any) => {
 
     setfilterkeys({ ..._tempFilterkeys });
     setfilteredcheckPoints([..._masterData]);
+    props?.setIsSelectTab(!props.isSelectTab);
   };
 
   // Function to fetch Title values
@@ -566,12 +567,18 @@ const HrPersons = (props: any) => {
                 // if (isEdit === false) {
                 //   setfilteredcheckPoints([...checkPointDetails]);
                 // }
-                !isEdit && setfilteredcheckPoints([...checkPointDetails]);
+                // !isEdit && setfilteredcheckPoints([...checkPointDetails]);
 
                 if (!isEdit) {
                   filterkeys.Forms = null;
                   filterkeys.people = [];
                   filterkeys.search = "";
+                  setfilteredcheckPoints([...checkPointDetails]);
+                  handlerQuestionsFilter(
+                    [...checkPointDetails],
+                    "Forms",
+                    firtFormID
+                  );
                 }
               }}
             />
@@ -599,7 +606,7 @@ const HrPersons = (props: any) => {
         </div>
         <DataTable
           className={styles.HRConfigDataTable}
-          value={[...filteredcheckPoints]}
+          value={!props?.isSelectTab ? [...filteredcheckPoints] : []}
         >
           <Column
             field="QuestionTitle"
@@ -639,6 +646,13 @@ const HrPersons = (props: any) => {
               filterkeys.Forms = null;
               filterkeys.people = [];
               filterkeys.search = "";
+
+              setfilteredcheckPoints([...checkPointDetails]);
+              handlerQuestionsFilter(
+                [...checkPointDetails],
+                "Forms",
+                firtFormID
+              );
             }}
             disabled={isEdit}
           />

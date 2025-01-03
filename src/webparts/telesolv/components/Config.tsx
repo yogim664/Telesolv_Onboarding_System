@@ -64,6 +64,8 @@ const Config = (props: any) => {
     aIndex: null,
   });
   const [activeIndex, setactiveIndex] = useState<number>(0);
+  const [isEditQuestion, setIsEditQuestion] = useState<boolean>(false);
+  const [isSelectTab, setIsSelectTab] = useState<boolean>(false);
 
   const handlerAcceptance = (id: any, qIndex: number) => {
     handlerQuestionDeletion(id, qIndex);
@@ -82,7 +84,7 @@ const Config = (props: any) => {
     });
   };
 
-  const showConfirmationHRscreenPop = (index: any) => {
+  const showConfirmationHRscreenPop = (index: any, isForm: boolean) => {
     if (index === 1 || props.isQuestionActivated) {
       confirmDialog({
         group: "templating",
@@ -94,14 +96,18 @@ const Config = (props: any) => {
         ),
 
         accept: async () => {
-          console.log(props.isQuestionActivated, "props.isQuestionActivated);");
-
+          console.log(props.isQuestionActivated, "props.isQuestionActivated");
           await handlervalidation(true);
         },
 
         reject: () => {
-          setactiveIndex(1);
-          props.onChange(false);
+          setfilteredQuestions([...questions]);
+          if (isForm) {
+            setactiveIndex(1);
+            props.onChange(false);
+          } else {
+            props.setActiveIndex(1);
+          }
         },
         closable: true,
       });
@@ -123,12 +129,12 @@ const Config = (props: any) => {
     }
   };
 
-  // function textAreaAdjust(element: HTMLTextAreaElement) {
-  //   if (element) {
-  //     element.style.height = "1px"; // Reset height
-  //     element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
-  //   }
-  // }
+  function textAreaAdjust(element: HTMLTextAreaElement) {
+    if (element) {
+      element.style.height = "1px"; // Reset height
+      element.style.height = `${element.scrollHeight + 25}px`; // Adjust based on content
+    }
+  }
 
   // useEffect(() => {
   //   function textAreaAdjust(element: HTMLTextAreaElement) {
@@ -358,13 +364,26 @@ const Config = (props: any) => {
   };
 
   const handlerEditQuestions = (questionId: number, qIndex: any) => {
-    setfilteredQuestions((prevQuestions: any) =>
-      prevQuestions.map((question: any) => ({
-        ...question,
-        //  isEdit: question.Id === questionId ? !question.isEdit : false,
-        isEdit: question.index === qIndex ? !question.isEdit : false,
-      }))
+    debugger;
+    const tempData: any[] = filteredQuestions?.filter(
+      (val: any, idx: number) => idx !== qIndex
     );
+
+    let isValid: boolean = tempData?.some((val: any) => val?.isEdit);
+
+    if (isValid) {
+      setSelectedQuestionId(null);
+      hanlderAnotherQuestionEdit(qIndex, 0);
+    } else {
+      setfilteredQuestions((prevQuestions: any) =>
+        prevQuestions.map((question: any) => ({
+          ...question,
+          //  isEdit: question.Id === questionId ? !question.isEdit : false,
+          isEdit: question.index === qIndex ? !question.isEdit : false,
+        }))
+      );
+      setSelectedQuestionId(null);
+    }
   };
 
   const handlerQuestionDeletion = (id: number, qIndex: number) => {
@@ -388,12 +407,14 @@ const Config = (props: any) => {
       .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
     sortQuestion[qIndex].isDelete = true;
+    sortQuestion[qIndex].isEdit = false;
 
     setfilteredQuestions(sortQuestion);
 
     console.log(filteredArr, "filteredArr");
 
     handlerQuestionsReArrange(qIndex);
+    setSelectedQuestionId(null);
   };
 
   const handlerQuestionsReArrange = (qIndex: any) => {
@@ -430,7 +451,18 @@ const Config = (props: any) => {
       transition: Bounce,
     });
 
-    setfilteredQuestions([...updatedQuestion]);
+    const temp: any[] = updatedQuestion?.filter(
+      (val: any) => val?.QuestionNo !== 10000
+    );
+
+    const curArray: any[] = temp?.map((val: any, i: number) => {
+      return {
+        ...val,
+        index: i,
+      };
+    });
+
+    setfilteredQuestions([...curArray]);
   };
 
   const handlerQuestionChange = (
@@ -692,7 +724,7 @@ const Config = (props: any) => {
     value: boolean,
     qIndex: any
   ): Promise<void> => {
-    // props.onChanges(true);
+    //   props.onChanges(true);
     let errmsg: string = "";
     let err: boolean = false;
 
@@ -749,6 +781,7 @@ const Config = (props: any) => {
         transition: Bounce,
       });
     } else {
+      setIsEditQuestion(false);
       await handlerEditQuestions(id, qIndex);
       setSelectedQuestionId(null);
     }
@@ -794,7 +827,7 @@ const Config = (props: any) => {
 
         const saveQuestions: any[] =
           filteredQuestions?.filter(
-            (_item: any) => !_item.Id && !_item.isDelete && _item.isEdit
+            (_item: any) => !_item.Id && !_item.isDelete
           ) || [];
 
         // Execute all operations in parallel
@@ -820,8 +853,11 @@ const Config = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
-        if (value) {
+        if (props.selTab === "Forms" && value) {
           setactiveIndex(1);
+          // props.setActiveIndex(props.activeIndex);
+        } else if (props.selTab === "Onboarding" && value) {
+          props.setActiveIndex(1);
         }
       } catch (error) {
         toast.error("Failed to process questions.", {
@@ -849,7 +885,6 @@ const Config = (props: any) => {
         transition: Bounce,
       });
     }
-    props.onChange(false);
   };
 
   const handlerSaveQuestionsToSP = async (questions: any) => {
@@ -858,9 +893,9 @@ const Config = (props: any) => {
         return sp.web.lists
           .getByTitle(GCongfig.ListName.CheckpointConfig)
           .items.add({
-            Sno: question.QuestionNo, // Maps to 'Sno' in SharePoint
-            Question: question.QuestionTitle, // Maps to 'Title' in SharePoint
-            Options: JSON.stringify(question.Options), // Convert Options to JSON string
+            Sno: question.QuestionNo,
+            Question: question.QuestionTitle,
+            Options: JSON.stringify(question.Options),
             Answer: question.Answer.key ? question.Answer.key : "",
             TaskName: question.QuestionTitle,
             isDelete: false,
@@ -914,6 +949,7 @@ const Config = (props: any) => {
       .filter(`isDelete ne 1 and Forms/Id eq ${key}`)
       .get()
       .then((items) => {
+        items?.sort((a: any, b: any) => a?.Sno - b?.Sno);
         formattedItems =
           items?.map((val: any, index: number) => {
             return {
@@ -942,9 +978,9 @@ const Config = (props: any) => {
             };
           }) || [];
 
-        formattedItems?.sort(
-          (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
-        );
+        // formattedItems?.sort(
+        //   (a: IQuestionDatas, b: IQuestionDatas) => a.QuestionNo - b.QuestionNo
+        // );
       })
       .catch((err) => {
         console.log(err);
@@ -1104,7 +1140,8 @@ const Config = (props: any) => {
   };
 
   const hanlderAnotherQuestionEdit = (id: any, sno: any) => {
-    toast.error(`Question ${sno} already editing`, {
+    // toast.error(`Question ${sno} already editing`, {
+    toast.error(`Another question editing`, {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -1156,9 +1193,22 @@ const Config = (props: any) => {
   useEffect(() => {
     hanlderForms(currentFormID);
   }, [isSubmitted]);
+
   useEffect(() => {
-    props.isQuestionActivated ? showConfirmationHRscreenPop(1) : "";
-  }, [props.isQuestionActivated]);
+    if (props.selTab === "Forms") {
+      props.setActiveIndex(0);
+    } else if (
+      filteredQuestions.filter((value: any) => value.isChanged === true)
+        .length > 0 &&
+      props.selTab === "Onboarding"
+    ) {
+      showConfirmationHRscreenPop(1, false);
+    } else {
+      props.setActiveIndex(1);
+    }
+    // props.isQuestionActivated ? showConfirmationHRscreenPop(1) : "";
+  }, [props.selTab, props.isTriger]);
+
   return (
     <>
       {isLoading ? (
@@ -1228,7 +1278,6 @@ const Config = (props: any) => {
                   className={styles.saveBtn}
                   disabled={!newformDetails}
                   onClick={() => {
-                    props.onChange(false);
                     handlerSaveForm();
                   }}
                 />
@@ -1263,12 +1312,14 @@ const Config = (props: any) => {
             activeIndex={activeIndex}
             onTabChange={(e) => {
               if (e.index === 1) {
+                props.setSelTab("Forms");
+                setIsSelectTab(true);
                 if (
                   filteredQuestions.filter(
                     (value: any) => value.isChanged === true
                   ).length > 0
                 ) {
-                  showConfirmationHRscreenPop(e.index);
+                  showConfirmationHRscreenPop(e.index, true);
                 } else {
                   setactiveIndex(1);
                 }
@@ -1285,7 +1336,14 @@ const Config = (props: any) => {
                 <div className={styles.formDetailsContainer}>
                   {currentFormName ? (
                     <>
-                      <h2>{currentFormName}</h2>
+                      <h2>
+                        {currentFormName}{" "}
+                        <div>{`No of questions - ${
+                          filteredQuestions.filter(
+                            (value: any) => value.QuestionNo !== 10000
+                          ).length
+                        }`}</div>
+                      </h2>
                       <i
                         className="pi pi-pencil"
                         style={{
@@ -1312,12 +1370,11 @@ const Config = (props: any) => {
                 </div>
 
                 <div className={styles.formSelectionSection}>
-                  <div className={styles.questionNoSection}>
-                    {`No of questions - `}
-                    <span className={styles.questionCountNo}>
-                      {filteredQuestions.length}
-                    </span>
-                  </div>
+                  {/* <div>{`No of questions - ${
+                    filteredQuestions.filter(
+                      (value: any) => value.QuestionNo !== 10000
+                    ).length
+                  }`}</div> */}
 
                   <Dropdown
                     className={styles.formFilterDD}
@@ -1337,7 +1394,7 @@ const Config = (props: any) => {
                     placeholder="Select a Form"
                   />
 
-                  {/* <i 
+                  {/* <i
                     className="pi  pi-file-plus"
                     style={{
                       fontSize: "1.25rem",
@@ -1361,6 +1418,7 @@ const Config = (props: any) => {
                       setnewformDetails(null);
                       setisVisible(true);
                     }}
+                    disabled={isEditQuestion}
                   />
                 </div>
               </div>
@@ -1401,18 +1459,35 @@ const Config = (props: any) => {
                             <i
                               className={
                                 !question.isEdit
-                                  ? "pi  pi-pencil"
+                                  ? "pi pi-pencil"
                                   : "pi pi-check"
                               }
                               style={{ fontSize: "1rem" }}
                               onClick={() => {
+                                debugger;
                                 if (
+                                  question.isEdit &&
+                                  selectedQuestionId === null
+                                ) {
+                                  setSelectedQuestionId(qIndex);
+                                  // handlerEditQuestions(question.Id, qIndex);
+                                  handlerQuestionvalidation(
+                                    question.Id,
+                                    false,
+                                    qIndex
+                                  );
+                                } else if (
                                   !question.isEdit &&
                                   selectedQuestionId === null
                                 ) {
-                                  props.onChange(true);
+                                  setIsEditQuestion(true);
                                   setSelectedQuestionId(qIndex);
                                   handlerEditQuestions(question.Id, qIndex);
+                                  // handlerQuestionvalidation(
+                                  //   question.Id,
+                                  //   false,
+                                  //   qIndex
+                                  // );
                                 } else if (
                                   question.isEdit &&
                                   selectedQuestionId === qIndex
@@ -1422,7 +1497,6 @@ const Config = (props: any) => {
                                     false,
                                     qIndex
                                   );
-
                                   //setSelectedQuestionId(null);
                                 } else {
                                   hanlderAnotherQuestionEdit(
@@ -1430,6 +1504,12 @@ const Config = (props: any) => {
                                     question.QuestionNo
                                   );
                                 }
+                                console.log(
+                                  !question.isEdit,
+                                  " !question.isEdit",
+                                  selectedQuestionId,
+                                  "selectedQuestionId"
+                                );
                               }}
                             />
                             <i
@@ -1437,7 +1517,12 @@ const Config = (props: any) => {
                               onClick={() => {
                                 showConfirmationPopup(question.Id, qIndex);
                               }}
-                              style={{ cursor: "pointer", color: "red" }}
+                              style={{
+                                cursor: "pointer",
+                                color: "red",
+
+                                display: isEditQuestion ? "none" : "block",
+                              }}
                             />
                             <i
                               className="pi pi-arrow-up"
@@ -1451,6 +1536,7 @@ const Config = (props: any) => {
                               style={{
                                 cursor: "pointer",
                                 color: "#233b83",
+                                display: isEditQuestion ? "none" : "block",
                               }}
                             />
                             <i
@@ -1458,6 +1544,7 @@ const Config = (props: any) => {
                               style={{
                                 cursor: "pointer",
                                 color: "#233b83",
+                                display: isEditQuestion ? "none" : "block",
                               }}
                               onClick={() => handlermoveQuestionDownn(qIndex)}
                             />
@@ -1472,19 +1559,12 @@ const Config = (props: any) => {
                             value={question?.QuestionTitle}
                             placeholder="Enter here"
                             onChange={(e) => {
-                              // textAreaAdjust(e.target);
+                              textAreaAdjust(e.target);
                               handlerQuestionChange(
                                 qIndex,
                                 e.target.value,
                                 "Question"
                               );
-                            }}
-                            style={{
-                              height: `${
-                                question?.QuestionTitle.length > 510
-                                  ? question?.QuestionTitle.length / 10
-                                  : 70
-                              }px`,
                             }}
                             // onFocusCapture={() => {
                             //   setfilteredQuestions([...filteredArr]);
@@ -1753,6 +1833,7 @@ const Config = (props: any) => {
                   <div
                     className={styles.addNewQuestionSection}
                     onClick={async () => {
+                      setIsEditQuestion(true);
                       await handlerAddNewQuestion();
                       let _tempFilteredQuestions = filteredQuestions.filter(
                         (value: any) => value.QuestionNo !== 10000
@@ -1792,6 +1873,7 @@ const Config = (props: any) => {
                       className={styles.saveBtn}
                       onClick={() => {
                         handlervalidation(false);
+                        props.onChange(false);
                       }}
                     />
                   </div>
@@ -1800,7 +1882,12 @@ const Config = (props: any) => {
             </TabPanel>
             <TabPanel header="HR Persons">
               {/* {isHrPersonScreen ? ( */}
-              <HrPersons context={props.context} Question={questions} />
+              <HrPersons
+                context={props.context}
+                Question={questions}
+                isSelectTab={isSelectTab}
+                setIsSelectTab={setIsSelectTab}
+              />
               {/* <p></p> */}
               {/* )} */}
             </TabPanel>
