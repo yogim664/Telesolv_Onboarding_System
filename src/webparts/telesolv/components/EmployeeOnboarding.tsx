@@ -342,6 +342,7 @@ const Onboarding = (props: any) => {
     let filteredData: any[] = [...EmployeeOnboardingDetails];
     let _tempFilterkeys: any = { ...filterkeys };
     _tempFilterkeys[key] = val;
+
     if (_tempFilterkeys?.dept) {
       filteredData = filteredData?.filter(
         (value: any) => value?.Department?.key === _tempFilterkeys?.dept
@@ -349,7 +350,9 @@ const Onboarding = (props: any) => {
     }
     if (_tempFilterkeys.Employee.length > 0) {
       filteredData = filteredData?.filter((_item: any) =>
-        val.some((_v: any) => _item.Employee.EmployeeEMail === _v.secondaryText)
+        _tempFilterkeys.Employee?.some(
+          (_v: any) => _item.Employee.EmployeeEMail === _v.secondaryText
+        )
       );
     }
     if (_tempFilterkeys?.search) {
@@ -359,7 +362,6 @@ const Onboarding = (props: any) => {
         )
       );
     }
-
     if (_tempFilterkeys.form) {
       filteredData = filteredData?.filter(
         (value: any) => value?.Forms === _tempFilterkeys.form

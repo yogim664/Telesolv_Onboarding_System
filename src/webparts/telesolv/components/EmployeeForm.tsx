@@ -66,7 +66,8 @@ const EmployeeForm = (props: any): JSX.Element => {
     let tempQuestions: any = [];
     sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
-      .items.select("ID,Question")
+      .items.select("*,ID,Question,Assigned/ID")
+      .expand("Assigned")
       .top(5000)
       .get()
       .then((questionData: any) => {
@@ -74,6 +75,8 @@ const EmployeeForm = (props: any): JSX.Element => {
           tempQuestions.push({
             ID: qitem.ID,
             QTitle: qitem.Question,
+            Assigned: qitem.Assigned?.map((item: any) => item.ID),
+            Task: qitem.TaskName,
           });
         });
         console.log("Appended Questions:", tempQuestions);
@@ -109,7 +112,6 @@ const EmployeeForm = (props: any): JSX.Element => {
           if (item.Status === "Pending") {
             const CurQuestion = tempQuestions.filter((qitems: any) => {
               console.log(qitems, "qitems");
-
               return qitems.ID === item.QuestionID.ID;
             });
             console.log(
@@ -122,11 +124,14 @@ const EmployeeForm = (props: any): JSX.Element => {
               Id: item.Id,
               QuestionNo: item.QuestionID?.Sno,
               QuestionTitle: CurQuestion[0]?.QTitle,
+              Task: CurQuestion[0]?.Task,
               Answer: item.QuestionID?.Answer,
               Status: item.Status,
               Comments: item.Comments,
               ResponseComments: item.ResponseComments,
               Options: options,
+              // Assigned: CurQuestion[0].Assigned?.map((item: any) => item.ID),
+              Assigned: CurQuestion[0].Assigned,
               Response: item.Response
                 ? {
                     key: item.Response,
@@ -145,9 +150,9 @@ const EmployeeForm = (props: any): JSX.Element => {
           } else {
             return {
               Id: item.Id,
-              QuestionNo: item.QuestionID?.Sno,
+              QuestionNo: item.Sno,
               QuestionTitle: item.Question,
-              Answer: item.QuestionID?.Answer,
+              Answer: item.Answer,
               Status: item.Status,
               Comments: item.Comments,
               ResponseComments: item.ResponseComments,
@@ -169,7 +174,6 @@ const EmployeeForm = (props: any): JSX.Element => {
         if (_tempArr.length === 0) {
           sethaveAccess(false);
         }
-
         setquestions(_tempArr);
         if (_tempArr.length > 0) {
           setComment(_tempArr[0].ResponseComments); // Set the first comment
@@ -247,12 +251,17 @@ const EmployeeForm = (props: any): JSX.Element => {
         .items.getById(questions[i].Id)
         .update({
           Question: questions[i].QuestionTitle,
+          Task: questions[i].Task,
           Response: questions[i].Response ? questions[i].Response.key : "",
           Status:
             questions[i].Response.key !== questions[i].Answer
               ? "Satisfactory"
               : "To be resolved",
           ResponseComments: comment,
+          Sno: questions[i].Sno,
+          Answer: questions[i].Answer,
+          QuestionIDId: null,
+          AssignedId: { results: questions[i].Assigned },
         })
         .then(async () => {
           if (questions.length - 1 === i) {
