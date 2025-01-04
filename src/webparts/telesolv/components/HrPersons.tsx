@@ -109,7 +109,9 @@ const HrPersons = (props: any) => {
 
     setfilterkeys({ ..._tempFilterkeys });
     setfilteredcheckPoints([..._masterData]);
-    props?.setIsSelectTab(!props.isSelectTab);
+    if (props.isSelectTab) {
+      props?.setIsSelectTab(false);
+    }
   };
 
   // Function to fetch Title values
@@ -420,7 +422,7 @@ const HrPersons = (props: any) => {
   const hrpersonfun = async (Spusers: any) => {
     console.log(Spusers, "HRDinction");
 
-    const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
+    const HRgroupId = GCongfig.ADGroupID.HRPersonID;
     await graph.groups
       .getById(HRgroupId)
       .members()
@@ -535,12 +537,16 @@ const HrPersons = (props: any) => {
             <div className="HRPersonPeopleSearch">
               <PeoplePicker
                 context={props.context}
-                webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                webAbsoluteUrl={GCongfig.SiteURL.siteUrl}
                 personSelectionLimit={100}
                 showtooltip={false}
                 ensureUser={true}
                 placeholder={"Search HR Persons"}
                 onChange={(selectedPeople: any[]) => {
+                  console.log(
+                    "GCongfig.SiteURL.siteUrl: ",
+                    GCongfig.SiteURL.siteUrl
+                  );
                   handlerQuestionsFilter(
                     checkPointDetails,
                     "people",
