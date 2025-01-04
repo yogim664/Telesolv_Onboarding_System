@@ -33,3 +33,12 @@ export interface IQuestionDatas {
   Assigned: IAssignedData[];
   TaskName: string | null;
 }
+
+export interface ISiteURL {
+  siteUrl: string;
+}
+
+export interface IADGroupID {
+  HRDirectorID: string;
+  HRPersonID: string;
+}

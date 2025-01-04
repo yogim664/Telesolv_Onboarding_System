@@ -18,6 +18,7 @@ import HrScreen from "./HrScreen";
 import { graph } from "@pnp/graph";
 import "@pnp/graph/groups";
 import "@pnp/graph/users";
+import { GCongfig } from "../../../Config/Config";
 let isOnboardSelected: boolean = false;
 const Telesolve = (props: any): JSX.Element => {
   const CurUser = {
@@ -38,7 +39,7 @@ const Telesolve = (props: any): JSX.Element => {
 
   // HR Person
   const hrpersonfun = async () => {
-    const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
+    const HRgroupId = GCongfig.ADGroupID.HRPersonID;
 
     await graph.groups
       .getById(HRgroupId)
@@ -56,7 +57,7 @@ const Telesolve = (props: any): JSX.Element => {
 
   //HR Director
   const getGroups = async () => {
-    const groupId = "0127711a-e331-4698-8e2e-47617926b1d0";
+    const groupId = GCongfig.ADGroupID.HRDirectorID;
 
     await graph.groups
       .getById(groupId)

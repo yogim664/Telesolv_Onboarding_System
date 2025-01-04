@@ -799,7 +799,7 @@ const Onboarding = (props: any) => {
               <div className={styles.filterEmployee}>
                 <PeoplePicker
                   context={props.context}
-                  webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                  webAbsoluteUrl={GCongfig.SiteURL.siteUrl}
                   personSelectionLimit={100}
                   showtooltip={false}
                   ensureUser={true}
@@ -919,7 +919,7 @@ const Onboarding = (props: any) => {
                   <div className={styles.peoplePicker}>
                     <PeoplePicker
                       context={props.context}
-                      webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+                      webAbsoluteUrl={GCongfig.SiteURL.siteUrl}
                       personSelectionLimit={1}
                       showtooltip={false}
                       ensureUser={true}

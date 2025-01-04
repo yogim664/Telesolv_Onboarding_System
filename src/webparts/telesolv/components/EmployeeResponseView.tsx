@@ -460,7 +460,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
   const hrpersonfun = async (Spusers: any) => {
     console.log(Spusers, "HRDinction");
 
-    const HRgroupId = "f092b7ad-ec31-478c-9225-a87fa73d65d1";
+    const HRgroupId = GCongfig.ADGroupID.HRPersonID;
     await graph.groups
       .getById(HRgroupId)
       .members()
@@ -648,7 +648,7 @@ const EmployeeResponseView = (props: any): JSX.Element => {
           <div className={styles.filterPeople}>
             <PeoplePicker
               context={props.context}
-              webAbsoluteUrl={`${window.location.origin}/sites/LogiiDev`}
+              webAbsoluteUrl={GCongfig.SiteURL.siteUrl}
               personSelectionLimit={100}
               showtooltip={false}
               ensureUser={true}
