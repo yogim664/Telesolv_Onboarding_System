@@ -1,114 +1,121 @@
 .CanvasComponent.LCS .CanvasZone:not(.CanvasZone--fullWidth) .ControlZone {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .ControlZone {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .CanvasSection {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .CanvasComponent.LCS .CanvasSection-col {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .spAppAndPropertyPanelContainer .sp-appBar {
-    display: none;
+  display: none;
 }
 
-.CanvasComponent.LCS .CanvasSection--read:not(.CanvasSection--fullWidth) .ControlZone {
-    margin-top: 0 !important;
+.CanvasComponent.LCS
+  .CanvasSection--read:not(.CanvasSection--fullWidth)
+  .ControlZone {
+  margin-top: 0 !important;
 }
 
 div[data-automation-id="CanvasZone-SectionContainer"] {
-    margin: 0 !important;
-    /* margin-top: 33px !important; */
+  margin: 0 !important;
+  /* margin-top: 33px !important; */
 }
 
 .CanvasZone-SectionContainer {
-    background-color: var(--body-bgcolor) !important;
+  background-color: var(--body-bgcolor) !important;
 }
-
 
 /* reset width in deloyment */
 
 .CanvasComponent .CanvasZone {
-    max-width: 100% !important;
-    padding: 0px !important;
+  max-width: 100% !important;
+  padding: 0px !important;
 }
 
 #workbenchPageContent {
-    width: 100% !important;
-    max-width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
 }
 
 *::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background-color: #f5f5f5;
-    border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+  border-radius: 10px;
 }
 
 *::-webkit-scrollbar {
-    width: 10px;
-    background-color: #f5f5f5;
+  width: 10px;
+  background-color: #f5f5f5;
 }
 
 *::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.44, rgb(78, 92, 121)), color-stop(0.72, rgb(58, 82, 110)), color-stop(0.86, rgb(15, 30, 77)));
+  border-radius: 10px;
+  background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.44, rgb(78, 92, 121)),
+    color-stop(0.72, rgb(58, 82, 110)),
+    color-stop(0.86, rgb(15, 30, 77))
+  );
 }
-
 
 /* font faces */
 
 @font-face {
-    font-family: "interThin";
-    src: url("../fonts/InterGF/Inter-Thin.ttf");
+  font-family: "interThin";
+  src: url("../fonts/InterGF/Inter-Thin.ttf");
 }
 
 @font-face {
-    font-family: "interRegular";
-    src: url("../fonts/InterGF/Inter-Regular.ttf");
+  font-family: "interRegular";
+  src: url("../fonts/InterGF/Inter-Regular.ttf");
 }
 
 @font-face {
-    font-family: "interBold";
-    src: url("../fonts/InterGF/Inter-Bold.ttf");
+  font-family: "interBold";
+  src: url("../fonts/InterGF/Inter-Bold.ttf");
 }
 
 @font-face {
-    font-family: "interSemibold";
-    src: url("../fonts/InterGF/Inter-SemiBold.ttf");
+  font-family: "interSemibold";
+  src: url("../fonts/InterGF/Inter-SemiBold.ttf");
 }
 
 @font-face {
-    font-family: "interLight";
-    src: url("../fonts/InterGF/Inter-Light.ttf");
+  font-family: "interLight";
+  src: url("../fonts/InterGF/Inter-Light.ttf");
 }
 
 @font-face {
-    font-family: "interExtralight";
-    src: url("../fonts/InterGF/Inter-ExtraLight.ttf");
+  font-family: "interExtralight";
+  src: url("../fonts/InterGF/Inter-ExtraLight.ttf");
 }
 
 @font-face {
-    font-family: "interExtraBold";
-    src: url("../fonts/InterGF/Inter-ExtraBold.ttf");
+  font-family: "interExtraBold";
+  src: url("../fonts/InterGF/Inter-ExtraBold.ttf");
 }
 
 @font-face {
-    font-family: "interBlack";
-    src: url("../fonts/InterGF/Inter-Black.ttf");
+  font-family: "interBlack";
+  src: url("../fonts/InterGF/Inter-Black.ttf");
 }
 
 @font-face {
-    font-family: "interMedium";
-    src: url("../fonts/InterGF/Inter-Medium.ttf");
+  font-family: "interMedium";
+  src: url("../fonts/InterGF/Inter-Medium.ttf");
 }
 
 h1,
@@ -126,67 +133,66 @@ ul,
 ol,
 th,
 td {
-    font-family: interLight;
+  font-family: interLight;
 }
 
 .p-toast-message-content {
-    align-items: center !important;
+  align-items: center !important;
 }
 
 .p-confirm-dialog {
-    min-width: 460px;
+  min-width: 460px;
 }
 
 .p-confirm-dialog-accept {
-    background-color: #233b83 !important;
-    outline: 0px !important;
-    padding: 8px 24px;
+  background-color: #233b83 !important;
+  outline: 0px !important;
+  padding: 8px 24px;
 }
 
 .p-confirm-dialog-reject {
-    background-color: #cfcfcf;
-    color: #000;
-    outline: 0px !important;
-    padding: 8px 24px;
+  background-color: #cfcfcf;
+  color: #000;
+  outline: 0px !important;
+  padding: 8px 24px;
 }
 
 .p-dialog {
-    border: none !important;
+  border: none !important;
 }
 
 .p-dialog .p-dialog-header,
 .p-dialog .p-dialog-footer {
-    border: none !important;
+  border: none !important;
 }
 
 .p-dialog .p-dialog-header {
-    position: relative;
+  position: relative;
 }
 
 .p-dialog .p-dialog-header,
 .p-dialog-content {
-    background: unset !important;
+  background: unset !important;
 }
 
 .p-dialog-title {
-    color: #233b83 !important;
+  color: #233b83 !important;
 }
 
 .p-dialog {
-    background: #fffffff0 !important;
+  background: #fffffff0 !important;
 }
 
 @keyframes depth-animation {
-    from {
-        width: 32px;
-        height: 32px;
-    }
-    to {
-        width: 64px;
-        height: 64px;
-    }
+  from {
+    width: 32px;
+    height: 32px;
+  }
+  to {
+    width: 64px;
+    height: 64px;
+  }
 }
-
 
 /* .p-dialog .p-dialog-header::after {
     content: "";
@@ -203,163 +209,167 @@ td {
 } */
 
 .p-dialog .p-dialog-footer button {
-    margin: 0 !important;
+  margin: 0 !important;
 }
 
 .p-dialog-footer {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 12px;
-    background-color: unset !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px;
+  background-color: unset !important;
 }
 
 .p-dialog-header {
-    justify-content: center;
+  justify-content: center;
 }
 
 .p-dialog-title {
-    text-align: center;
-    /* margin-bottom: 52px; */
+  text-align: center;
+  /* margin-bottom: 52px; */
 }
 
 .p-dialog-header-icons {
-    display: none !important;
+  display: none !important;
+}
+
+.Confirmation_Dialog .p-dialog-header-icons {
+  display: flex !important;
 }
 
 .ms-BasePicker-text {
-    border: 1px solid #ced4da;
-    border-radius: 4px !important;
-    min-height: 38px !important;
+  border: 1px solid #ced4da;
+  border-radius: 4px !important;
+  min-height: 38px !important;
 }
 
 .is-disabled.ms-PickerItem-removeButton {
-    display: none !important;
+  display: none !important;
 }
 
 .ms-PickerPersona-container {
-    background-color: #e8e8e8 !important;
+  background-color: #e8e8e8 !important;
 }
 
-.p-datatable .p-datatable-thead>tr>th {
-    border: none !important;
+.p-datatable .p-datatable-thead > tr > th {
+  border: none !important;
 }
 
-.p-datatable .p-datatable-tbody>tr>td {
-    padding: 12px 16px !important;
-    font-size: 0.9rem !important;
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 12px 16px !important;
+  font-size: 0.9rem !important;
 }
 
 .p-datatable-wrapper {
-    overflow: unset !important;
+  overflow: unset !important;
 }
 
 [class^="taskName"] .p-disabled {
-    color: #000 !important;
+  color: #000 !important;
 }
 
 .HRPersonPeopleSearch {
-    width: 220px;
+  width: 220px;
 }
 
 .HRPersonPeopleSearch .ms-BasePicker-text {
-    min-height: 38px;
+  min-height: 38px;
 }
 
 [class^="OnboardingRightContainer"] .ms-BasePicker-text {
-    min-height: 36px !important;
+  min-height: 36px !important;
 }
 
 i {
-    cursor: pointer !important;
+  cursor: pointer !important;
 }
 
 [class^="filterEmployee"] .ms-BasePicker-input::placeholder {
-    color: #818181;
-    font-size: 17px;
-    font-weight: 300;
-    position: relative;
-    top: -3px;
+  color: #818181;
+  font-size: 17px;
+  font-weight: 300;
+  position: relative;
+  top: -3px;
 }
 
 .p-confirm-dialog .p-dialog-content {
-    justify-content: center !important;
-    background-color: unset !important;
+  justify-content: center !important;
+  background-color: unset !important;
 }
 
 .commandBarWrapper {
-    display: none !important;
+  display: none !important;
 }
 
 [class^="navBar"] h2 {
-    color: #233b83;
+  color: #233b83;
 }
 
 .p-paginator {
-    background-color: unset !important;
-    gap: 6px;
+  background-color: unset !important;
+  gap: 6px;
 }
 
 .p-paginator-element {
-    margin: 0 3px;
+  margin: 0 3px;
 }
 
-.p-datatable .p-datatable-thead>tr>th {
-    background-color: #f0f8ff71 !important;
-    color: #233b83 !important;
-    border: none !important;
-    font-size: 14px;
+.p-datatable .p-datatable-thead > tr > th {
+  background-color: #f0f8ff71 !important;
+  color: #233b83 !important;
+  border: none !important;
+  font-size: 14px;
 }
 
 .p-datatable-wrapper {
-    border-radius: 5px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .p-datatable .p-column-header-content {
-    padding-left: 50px;
+  padding-left: 50px;
 }
 
-.p-datatable .p-datatable-tbody>tr>td {
-    text-align: left;
-    border: none;
-    /* border-width: 1px 0 0 0; */
-    padding-top: 10px;
-    padding-left: 65px;
-    padding-bottom: 10px;
+.p-datatable .p-datatable-tbody > tr > td {
+  text-align: left;
+  border: none;
+  /* border-width: 1px 0 0 0; */
+  padding-top: 10px;
+  padding-left: 65px;
+  padding-bottom: 10px;
 }
 
-.p-datatable .p-datatable-tbody>tr {
-    background: #ffffff61 !important;
+.p-datatable .p-datatable-tbody > tr {
+  background: #ffffff61 !important;
 }
 
 .p-tabview .p-tabview-panels {
-    background: unset !important;
+  background: unset !important;
 }
 
 .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-    background: #ffffffcc;
-    padding: 0.75rem 3rem !important;
+  background: #ffffffcc;
+  padding: 0.75rem 3rem !important;
 }
 
 .p-dropdown,
 .p-inputtext,
 .ms-BasePicker-text {
-    background: #f8f7fe !important;
+  background: #f8f7fe !important;
 }
 
 [class^="addNewForm"] .p-dialog-content {
-    padding: 12px !important;
+  padding: 12px !important;
 }
 
 .ms-BasePicker-text input::placeholder {
-    font-family: "interLight";
-    font-size: 16px !important;
+  font-family: "interLight";
+  font-size: 16px !important;
 }
 
 .p-button.p-button-danger {
-    border: none !important;
+  border: none !important;
 }
 
 button {
-    border: none !important;
+  border: none !important;
 }
