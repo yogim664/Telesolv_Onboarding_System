@@ -399,11 +399,12 @@ const Onboarding = (props: any) => {
       .getByTitle(GCongfig.ListName.EmployeeOnboarding)
       .items.getById(id)
       .delete()
-      .then(() => {
-        const afterDelete = filteredEmployeeOnboardingDetails.filter(
-          (e: any) => e.Id !== id
-        );
-        setfilteredEmployeeOnboardingDetails(afterDelete);
+      .then(async () => {
+        // const afterDelete = filteredEmployeeOnboardingDetails.filter(
+        //   (e: any) => e.Id !== id
+        // );
+        await handlerGetDepartments();
+        // setfilteredEmployeeOnboardingDetails(afterDelete);
         toast.success("Deleted Successfully", {
           position: "top-right",
           autoClose: 5000,
@@ -483,7 +484,7 @@ const Onboarding = (props: any) => {
     let errmsg: string = "";
     let err: boolean = false;
     const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const EmployeeCount = filteredEmployeeOnboardingDetails.filter(
+    const EmployeeCount = EmployeeOnboardingDetails.filter(
       (item: any) =>
         item?.Employee.EmployeeEMail?.toLowerCase() ===
         tempEmployeeOnboardingDetails.Employee.EmployeeEMail?.toLowerCase()

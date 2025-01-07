@@ -109,7 +109,7 @@ const Config = (props: any) => {
             props.setActiveIndex(1);
           }
         },
-        closable: true,
+        //closable: true,
       });
 
       // <ConfirmDialog
@@ -559,6 +559,20 @@ const Config = (props: any) => {
   //   setnewOptionValue("");
   //   setSelectedQuestionId(null); // Hide the input container
   // };
+
+  const formOnchange = () => {
+    toast.error("Please save questions", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+  };
 
   const handlermoveQuestionUp = (index: any, del: boolean, _tempArr?: any) => {
     const updatedQuestions = [..._tempArr];
@@ -1285,7 +1299,12 @@ const Config = (props: any) => {
             </Dialog>
           </div>
 
-          <ConfirmDialog group="templating" />
+          <ConfirmDialog
+            group="templating"
+            className="Confirmation_Dialog"
+            closable={true}
+            draggable={false}
+          />
           <ConfirmDialog />
           <Dialog
             header="Header"
@@ -1324,6 +1343,7 @@ const Config = (props: any) => {
                   setactiveIndex(1);
                 }
               } else {
+                setisSubmitted(!isSubmitted);
                 setactiveIndex(0);
               }
             }}
@@ -1386,8 +1406,18 @@ const Config = (props: any) => {
                         : null
                     }
                     onChange={(e) => {
-                      hanlderfilter("Forms", e.value.ID, formsDetails);
-                      setcurrentFormID(e.value.ID);
+                      if (isEditQuestion) {
+                        formOnchange();
+                      } else if (
+                        filteredQuestions.filter(
+                          (value: any) => value.isChanged === true
+                        ).length > 0
+                      ) {
+                        formOnchange();
+                      } else {
+                        hanlderfilter("Forms", e.value.ID, formsDetails);
+                        setcurrentFormID(e.value.ID);
+                      }
                     }}
                     options={formsDetails || []}
                     optionLabel="name"
@@ -1415,8 +1445,18 @@ const Config = (props: any) => {
                     label="New form"
                     icon="pi  pi-file-plus"
                     onClick={() => {
-                      setnewformDetails(null);
-                      setisVisible(true);
+                      if (isEditQuestion) {
+                        formOnchange();
+                      } else if (
+                        filteredQuestions.filter(
+                          (value: any) => value.isChanged === true
+                        ).length > 0
+                      ) {
+                        formOnchange();
+                      } else {
+                        setnewformDetails(null);
+                        setisVisible(true);
+                      }
                     }}
                     disabled={isEditQuestion}
                   />
@@ -1436,10 +1476,7 @@ const Config = (props: any) => {
                   filteredQuestions
                     .filter((value: any) => value.QuestionNo !== 10000)
                     .map((question: any, qIndex: any) => (
-                      <div
-                        key={question.QuestionNo}
-                        className={styles.questionBlock}
-                      >
+                      <div key={qIndex} className={styles.questionBlock}>
                         <div className={styles.CheckPointSection}>
                           <div className={styles.leftSection}>
                             {/* <i className="pi pi-comment" /> */}
@@ -1584,7 +1621,7 @@ const Config = (props: any) => {
                               {question?.Options?.map(
                                 (category: any, aIndex: any) => (
                                   <div
-                                    key={category.key}
+                                    key={aIndex}
                                     className="flex align-items-center"
                                   >
                                     <div className={styles.optionSection}>

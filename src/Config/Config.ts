@@ -15,7 +15,7 @@ export namespace GCongfig {
     siteUrl: `${window.location.origin}/sites/LogiiDev`,
 
     // UAT
-    //siteUrl: `${window.location.origin}/sites/Automation-Dev`,
+    // siteUrl: `${window.location.origin}/sites/Automation-Dev`,
 
     // Prod
     // siteUrl: ""
@@ -27,7 +27,7 @@ export namespace GCongfig {
     HRPersonID: "f092b7ad-ec31-478c-9225-a87fa73d65d1",
 
     // UAT
-    //HRDirectorID: "738add66-3c24-47a5-bfac-284bf7013f2c",
+    // HRDirectorID: "738add66-3c24-47a5-bfac-284bf7013f2c",
     // HRPersonID: "0a446dc3-dd61-4d50-826c-f20d1b6621d5",
 
     // Prod
