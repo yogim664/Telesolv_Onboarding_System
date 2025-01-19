@@ -873,7 +873,7 @@ const Onboarding = (props: any) => {
               <Column field="Role" header="Role" />
               <Column field="Department.key" header="Department" />
               <Column field="Employee.EmployeeEMail" header="Email" />
-              <Column field="SecondaryEmail" header="SecondryEmail" />
+              <Column field="SecondaryEmail" header="Secondary Email" />
               <Column field="FormTitle" header="Form" />
               <Column field="Status" header="Status" body={stsTemplate} />
               <Column
