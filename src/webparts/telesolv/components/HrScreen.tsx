@@ -551,7 +551,7 @@ const HrScreen = (props: any): JSX.Element => {
             </div>
 
             <div className={styles.addDialog}>
-              <div className={styles.addDialogHeader}>SecondaryEmail</div>
+              <div className={styles.addDialogHeader}>Secondary Email</div>
               <div className={styles.addDialogInput}>
                 {tempEmployeeDetails?.SecondaryEmail}
               </div>
@@ -629,6 +629,10 @@ const HrScreen = (props: any): JSX.Element => {
                       width: "100px",
                     }}
                     onClick={async () => {
+                      filData.dept = "";
+                      filData.status = "";
+                      filData.search = "";
+                      setfilterKeys({ ...filData });
                       await handlerUpdateResponsesToSp(tempEmployeeDetails);
                     }}
                   />

@@ -64,14 +64,14 @@ const EmployeeForm = (props: any): JSX.Element => {
   //Get EmployeeResponse
   const questionConfig = async () => {
     let tempQuestions: any = [];
-    sp.web.lists
+    await sp.web.lists
       .getByTitle(GCongfig.ListName.CheckpointConfig)
-      .items.select("*,ID,Question,Assigned/ID")
+      .items.select("*, ID, Question, Assigned/ID")
       .expand("Assigned")
       .top(5000)
       .get()
-      .then((questionData: any) => {
-        questionData.forEach((qitem: any) => {
+      .then(async (questionData: any) => {
+        await questionData?.forEach((qitem: any) => {
           tempQuestions.push({
             ID: qitem.ID,
             QTitle: qitem.Question,
@@ -79,112 +79,101 @@ const EmployeeForm = (props: any): JSX.Element => {
             Task: qitem.TaskName,
           });
         });
-        console.log("Appended Questions:", tempQuestions);
+
+        await sp.web.lists
+          .getByTitle(GCongfig.ListName.EmployeeResponse)
+          .items.select(
+            "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options ,Employee/ID, Employee/EMail"
+          )
+          .expand("QuestionID, Employee")
+          .top(5000)
+          .get()
+          .then((_items: any) => {
+            const temp: any = _items?.filter(
+              (val: any) =>
+                val?.Employee?.EMail.toLowerCase() ===
+                CurUser?.Email.toLowerCase()
+            );
+
+            const _tempArr = temp?.map((item: any) => {
+              let options = [];
+
+              try {
+                options = JSON.parse(item.QuestionID?.Options || "[]");
+              } catch (error) {
+                console.error("Error parsing options:", error);
+              }
+
+              if (item.Status === "Pending") {
+                const CurQuestion = tempQuestions.filter((qitems: any) => {
+                  console.log(qitems, "qitems");
+                  return qitems.ID === item.QuestionID.ID;
+                });
+
+                return {
+                  Id: item.Id,
+                  QuestionNo: item.QuestionID?.Sno,
+                  QuestionTitle: CurQuestion[0]?.QTitle,
+                  Task: CurQuestion[0]?.Task,
+                  Answer: item.QuestionID?.Answer,
+                  Status: item.Status,
+                  Comments: item.Comments,
+                  ResponseComments: item.ResponseComments,
+                  Options: options,
+                  // Assigned: CurQuestion[0].Assigned?.map((item: any) => item.ID),
+                  Assigned: CurQuestion[0].Assigned,
+                  Response: item.Response
+                    ? {
+                        key: item.Response,
+                        name: item.Response,
+                      }
+                    : {
+                        key: null,
+                        name: null,
+                      },
+                  isAnswered: item.Response ? true : false,
+                };
+              } else {
+                return {
+                  Id: item.Id,
+                  QuestionNo: item.Sno,
+                  QuestionTitle: item.Question,
+                  Answer: item.Answer,
+                  Status: item.Status,
+                  Comments: item.Comments,
+                  ResponseComments: item.ResponseComments,
+                  Options: options,
+                  Response: item.Response
+                    ? {
+                        key: item.Response,
+                        name: item.Response,
+                      }
+                    : {
+                        key: null,
+                        name: null,
+                      },
+                  isAnswered: item.Response ? true : false,
+                };
+              }
+            });
+
+            if (!_tempArr?.length) {
+              sethaveAccess(false);
+            } else if (_tempArr?.length) {
+              setComment(_tempArr[0].ResponseComments);
+            } else {
+              setComment("");
+            }
+
+            setquestions(_tempArr);
+            calculateProgressPercentage(_tempArr);
+          })
+          .catch((err) => {
+            console.error("Error in questionConfig:", err);
+          });
       })
       .catch((error: any) => {
         console.error("Error fetching data:", error);
-      });
-
-    console.log(tempQuestions, "tempQuestionswe");
-
-    await sp.web.lists
-      .getByTitle(GCongfig.ListName.EmployeeResponse)
-      .items.select(
-        "*, QuestionID/ID, QuestionID/Title, QuestionID/Answer, QuestionID/Sno, QuestionID/Options ,Employee/ID, Employee/EMail"
-      )
-      .expand("QuestionID, Employee")
-      .top(5000)
-      .get()
-      .then((_items: any) => {
-        const temp: any = _items?.filter(
-          (val: any) =>
-            val?.Employee?.EMail.toLowerCase() === CurUser?.Email.toLowerCase()
-        );
-
-        const _tempArr = temp?.map((item: any) => {
-          let options = [];
-          try {
-            options = JSON.parse(item.QuestionID?.Options || "[]");
-          } catch (error) {
-            console.error("Error parsing options:", error);
-          }
-          console.log(item.Status);
-          if (item.Status === "Pending") {
-            const CurQuestion = tempQuestions.filter((qitems: any) => {
-              console.log(qitems, "qitems");
-              return qitems.ID === item.QuestionID.ID;
-            });
-            console.log(
-              CurQuestion[0]?.QTitle,
-              CurQuestion,
-              "CurQuestion[0]?.QTitle"
-            );
-            debugger;
-            return {
-              Id: item.Id,
-              QuestionNo: item.QuestionID?.Sno,
-              QuestionTitle: CurQuestion[0]?.QTitle,
-              Task: CurQuestion[0]?.Task,
-              Answer: item.QuestionID?.Answer,
-              Status: item.Status,
-              Comments: item.Comments,
-              ResponseComments: item.ResponseComments,
-              Options: options,
-              // Assigned: CurQuestion[0].Assigned?.map((item: any) => item.ID),
-              Assigned: CurQuestion[0].Assigned,
-              Response: item.Response
-                ? {
-                    key: item.Response,
-                    name: item.Response,
-                  }
-                : {
-                    key: null,
-                    name: null,
-                  },
-              isAnswered: item.Response ? true : false,
-            };
-
-            debugger;
-            console.log(CurQuestion, "CurQuestion");
-            //   debugger;
-          } else {
-            return {
-              Id: item.Id,
-              QuestionNo: item.Sno,
-              QuestionTitle: item.Question,
-              Answer: item.Answer,
-              Status: item.Status,
-              Comments: item.Comments,
-              ResponseComments: item.ResponseComments,
-              Options: options,
-              Response: item.Response
-                ? {
-                    key: item.Response,
-                    name: item.Response,
-                  }
-                : {
-                    key: null,
-                    name: null,
-                  },
-              isAnswered: item.Response ? true : false,
-            };
-          }
-        });
-
-        if (_tempArr.length === 0) {
-          sethaveAccess(false);
-        }
-        setquestions(_tempArr);
-        if (_tempArr.length > 0) {
-          setComment(_tempArr[0].ResponseComments); // Set the first comment
-        } else {
-          setComment("");
-        }
-
-        calculateProgressPercentage(_tempArr);
-      })
-      .catch((err) => {
-        console.error("Error in questionConfig:", err);
       });
   };
 
@@ -195,8 +184,8 @@ const EmployeeForm = (props: any): JSX.Element => {
     aIndex?: number
   ) => {
     let _Listitems: any = questions
-      .filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
-      .sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
+      ?.filter((val: any) => !val.isDelete && val.QuestionNo !== 10000)
+      ?.sort((a: any, b: any) => a.QuestionNo - b.QuestionNo);
 
     _Listitems[qIndex].Response = { key: value, name: value };
 
@@ -204,7 +193,6 @@ const EmployeeForm = (props: any): JSX.Element => {
   };
 
   /// validation
-
   const validation = async (): Promise<void> => {
     debugger;
     let errmsg: string = "";
@@ -380,7 +368,7 @@ const EmployeeForm = (props: any): JSX.Element => {
                   </div>
                   {questions.length ===
                   questions.filter((item: any) => item.isAnswered === true)
-                    .length ? (
+                    ?.length ? (
                     <div className={styles.ProgressBar}>
                       <ProgressBar
                         value={ProgressPercent}
@@ -408,105 +396,114 @@ const EmployeeForm = (props: any): JSX.Element => {
                     <div className="QuestionSection">
                       <div className={styles.EmployeeQuestionContainer}>
                         <div style={{ width: "100%" }}>
-                          {questions.length &&
-                            questions
-                              .sort(
-                                (a: any, b: any) => a.QuestionNo - b.QuestionNo
-                              ) // Direct number comparison
-
-                              .map((_item: any, qIndex: any) => (
-                                <div
-                                  className={styles.question}
-                                  style={{
-                                    animationDelay: `${(qIndex + 1) * 0.2}s`,
-                                  }}
-                                >
+                          {questions.length
+                            ? questions
+                                ?.sort(
+                                  (a: any, b: any) =>
+                                    a.QuestionNo - b.QuestionNo
+                                )
+                                ?.map((_item: any, qIndex: any) => (
                                   <div
-                                    className={styles.questionTitle}
-                                  >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</div>
+                                    key={qIndex}
+                                    className={styles.question}
+                                    style={{
+                                      animationDelay: `${(qIndex + 1) * 0.2}s`,
+                                    }}
+                                  >
+                                    <div
+                                      className={styles.questionTitle}
+                                    >{`${_item.QuestionNo}. ${_item.QuestionTitle}`}</div>
 
-                                  <div className={styles.employeeResponse}>
-                                    {_item.isAnswered === true ? (
-                                      <div className={styles.responseAnswer}>
-                                        {_item.Response.key}
-                                      </div>
-                                    ) : (
-                                      <div>
-                                        {_item.Options.length &&
-                                          _item.Options?.map(
-                                            (category: any, aIndex: number) => (
-                                              <div
-                                                key={category.key}
-                                                className="flex align-items-center"
-                                              >
-                                                <div
-                                                  style={{
-                                                    margin: "10px",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                  }}
-                                                >
-                                                  <RadioButton
-                                                    inputId={`${_item.QuestionNo}-${category.key}`}
-                                                    name={`category-${_item.QuestionNo}`}
-                                                    value={category.name}
-                                                    style={{ margin: "2px" }}
-                                                    onChange={(e) => {
-                                                      handleQuestionChange(
-                                                        qIndex,
-
-                                                        e.target.value,
-                                                        "Radio",
-                                                        aIndex
-                                                      );
-                                                    }}
-                                                    checked={
-                                                      _item.Response.name ===
-                                                      category.name
-                                                    }
-                                                  />
-
-                                                  <label
-                                                    htmlFor={`${_item.QuestionNo}-${category.key}`}
-                                                    style={{
-                                                      paddingLeft: "10px",
-                                                    }}
-                                                    className="ml-2"
+                                    <div className={styles.employeeResponse}>
+                                      {_item.isAnswered === true ? (
+                                        <div className={styles.responseAnswer}>
+                                          {_item.Response.key}
+                                        </div>
+                                      ) : (
+                                        <div>
+                                          {_item.Options.length
+                                            ? _item.Options?.map(
+                                                (
+                                                  category: any,
+                                                  aIndex: number
+                                                ) => (
+                                                  <div
+                                                    key={aIndex}
+                                                    className="flex align-items-center"
                                                   >
-                                                    {category.name}
-                                                  </label>
-                                                </div>
-                                              </div>
-                                            )
-                                          )}
-                                      </div>
-                                    )}
+                                                    <div
+                                                      style={{
+                                                        margin: "10px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                      }}
+                                                    >
+                                                      <RadioButton
+                                                        inputId={`${_item.QuestionNo}-${category.key}`}
+                                                        name={`category-${_item.QuestionNo}`}
+                                                        value={category.name}
+                                                        style={{
+                                                          margin: "2px",
+                                                        }}
+                                                        onChange={(e) => {
+                                                          handleQuestionChange(
+                                                            qIndex,
 
-                                    {_item.isAnswered === true && (
-                                      <div
-                                        className={styles.responseStatus}
-                                        style={{
-                                          backgroundColor:
-                                            _item.Status === "Satisfactory"
-                                              ? " #caf0cc"
-                                              : "#ffebc0",
-                                        }}
-                                      >
-                                        <span
+                                                            e.target.value,
+                                                            "Radio",
+                                                            aIndex
+                                                          );
+                                                        }}
+                                                        checked={
+                                                          _item.Response
+                                                            .name ===
+                                                          category.name
+                                                        }
+                                                      />
+
+                                                      <label
+                                                        htmlFor={`${_item.QuestionNo}-${category.key}`}
+                                                        style={{
+                                                          paddingLeft: "10px",
+                                                        }}
+                                                        className="ml-2"
+                                                      >
+                                                        {category.name}
+                                                      </label>
+                                                    </div>
+                                                  </div>
+                                                )
+                                              )
+                                            : null}
+                                        </div>
+                                      )}
+                                      {_item.isAnswered === true && (
+                                        <div
+                                          className={styles.responseStatus}
                                           style={{
-                                            color:
-                                              _item.Status === "Satisfactory"
-                                                ? "#437426"
-                                                : "#8f621f",
+                                            backgroundColor:
+                                              _item.Status !== "To be resolved"
+                                                ? " #caf0cc"
+                                                : "#ffebc0",
                                           }}
                                         >
-                                          {_item.Status}
-                                        </span>
-                                      </div>
-                                    )}
+                                          <span
+                                            style={{
+                                              color:
+                                                _item.Status !==
+                                                "To be resolved"
+                                                  ? "#437426"
+                                                  : "#8f621f",
+                                            }}
+                                          >
+                                            {_item.Status}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                ))
+                            : null}
                         </div>
                       </div>
                       <div
