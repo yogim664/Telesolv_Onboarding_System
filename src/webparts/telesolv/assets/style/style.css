@@ -1,3 +1,57 @@
+/* Team site ribbons hide */
+#sp-appBar {
+  display: none !important;
+}
+
+#spLeftNav {
+  display: none !important;
+}
+
+#spSiteHeader {
+  display: none !important;
+}
+
+#spCommandBar {
+  display: none !important;
+}
+
+#CommentsWrapper {
+  display: none !important;
+}
+
+.CanvasComponent > div > div,
+.CanvasComponent > div > div > div,
+.CanvasComponent > div > div > div > div,
+.CanvasComponent > div > div > div > div > div {
+  width: 100% !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  display: block;
+}
+
+.CanvasComponent > div > div > div > div {
+  max-width: 100% !important;
+}
+
+.mainContent > article > div > div {
+  display: block !important;
+}
+
+.webPartContainer {
+  display: none !important;
+}
+
+.ControlZone--clean {
+  padding: 0px !important;
+  margin: 0px !important;
+}
+
+.CanvasSection {
+  padding-left: 0px !important;
+}
+
+/* Other styles */
 .CanvasComponent.LCS .CanvasZone:not(.CanvasZone--fullWidth) .ControlZone {
   padding: 0 !important;
 }
@@ -28,6 +82,7 @@
 div[data-automation-id="CanvasZone-SectionContainer"] {
   margin: 0 !important;
   /* margin-top: 33px !important; */
+  max-width: 100% !important;
 }
 
 .CanvasZone-SectionContainer {
