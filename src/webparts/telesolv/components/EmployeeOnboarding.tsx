@@ -26,6 +26,7 @@ import "../assets/style/EmployeeOnboarding.css";
 import { useState } from "react";
 import { sp } from "@pnp/sp/presets/all";
 import { useEffect } from "react";
+import DataLoader from "./DataLoader";
 import {
   PeoplePicker,
   PrincipalType,
@@ -59,6 +60,7 @@ const Onboarding = (props: any) => {
     form: "",
   };
   const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoader, setDataLoader] = useState(false);
   const [isVisible, setisVisible] = useState(false);
   const [isUpdate, setisUpdate] = useState(false);
   const [EmployeeOnboardingDetails, setEmployeeOnboardingDetails] =
@@ -115,6 +117,7 @@ const Onboarding = (props: any) => {
           name: choice,
         }));
         setstatusDetails(ChoicesCollection);
+        // setDataLoader(false);
       })
       .catch((err) => console.error("Error fetching choices:", err));
   };
@@ -227,8 +230,6 @@ const Onboarding = (props: any) => {
               SecondaryEmail: item.SecondaryEmail || "No Email",
             };
           }) || [];
-
-        console.log(formattedResponseItems);
 
         await handlerEmployeeOnboardingDetails(formattedResponseItems);
       })
@@ -389,7 +390,10 @@ const Onboarding = (props: any) => {
       header: "Delete Confirmation",
       defaultFocus: "reject",
       acceptClassName: "p-button-danger",
-      accept: () => handleDeletion(id, index),
+      accept: () => {
+        setDataLoader(true);
+        handleDeletion(id, index);
+      },
     });
   };
 
@@ -416,6 +420,7 @@ const Onboarding = (props: any) => {
           theme: "light",
           transition: Bounce,
         });
+        setDataLoader(false);
       })
       .catch((error) => {
         console.error("Error saving questions:", error);
@@ -731,7 +736,9 @@ const Onboarding = (props: any) => {
 
   return (
     <>
-      {isLoading ? (
+      {isDataLoader ? (
+        <DataLoader />
+      ) : isLoading ? (
         <Loader />
       ) : showResponseView ? (
         <EmployeeResponseView
@@ -803,6 +810,7 @@ const Onboarding = (props: any) => {
                   webAbsoluteUrl={GCongfig.SiteURL.siteUrl}
                   personSelectionLimit={100}
                   showtooltip={false}
+                  searchTextLimit={2}
                   ensureUser={true}
                   placeholder={"Search Employee"}
                   onChange={(selectedPeople: any[]) => {
@@ -924,6 +932,7 @@ const Onboarding = (props: any) => {
                       personSelectionLimit={1}
                       showtooltip={false}
                       ensureUser={true}
+                      searchTextLimit={2}
                       placeholder={""}
                       styles={{
                         root: {

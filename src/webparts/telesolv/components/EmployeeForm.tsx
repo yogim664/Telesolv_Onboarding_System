@@ -91,7 +91,7 @@ const EmployeeForm = (props: any): JSX.Element => {
           .then((_items: any) => {
             const temp: any = _items?.filter(
               (val: any) =>
-                val?.Employee?.EMail.toLowerCase() ===
+                val?.Employee?.EMail?.toLowerCase() ===
                 CurUser?.Email.toLowerCase()
             );
 
