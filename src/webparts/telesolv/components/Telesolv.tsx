@@ -49,7 +49,6 @@ const Telesolve = (props: any): JSX.Element => {
           (user: any) =>
             user?.mail.toLowerCase() === CurUser?.Email.toLowerCase()
         );
-        console.log(HrPerson, "HR Director");
         setShowHrPerson(HrPerson);
         setIsLoader(false);
       });
@@ -68,7 +67,6 @@ const Telesolve = (props: any): JSX.Element => {
             user?.mail.toLowerCase() === CurUser?.Email.toLowerCase()
         );
         setShowHrDirectorScreen(HrDirector);
-        console.log(HrDirector, "HR Director");
         await hrpersonfun();
       });
   };
